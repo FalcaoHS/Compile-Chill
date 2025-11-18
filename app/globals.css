@@ -427,3 +427,97 @@ body {
   opacity: 0.5;
 }
 
+/* Light Animations for Mobile Lite Mode */
+/* These animations use opacity/transform with will-change for optimal performance */
+
+@keyframes fade-in-light {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fade-out-light {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes pulse-light {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.02);
+  }
+}
+
+@keyframes slide-up-light {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-down-light {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-light {
+  animation: fade-in-light 300ms ease-in-out;
+  will-change: opacity;
+}
+
+.animate-fade-out-light {
+  animation: fade-out-light 300ms ease-in-out;
+  will-change: opacity;
+}
+
+.animate-pulse-light {
+  animation: pulse-light 2000ms ease-in-out infinite;
+  will-change: opacity, transform;
+}
+
+.animate-slide-up-light {
+  animation: slide-up-light 300ms ease-in-out;
+  will-change: opacity, transform;
+}
+
+.animate-slide-down-light {
+  animation: slide-down-light 300ms ease-in-out;
+  will-change: opacity, transform;
+}
+
+/* Static Orbs Float Animation (optional, very light) */
+@keyframes float-light {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-2px);
+  }
+}
+
+.animate-float-light {
+  animation: float-light 6s ease-in-out infinite;
+  will-change: transform;
+}
+

@@ -24,8 +24,8 @@ export interface PhysicsConfig {
  */
 const DEFAULT_CONFIG: PhysicsConfig = {
   gravityY: 1.4,
-  restitution: 0.7,
-  frictionAir: 0.01,
+  restitution: 0.85, // Increased for more natural stopping
+  frictionAir: 0.01, // Light damping for natural movement
   isMobile: false,
 }
 
@@ -230,6 +230,24 @@ export function isMobileDevice(): boolean {
   return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
     navigator.userAgent
   ) || window.innerWidth < 768
+}
+
+/**
+ * Get mobile mode state
+ * 
+ * @returns 'lite' if mobile mode is active, 'full' otherwise
+ */
+export function getMobileMode(): 'lite' | 'full' {
+  if (typeof window === "undefined") return 'full'
+  
+  // Import dynamically to avoid circular dependencies
+  try {
+    const { getMobileModeState } = require('@/lib/performance/mobile-mode')
+    return getMobileModeState()
+  } catch {
+    // Fallback to direct detection if store not available
+    return isMobileDevice() ? 'lite' : 'full'
+  }
 }
 
 /**

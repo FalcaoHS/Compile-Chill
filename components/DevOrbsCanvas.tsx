@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState, useCallback } from "react"
 import { useThemeStore } from "@/lib/theme-store"
+import { useMobileModeStore } from "@/lib/performance/mobile-mode"
+import { useFPSGuardianStore } from "@/lib/performance/fps-guardian"
 import Matter from "matter-js"
 import {
   createPhysicsEngine,
@@ -34,6 +36,17 @@ interface Orb {
   imageLoaded: boolean
 }
 
+interface StaticOrb {
+  id: string
+  userId: number
+  avatar: string | null
+  username: string
+  x: number
+  y: number
+  image: HTMLImageElement | null
+  imageLoaded: boolean
+}
+
 interface DevOrbsCanvasProps {
   users: UserData[]
   onShakeReady?: (handleShake: () => void) => void
@@ -55,6 +68,7 @@ export function DevOrbsCanvas({ users, onShakeReady }: DevOrbsCanvasProps) {
   const engineRef = useRef<Matter.Engine | null>(null)
   const worldRef = useRef<Matter.World | null>(null)
   const orbsRef = useRef<Orb[]>([])
+  const staticOrbsRef = useRef<StaticOrb[]>([])
   const imagesRef = useRef<Map<string, HTMLImageElement>>(new Map())
   const animationFrameRef = useRef<number>()
   const lastFrameTimeRef = useRef<number>(0)
@@ -75,7 +89,7 @@ export function DevOrbsCanvas({ users, onShakeReady }: DevOrbsCanvasProps) {
     typeof window !== "undefined" 
       ? (() => {
           const saved = localStorage.getItem("dev-orbs-best-score")
-          return saved ? parseInt(saved, 10) : 0
+    return saved ? parseInt(saved, 10) : 0
         })()
       : 0
   )
@@ -99,7 +113,23 @@ export function DevOrbsCanvas({ users, onShakeReady }: DevOrbsCanvasProps) {
   const backboardShakeRef = useRef<number>(0) // Backboard shake offset
   const isShakingRef = useRef<boolean>(false) // Shake state
   
+  // Fireworks particles
+  interface FireworkParticle {
+    x: number
+    y: number
+    vx: number
+    vy: number
+    life: number
+    maxLife: number
+    color: string
+    size: number
+  }
+  const fireworksRef = useRef<FireworkParticle[]>([])
+  const createFireworksRef = useRef<((x: number, y: number, colors: ReturnType<typeof getThemeColors>) => void) | null>(null)
+  
   const { theme: themeId } = useThemeStore()
+  const { mode: mobileMode, init: initMobileMode } = useMobileModeStore()
+  const { level: fpsLevel, setFPS } = useFPSGuardianStore()
   const [canvasSize, setCanvasSize] = useState({ width: 0, height: 0 })
   const [isMounted, setIsMounted] = useState(false)
   const [isVisible, setIsVisible] = useState(() => {
@@ -107,6 +137,21 @@ export function DevOrbsCanvas({ users, onShakeReady }: DevOrbsCanvasProps) {
     const saved = localStorage.getItem("dev-orbs-visible")
     return saved !== null ? saved === "true" : true
   })
+  
+  // Initialize mobile mode on mount
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      initMobileMode()
+    }
+  }, [initMobileMode])
+  
+  // Check if mobile mode (lite) is active
+  const isLiteMode = mobileMode === 'lite'
+  
+  // FPS level states
+  const isFPSLevel0 = fpsLevel === 0 // FPS ≥ 50: everything enabled
+  const isFPSLevel1 = fpsLevel === 1 // 40 ≤ FPS < 50: smooth degradation
+  const isFPSLevel2 = fpsLevel === 2 // FPS < 40: aggressive fallback
 
   // Ensure component is mounted (client-side only)
   useEffect(() => {
@@ -185,6 +230,70 @@ export function DevOrbsCanvas({ users, onShakeReady }: DevOrbsCanvasProps) {
       img.src = avatarUrl
     })
   }, [])
+
+  // Generate static orbs for mobile lite mode (5-7 orbs in random positions)
+  const generateStaticOrbs = useCallback((canvasWidth: number, canvasHeight: number, users: UserData[]): StaticOrb[] => {
+    const orbCount = 5 + Math.floor(Math.random() * 3) // 5-7 orbs
+    const isMobile = isMobileDevice()
+    const radius = isMobile ? ORB_RADIUS_MOBILE : ORB_RADIUS_DESKTOP
+    const headerHeight = 96
+    const floorHeight = canvasHeight * 0.2
+    const floorY = canvasHeight - floorHeight
+    const backboardY = headerHeight + 20
+    const backboardHeight = 140
+    const backboardBottom = backboardY + backboardHeight
+    
+    // Safe area: avoid header, backboard, and floor
+    const safeTop = backboardBottom + 20
+    const safeBottom = floorY - radius - 10
+    const safeLeft = radius
+    const safeRight = canvasWidth - radius
+    
+    const staticOrbs: StaticOrb[] = []
+    const usedUsers = new Set<number>()
+    
+    for (let i = 0; i < orbCount && i < users.length; i++) {
+      // Pick a random user (avoid duplicates if possible)
+      let user: UserData
+      let attempts = 0
+      do {
+        const randomIndex = Math.floor(Math.random() * users.length)
+        user = users[randomIndex]
+        attempts++
+      } while (usedUsers.has(user.userId) && attempts < users.length)
+      
+      usedUsers.add(user.userId)
+      
+      // Random position in safe area
+      const x = safeLeft + Math.random() * (safeRight - safeLeft)
+      const y = safeTop + Math.random() * (safeBottom - safeTop)
+      
+      staticOrbs.push({
+        id: `static-orb-${user.userId}-${i}`,
+        userId: user.userId,
+        avatar: user.avatar,
+        username: user.username,
+        x,
+        y,
+        image: null,
+        imageLoaded: false,
+      })
+    }
+    
+    // Load images for static orbs (will be handled after drawStaticCanvas is defined)
+    staticOrbs.forEach((orb) => {
+      if (orb.avatar) {
+        loadAvatarImage(orb.avatar, orb.id).then((img) => {
+          orb.image = img
+          orb.imageLoaded = true
+        })
+      } else {
+        orb.imageLoaded = true
+      }
+    })
+    
+    return staticOrbs
+  }, [loadAvatarImage])
 
   // Spawn a single orb
   const spawnOrb = useCallback((user: UserData, index: number) => {
@@ -297,6 +406,12 @@ export function DevOrbsCanvas({ users, onShakeReady }: DevOrbsCanvasProps) {
 
     // Set initial canvas size
     setCanvasSize(size)
+
+    // Skip physics engine initialization in mobile lite mode
+    if (isLiteMode) {
+      console.log("Mobile lite mode active - skipping physics engine initialization")
+      return
+    }
 
     console.log("Initializing physics engine...", { width: size.width, height: size.height })
 
@@ -411,6 +526,14 @@ export function DevOrbsCanvas({ users, onShakeReady }: DevOrbsCanvasProps) {
             // Mark as scored to prevent double scoring
             scoredOrbsRef.current.add(orb.id)
             
+            // Get orb position for fireworks
+            const orbPos = getBodyPosition(orbBody)
+            const colors = getThemeColors()
+            if (colors && createFireworksRef.current) {
+              // Create fireworks at orb position
+              createFireworksRef.current(orbPos.x, orbPos.y, colors)
+            }
+            
             // Increment score
             scoreRef.current += 1
             
@@ -447,7 +570,7 @@ export function DevOrbsCanvas({ users, onShakeReady }: DevOrbsCanvasProps) {
             setTimeout(() => {
               digitScaleRef.current = 1.0
             }, 150)
-            
+
             // Digit glow pulse (150ms) - shadowBlur 10 → 20 → 10
             digitGlowRef.current = 20
             setTimeout(() => {
@@ -479,6 +602,12 @@ export function DevOrbsCanvas({ users, onShakeReady }: DevOrbsCanvasProps) {
 
   // Start spawn when users are available (only once, not on every users change)
   useEffect(() => {
+    // Skip spawn in mobile lite mode
+    if (isLiteMode) {
+      console.log("Mobile lite mode active - skipping orb spawn")
+      return
+    }
+    
     console.log("Spawn effect triggered:", { usersCount: users.length, hasEngine: !!engineRef.current, currentOrbs: orbsRef.current.length })
     
     // Only start spawn if:
@@ -501,7 +630,7 @@ export function DevOrbsCanvas({ users, onShakeReady }: DevOrbsCanvasProps) {
       // Don't clear timer on users change - let it continue
       // Only clear on unmount
     }
-  }, [users.length, startSpawnSequence]) // Only depend on users.length, not the whole users array
+  }, [users.length, startSpawnSequence, isLiteMode]) // Only depend on users.length, not the whole users array
 
   // Handle shake function - throws all orbs upward with strong force
   const handleShake = useCallback(() => {
@@ -603,7 +732,7 @@ export function DevOrbsCanvas({ users, onShakeReady }: DevOrbsCanvasProps) {
       boundaries.forEach((boundary) => {
         Matter.World.add(engineRef.current!.world, boundary)
       })
-      
+
       // Recreate rim support colliders and sensor
       // Position matches the rim position (dentro do backboard)
       const headerHeight = 96
@@ -627,8 +756,8 @@ export function DevOrbsCanvas({ users, onShakeReady }: DevOrbsCanvasProps) {
         leftSupportY,
         supportWidth,
         supportHeight,
-        {
-          isStatic: true,
+          {
+            isStatic: true,
           isSensor: false, // Physical collision
           restitution: 0.2,
           friction: 0.5,
@@ -648,7 +777,7 @@ export function DevOrbsCanvas({ users, onShakeReady }: DevOrbsCanvasProps) {
         supportWidth,
         supportHeight,
         {
-          isStatic: true,
+            isStatic: true,
           isSensor: false, // Physical collision
           restitution: 0.2,
           friction: 0.5,
@@ -665,21 +794,21 @@ export function DevOrbsCanvas({ users, onShakeReady }: DevOrbsCanvasProps) {
       const sensorX = rimCenterX - sensorWidth / 2
       const sensorY = rimCenterY + 5 // Sensor fica logo abaixo do centro do aro
 
-      const sensor = Bodies.rectangle(
+         const sensor = Bodies.rectangle(
         sensorX + sensorWidth / 2,
         sensorY + sensorHeight / 2,
-        sensorWidth,
-        sensorHeight,
-        {
-          isStatic: true,
-          isSensor: true,
-          render: { visible: false },
+           sensorWidth,
+           sensorHeight,
+           {
+             isStatic: true,
+             isSensor: true,
+             render: { visible: false },
           label: 'basket-sensor',
-        }
-      )
+           }
+         )
       
       Matter.World.add(engineRef.current.world, sensor)
-      sensorBodyRef.current = sensor
+        sensorBodyRef.current = sensor
     }
   }, [canvasSize, isMounted])
 
@@ -924,7 +1053,9 @@ export function DevOrbsCanvas({ users, onShakeReady }: DevOrbsCanvasProps) {
     // Draw segment with rounded corners and glow
     if (isActive) {
       ctx.fillStyle = neonColor
-      ctx.shadowBlur = digitGlowRef.current // Dynamic glow (10 default, 20 on score)
+      // FPS Guardian Level 1: Reduce glow intensity by 50%
+      const baseDigitGlow = digitGlowRef.current // Dynamic glow (10 default, 20 on score)
+      ctx.shadowBlur = isFPSLevel1 ? baseDigitGlow * 0.5 : baseDigitGlow
       ctx.shadowColor = neonColor
     } else {
       ctx.fillStyle = 'rgba(255, 255, 255, 0.06)' // Unlit segments
@@ -950,7 +1081,7 @@ export function DevOrbsCanvas({ users, onShakeReady }: DevOrbsCanvasProps) {
   // Draw a digit using 7-segment display (exact dimensions: 60px height, 35px width)
   const drawDigit = useCallback((ctx: CanvasRenderingContext2D, x: number, y: number, value: number, neonColor: string, scale: number = 1) => {
     ctx.save()
-    
+
     // Apply scale for pulse animation
     const centerX = x + 35 / 2
     const centerY = y + 60 / 2
@@ -1012,11 +1143,13 @@ export function DevOrbsCanvas({ users, onShakeReady }: DevOrbsCanvasProps) {
       }
     })
     
-    ctx.restore()
-  }, [drawSegment])
+      ctx.restore()
+  }, [drawSegment, isFPSLevel1])
 
   // Draw backboard with integrated LED scoreboard
   const drawBackboard = useCallback((ctx: CanvasRenderingContext2D, colors: ReturnType<typeof getThemeColors>) => {
+    // FPS Guardian Level 2: Skip backboard rendering
+    if (isFPSLevel2) return
     if (!colors) return
 
     const headerHeight = 96
@@ -1030,13 +1163,15 @@ export function DevOrbsCanvas({ users, onShakeReady }: DevOrbsCanvasProps) {
     const cornerRadius = 4
 
     ctx.save()
-    
+
     // Apply flash effect if active
     const flashIntensity = backboardFlashRef.current
     ctx.globalAlpha = 0.85 + (flashIntensity * 0.15) // Flash increases alpha, base 0.85
 
     // Draw external shadow (soft glow around backboard)
-    ctx.shadowBlur = 18
+    // FPS Guardian Level 1: Reduce glow intensity by 50%
+    const baseShadowBlur = 18
+    ctx.shadowBlur = isFPSLevel1 ? baseShadowBlur * 0.5 : baseShadowBlur
     // Convert hex color to rgba for shadow (22 = ~13% opacity in hex - subtle)
     const shadowColor = colors.accent.startsWith('#') 
       ? colors.accent + '22' 
@@ -1047,7 +1182,8 @@ export function DevOrbsCanvas({ users, onShakeReady }: DevOrbsCanvasProps) {
 
     // Draw internal shadow first (for depth)
     ctx.shadowColor = 'rgba(0, 0, 0, 0.4)'
-    ctx.shadowBlur = 20
+    const baseInternalBlur = 20
+    ctx.shadowBlur = isFPSLevel1 ? baseInternalBlur * 0.5 : baseInternalBlur
     ctx.shadowOffsetX = 0
     ctx.shadowOffsetY = 6
     
@@ -1082,8 +1218,8 @@ export function DevOrbsCanvas({ users, onShakeReady }: DevOrbsCanvasProps) {
 
     // Draw top border (lighter - holographic highlight)
     ctx.strokeStyle = 'rgba(255, 255, 255, 0.10)'
-    ctx.lineWidth = 1
-    ctx.beginPath()
+      ctx.lineWidth = 1
+        ctx.beginPath()
     ctx.moveTo(x + cornerRadius, y)
     ctx.lineTo(x + width - cornerRadius, y)
     ctx.stroke()
@@ -1107,8 +1243,8 @@ export function DevOrbsCanvas({ users, onShakeReady }: DevOrbsCanvasProps) {
       ctx.beginPath()
       ctx.moveTo(x + 10, scanlineY)
       ctx.lineTo(x + width - 10, scanlineY)
-      ctx.stroke()
-    }
+        ctx.stroke()
+      }
 
     ctx.globalAlpha = 1
 
@@ -1168,7 +1304,7 @@ export function DevOrbsCanvas({ users, onShakeReady }: DevOrbsCanvasProps) {
     }
 
     ctx.restore()
-  }, [canvasSize.width, drawDigit])
+  }, [canvasSize.width, drawDigit, isFPSLevel1, isFPSLevel2])
 
   // Draw floor (stylized court floor)
   const drawFloor = useCallback((ctx: CanvasRenderingContext2D, colors: ReturnType<typeof getThemeColors>) => {
@@ -1183,7 +1319,7 @@ export function DevOrbsCanvas({ users, onShakeReady }: DevOrbsCanvasProps) {
 
     // Draw floor gradient (transparent at top to neon at bottom)
     const gradient = ctx.createLinearGradient(floorX, floorY, floorX, canvasSize.height)
-    
+
     // Convert hex to rgba for gradient stops
     const primaryColor = colors.primary
     let primaryRgba = primaryColor
@@ -1218,7 +1354,7 @@ export function DevOrbsCanvas({ users, onShakeReady }: DevOrbsCanvasProps) {
     // Reset shadow
     ctx.shadowBlur = 0
     ctx.restore()
-  }, [canvasSize.width, canvasSize.height])
+  }, [canvasSize.width, canvasSize.height, isFPSLevel1, isFPSLevel2])
 
   // Draw backboard side supports (two vertical neon poles behind backboard)
   const drawBackboardSideSupports = useCallback((ctx: CanvasRenderingContext2D, colors: ReturnType<typeof getThemeColors>) => {
@@ -1267,15 +1403,15 @@ export function DevOrbsCanvas({ users, onShakeReady }: DevOrbsCanvasProps) {
     ctx.moveTo(leftSupportX, supportStartY)
     ctx.lineTo(leftSupportX, supportEndY)
     ctx.stroke()
-    
+
     // Draw right vertical support pole
     ctx.beginPath()
     ctx.moveTo(rightSupportX, supportStartY)
     ctx.lineTo(rightSupportX, supportEndY)
     ctx.stroke()
-    
+
     ctx.restore()
-  }, [canvasSize.width, canvasSize.height])
+  }, [canvasSize.width, canvasSize.height, isFPSLevel1, isFPSLevel2])
 
   // Draw minimalist basketball court (neon Tron style)
   const drawCourt = useCallback((ctx: CanvasRenderingContext2D, colors: ReturnType<typeof getThemeColors>) => {
@@ -1312,12 +1448,114 @@ export function DevOrbsCanvas({ users, onShakeReady }: DevOrbsCanvasProps) {
     ctx.beginPath()
     ctx.arc(centerX, arcY, arcRadius, 0, Math.PI, false) // 0 to Math.PI = bottom half circle (inverted)
     ctx.stroke()
+
+    ctx.restore()
+  }, [canvasSize.width, canvasSize.height, isFPSLevel1])
+
+  // Create fireworks effect at position
+  const createFireworks = useCallback((x: number, y: number, colors: ReturnType<typeof getThemeColors>) => {
+    if (!colors) return
+    
+    // FPS Guardian Level 1: Limit fireworks to 3 simultaneous
+    const maxFireworks = isFPSLevel1 ? 3 : 6
+    if (fireworksRef.current.length > maxFireworks * 30) {
+      // Remove oldest fireworks (fade out gradually)
+      const oldestCount = Math.floor(fireworksRef.current.length * 0.3)
+      fireworksRef.current = fireworksRef.current.slice(oldestCount)
+    }
+    
+    // FPS Guardian Level 1: Reduce particle count by half
+    const baseParticleCount = 30
+    const particleCount = isFPSLevel1 ? Math.floor(baseParticleCount / 2) : baseParticleCount
+    const particles: FireworkParticle[] = []
+    
+    // Create particles in all directions
+    for (let i = 0; i < particleCount; i++) {
+      const angle = (Math.PI * 2 * i) / particleCount + (Math.random() - 0.5) * 0.5
+      const speed = 2 + Math.random() * 4
+      const life = 40 + Math.random() * 20 // 40-60 frames
+      
+      particles.push({
+        x,
+        y,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        life,
+        maxLife: life,
+        color: colors.primary,
+        size: 2 + Math.random() * 3, // 2-5px
+      })
+    }
+    
+    fireworksRef.current.push(...particles)
+  }, [isFPSLevel1])
+  
+  // Store createFireworks in ref for access in collision handler
+  useEffect(() => {
+    createFireworksRef.current = createFireworks
+  }, [createFireworks])
+
+  // Render fireworks particles
+  const renderFireworks = useCallback((ctx: CanvasRenderingContext2D) => {
+    if (fireworksRef.current.length === 0) return
+    
+    // FPS Guardian Level 2: Skip fireworks rendering
+    if (isFPSLevel2) return
+    
+    ctx.save()
+    
+    // FPS Guardian Level 1: Reduce particles by half (skip every other particle)
+    const particlesToRender = isFPSLevel1 
+      ? fireworksRef.current.filter((_, index) => index % 2 === 0)
+      : fireworksRef.current
+    
+    // Update and render each particle
+    fireworksRef.current = fireworksRef.current.filter((particle) => {
+      // Update position
+      particle.x += particle.vx
+      particle.y += particle.vy
+      
+      // Apply gravity
+      particle.vy += 0.15
+      
+      // Update life
+      particle.life -= 1
+      
+      if (particle.life <= 0) {
+        return false // Remove dead particles
+      }
+      
+      // Calculate alpha based on remaining life
+      let alpha = particle.life / particle.maxLife
+      
+      // FPS Guardian Level 1: Decrease neon opacity by 50%
+      if (isFPSLevel1) {
+        alpha *= 0.5
+      }
+      
+      // Draw particle with glow
+      ctx.globalAlpha = alpha
+      ctx.fillStyle = particle.color
+      
+      // FPS Guardian Level 1: Reduce glow intensity by 50%
+      const baseGlow = 8
+      ctx.shadowBlur = isFPSLevel1 ? baseGlow * 0.5 : baseGlow
+      ctx.shadowColor = particle.color
+      
+      ctx.beginPath()
+      ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2)
+      ctx.fill()
+      
+      return true // Keep alive particles
+    })
     
     ctx.restore()
-  }, [canvasSize.width, canvasSize.height])
+  }, [isFPSLevel1, isFPSLevel2])
 
   // Draw rim (basket hoop)
   const drawRim = useCallback((ctx: CanvasRenderingContext2D, colors: ReturnType<typeof getThemeColors>) => {
+    // FPS Guardian Level 2: Skip rim rendering
+    if (isFPSLevel2) return
     if (!colors) return
 
     const headerHeight = 96
@@ -1336,12 +1574,19 @@ export function DevOrbsCanvas({ users, onShakeReady }: DevOrbsCanvasProps) {
     ctx.save()
 
     // Apply pulse alpha effect
-    ctx.globalAlpha = rimAlphaRef.current
+    // FPS Guardian Level 1: Decrease neon opacity by 50%
+    let alpha = rimAlphaRef.current
+    if (isFPSLevel1) {
+      alpha *= 0.5
+    }
+    ctx.globalAlpha = alpha
 
     // Layer 1: Main neon arc (thick)
     ctx.strokeStyle = colors.accent
     ctx.lineWidth = 6
-    ctx.shadowBlur = rimGlowRef.current // Dynamic glow (8 default, 16 on score)
+    // FPS Guardian Level 1: Reduce glow intensity by 50%
+    const baseGlow = rimGlowRef.current // Dynamic glow (8 default, 16 on score)
+    ctx.shadowBlur = isFPSLevel1 ? baseGlow * 0.5 : baseGlow
     ctx.shadowOffsetY = 4 // Vertical offset for depth
     ctx.shadowColor = colors.accent // Use neon color directly
     ctx.beginPath()
@@ -1351,7 +1596,9 @@ export function DevOrbsCanvas({ users, onShakeReady }: DevOrbsCanvasProps) {
     // Layer 2: Secondary neon arc (thin, 3px below)
     ctx.strokeStyle = colors.accent
     ctx.lineWidth = 2
-    ctx.shadowBlur = rimGlowRef.current * 0.5 // Half glow for inner arc
+    // FPS Guardian Level 1: Reduce glow intensity by 50%
+    const innerGlow = rimGlowRef.current * 0.5 // Half glow for inner arc
+    ctx.shadowBlur = isFPSLevel1 ? innerGlow * 0.5 : innerGlow
     ctx.shadowOffsetY = 2 // Smaller offset
     ctx.beginPath()
     ctx.arc(centerX, centerY + arcSpacing, radius - 8, 0, Math.PI)
@@ -1368,8 +1615,131 @@ export function DevOrbsCanvas({ users, onShakeReady }: DevOrbsCanvasProps) {
 
     ctx.globalAlpha = 1
     ctx.restore()
-  }, [canvasSize.width])
+  }, [canvasSize.width, isFPSLevel1, isFPSLevel2])
 
+  // Render static orb (for mobile lite mode - no physics)
+  const renderStaticOrb = useCallback((ctx: CanvasRenderingContext2D, orb: StaticOrb, colors: ReturnType<typeof getThemeColors>) => {
+    if (!colors) return
+
+    const pos = { x: orb.x, y: orb.y }
+    const isMobile = isMobileDevice()
+    const radius = isMobile ? ORB_RADIUS_MOBILE : ORB_RADIUS_DESKTOP
+
+    ctx.save()
+
+    // Theme-specific orb styling
+    let borderColor = colors.accent
+    let borderWidth = 2
+    let glowIntensity = 4
+
+    if (themeId === "cyber") {
+      borderColor = "#00ff00" // Green for cyber
+      glowIntensity = 6
+    } else if (themeId === "pixel") {
+      borderColor = colors.primary
+      borderWidth = 3
+      glowIntensity = 2
+    } else if (themeId === "neon") {
+      borderColor = colors.accent
+      glowIntensity = 8
+    } else if (themeId === "terminal") {
+      borderColor = colors.text
+      borderWidth = 1
+      glowIntensity = 2
+    }
+
+    // Draw orb circle
+    ctx.beginPath()
+    ctx.arc(pos.x, pos.y, radius, 0, Math.PI * 2)
+    
+    // Draw avatar if loaded
+    if (orb.imageLoaded && orb.image) {
+      ctx.save()
+      ctx.beginPath()
+      ctx.arc(pos.x, pos.y, radius - borderWidth, 0, Math.PI * 2)
+      ctx.clip()
+      ctx.drawImage(orb.image, pos.x - radius + borderWidth, pos.y - radius + borderWidth, (radius - borderWidth) * 2, (radius - borderWidth) * 2)
+      ctx.restore()
+    } else {
+      // Fallback: draw colored circle
+      ctx.fillStyle = colors.primary
+      ctx.fill()
+    }
+
+    // Draw border with reduced glow (consistent with rim)
+    ctx.strokeStyle = borderColor
+    ctx.lineWidth = borderWidth
+    ctx.shadowBlur = 12 // Reduced glow for orbs
+    ctx.shadowColor = colors.accent // Use same neon color as rim for consistency
+    ctx.stroke()
+    ctx.shadowBlur = 0
+
+    // Terminal theme: ASCII representation
+    if (themeId === "terminal" && !orb.image) {
+      ctx.fillStyle = colors.text
+      ctx.font = `${radius}px monospace`
+      ctx.textAlign = "center"
+      ctx.textBaseline = "middle"
+      ctx.fillText("()", pos.x, pos.y)
+    }
+
+    ctx.restore()
+  }, [themeId])
+
+  // Draw static canvas for mobile lite mode (no animation loop)
+  // Must be defined after all draw functions (drawFloor, drawCourt, etc.) and renderStaticOrb
+  const drawStaticCanvas = useCallback(() => {
+    const canvas = canvasRef.current
+    if (!canvas || !isLiteMode) return
+
+    const ctx = canvas.getContext("2d")
+    if (!ctx) return
+
+    // Set canvas size
+    canvas.width = canvasSize.width
+    canvas.height = canvasSize.height
+
+    const colors = getThemeColors()
+    if (!colors) return
+
+    // Background gradient
+    const headerHeight = 96
+    const backboardY = headerHeight + 20
+    const backboardHeight = 140
+    const backboardBottom = backboardY + backboardHeight
+    const rimCenterY = backboardBottom - 15
+    const gradientCenterX = canvas.width / 2
+    const gradientCenterY = rimCenterY
+    
+    const gradient = ctx.createRadialGradient(
+      gradientCenterX, gradientCenterY, 0,
+      gradientCenterX, gradientCenterY, Math.max(canvas.width, canvas.height)
+    )
+    
+    gradient.addColorStop(0, '#0d1b2a')
+    gradient.addColorStop(1, '#000814')
+    
+    ctx.fillStyle = gradient
+    ctx.fillRect(0, 0, canvas.width, canvas.height)
+    
+    // Draw static basket and court
+    drawFloor(ctx, colors)
+    drawCourt(ctx, colors)
+    drawBackboardSideSupports(ctx, colors)
+    drawBackboard(ctx, colors)
+    drawRim(ctx, colors)
+    
+    // Generate static orbs if not already generated or if canvas size changed
+    if (staticOrbsRef.current.length === 0 || 
+        (staticOrbsRef.current[0] && (staticOrbsRef.current[0].x > canvas.width || staticOrbsRef.current[0].y > canvas.height))) {
+      staticOrbsRef.current = generateStaticOrbs(canvas.width, canvas.height, users)
+    }
+    
+    // Draw static orbs
+    staticOrbsRef.current.forEach((orb) => {
+      renderStaticOrb(ctx, orb, colors)
+    })
+  }, [canvasSize, themeId, isLiteMode, users, drawFloor, drawCourt, drawBackboardSideSupports, drawBackboard, drawRim, generateStaticOrbs, renderStaticOrb, getThemeColors])
 
   // Render orb with theme-specific styling
   const renderOrb = useCallback((ctx: CanvasRenderingContext2D, orb: Orb, colors: ReturnType<typeof getThemeColors>) => {
@@ -1442,7 +1812,21 @@ export function DevOrbsCanvas({ users, onShakeReady }: DevOrbsCanvasProps) {
 
   // Render loop
   useEffect(() => {
-    if (!canvasRef.current || !engineRef.current) return
+    if (!canvasRef.current) return
+    
+    // Mobile lite mode: draw static canvas once (no animation loop)
+    if (isLiteMode) {
+      drawStaticCanvas()
+      return
+    }
+    
+    // Desktop: ensure engine is initialized before rendering
+    // If engine is not initialized, wait for the physics init effect to run
+    if (!engineRef.current) {
+      // Engine not ready yet, skip this render cycle
+      // The physics init effect will initialize it
+      return
+    }
 
     const canvas = canvasRef.current
     const ctx = canvas.getContext("2d")
@@ -1468,24 +1852,23 @@ export function DevOrbsCanvas({ users, onShakeReady }: DevOrbsCanvasProps) {
         if (fpsHistoryRef.current.length > 60) {
           fpsHistoryRef.current.shift()
         }
+        
+        // Update FPS Guardian store (handles level calculation with hysteresis)
+        setFPS(fps)
       }
       lastFrameTimeRef.current = currentTime
 
-      // Check if FPS is too low (fallback to static if < 40)
-      const avgFps =
-        fpsHistoryRef.current.length > 0
-          ? fpsHistoryRef.current.reduce((a, b) => a + b, 0) / fpsHistoryRef.current.length
-          : 60
-
-      if (avgFps < 40) {
+      // FPS Guardian: Check FPS level and apply degradation
+      // Level 2 (FPS < 40): Aggressive fallback - render static only
+      if (isFPSLevel2) {
         // Fallback: render static background only with radial gradient
         const colors = getThemeColors()
         if (colors) {
           const headerHeight = 96
           const backboardY = headerHeight + 20
-          const backboardHeight = 140 // Increased by 50% then +30% then +20% (60 * 1.5 * 1.3 * 1.2 = 140.4 ≈ 140)
+          const backboardHeight = 140
           const backboardBottom = backboardY + backboardHeight
-          const rimCenterY = backboardBottom - 15 // Match rim position (dentro do backboard)
+          const rimCenterY = backboardBottom - 15
           const gradientCenterX = canvas.width / 2
           const gradientCenterY = rimCenterY
           
@@ -1504,8 +1887,10 @@ export function DevOrbsCanvas({ users, onShakeReady }: DevOrbsCanvasProps) {
         return
       }
 
-      // Update physics
-      updatePhysics(engineRef.current)
+      // Update physics (only if not in lite mode and not Level 2)
+      if (engineRef.current && !isFPSLevel2) {
+        updatePhysics(engineRef.current)
+      }
 
       // Debug: log orbs count changes (to see when/why they "disappear")
       const currentOrbsCount = orbsRef.current.length
@@ -1614,6 +1999,9 @@ export function DevOrbsCanvas({ users, onShakeReady }: DevOrbsCanvasProps) {
               ctx.restore()
             }
           })
+          
+          // Render fireworks (on top of everything)
+          renderFireworks(ctx)
         }
       }
 
@@ -1627,7 +2015,7 @@ export function DevOrbsCanvas({ users, onShakeReady }: DevOrbsCanvasProps) {
         cancelAnimationFrame(animationFrameId)
       }
     }
-  }, [canvasSize, themeId, renderOrb, isVisible, drawBackboard, drawRim, drawBackboardSideSupports, drawFloor, drawCourt])
+  }, [canvasSize, themeId, renderOrb, isVisible, drawBackboard, drawRim, drawBackboardSideSupports, drawFloor, drawCourt, renderFireworks, createFireworks, isLiteMode, isFPSLevel1, isFPSLevel2, fpsLevel])
 
   // Apply theme to canvas
   useEffect(() => {
@@ -1635,7 +2023,22 @@ export function DevOrbsCanvas({ users, onShakeReady }: DevOrbsCanvasProps) {
 
     const canvas = canvasRef.current
     canvas.setAttribute("data-theme", themeId)
-  }, [themeId])
+    
+    // Redraw static canvas if in lite mode when theme changes
+    if (isLiteMode) {
+      drawStaticCanvas()
+    }
+  }, [themeId, isLiteMode, drawStaticCanvas])
+
+  // Redraw static canvas when canvas size changes (e.g., screen rotation)
+  // Only for mobile lite mode
+  useEffect(() => {
+    if (isLiteMode && canvasSize.width > 0 && canvasSize.height > 0) {
+      // Clear static orbs to regenerate with new positions
+      staticOrbsRef.current = []
+      drawStaticCanvas()
+    }
+  }, [canvasSize.width, canvasSize.height, isLiteMode, drawStaticCanvas])
 
   // Save visibility preference to localStorage
   useEffect(() => {

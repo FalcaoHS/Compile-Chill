@@ -8,6 +8,10 @@ import { GameCard } from "@/components/GameCard"
 import { getAllGames } from "@/lib/games"
 import { DevOrbsCanvas } from "@/components/DevOrbsCanvas"
 import { ShakeButton } from "@/components/ShakeButton"
+import { DropsCanvas } from "@/components/DropsCanvas"
+import { EmoteBubble } from "@/components/EmoteBubble"
+import { HackerPanel } from "@/components/hacker-panel/HackerPanel"
+import { getEmotesByRarity, getEmoteById } from "@/lib/canvas/emotes/emote-loader"
 
 interface UserData {
   userId: number
@@ -19,10 +23,12 @@ interface UserData {
 export default function Home() {
   const { data: session, status } = useSession()
   const handleShakeRef = useRef<(() => void) | null>(null)
+  const spawnEmoteRef = useRef<((type: string, x: number, y: number) => void) | null>(null)
   const games = getAllGames()
   const [users, setUsers] = useState<UserData[]>([])
   const [usersLoading, setUsersLoading] = useState(true)
   const [usersError, setUsersError] = useState<string | null>(null)
+  const [showHackerPanel, setShowHackerPanel] = useState(false)
 
   // Fetch recent users
   useEffect(() => {
@@ -63,11 +69,27 @@ export default function Home() {
     <main className="min-h-screen bg-page">
       {/* Physics Area - Replaces Hero Section */}
       <div className="w-full relative" style={{ height: "calc(100vh - 96px)", minHeight: "400px" }}>
-        {/* Canvas sempre montado para não resetar física/orbs em cada refetch */}
+        {/* DevOrbs Canvas - Bottom layer */}
         <DevOrbsCanvas 
           users={users} 
           onShakeReady={(handleShake) => {
             handleShakeRef.current = handleShake
+          }}
+        />
+        
+        {/* Drops Canvas - Middle layer (above DevOrbs) */}
+        <DropsCanvas
+          onReward={(type, value) => {
+            // Handle reward (client state only for now)
+            console.log(`Reward granted: ${type} = ${value}`)
+            // TODO: Display reward UI/animation
+          }}
+        />
+        
+        {/* Emotes Canvas - Top layer (above Drops) */}
+        <EmoteBubble 
+          onReady={(spawnEmoteFn) => {
+            spawnEmoteRef.current = spawnEmoteFn
           }}
         />
         
@@ -79,6 +101,133 @@ export default function Home() {
             }
           }}
         />
+
+        {/* Hacker Panel Toggle Button */}
+        <button
+          onClick={() => setShowHackerPanel(!showHackerPanel)}
+          className="absolute top-20 right-4 md:right-4 z-30 px-3 py-2 bg-page-secondary text-text border border-border rounded hover:bg-page-secondary/80 hover:border-primary transition-colors text-sm font-theme flex items-center gap-2"
+          style={{ pointerEvents: 'auto' }}
+          aria-label="Toggle Hacker Panel"
+        >
+          <span className="text-primary">[</span>
+          <span>{showHackerPanel ? 'HIDE' : 'TERMINAL'}</span>
+          <span className="text-primary">]</span>
+        </button>
+
+        {/* Hacker Panel - Overlay layer (highest z-index when visible) */}
+        {showHackerPanel && (
+          <div 
+            className="absolute top-28 right-4 w-80 h-80 md:w-96 md:h-96 z-[60] border border-primary rounded"
+            style={{ 
+              pointerEvents: 'auto',
+              boxShadow: '0 0 20px rgba(126, 249, 255, 0.3)',
+            }}
+          >
+            <HackerPanel 
+              className="w-full h-full"
+              enabled={showHackerPanel}
+            />
+          </div>
+        )}
+        
+        {/* Temporary Emote Test Buttons - Hidden */}
+        <div className="absolute bottom-20 right-4 flex flex-col gap-2 z-30 hidden" style={{ pointerEvents: 'auto' }}>
+          <button
+            onClick={() => {
+              if (spawnEmoteRef.current) {
+                const rareEmotes = getEmotesByRarity('rare')
+                if (rareEmotes.length > 0) {
+                  const randomEmote = rareEmotes[Math.floor(Math.random() * rareEmotes.length)]
+                  const x = Math.random() * window.innerWidth
+                  const y = 100 + Math.random() * 200
+                  spawnEmoteRef.current(randomEmote.id, x, y)
+                }
+              }
+            }}
+            className="px-4 py-2 bg-accent text-page rounded border border-border hover:bg-accent-hover transition-colors text-sm font-theme"
+          >
+            🎯 Test Rare
+          </button>
+          
+          <button
+            onClick={() => {
+              if (spawnEmoteRef.current) {
+                const epicEmotes = getEmotesByRarity('epic')
+                if (epicEmotes.length > 0) {
+                  const randomEmote = epicEmotes[Math.floor(Math.random() * epicEmotes.length)]
+                  const x = Math.random() * window.innerWidth
+                  const y = 100 + Math.random() * 200
+                  spawnEmoteRef.current(randomEmote.id, x, y)
+                }
+              }
+            }}
+            className="px-4 py-2 bg-purple-500 text-page rounded border border-border hover:bg-purple-600 transition-colors text-sm font-theme"
+          >
+            ⚡ Test Epic
+          </button>
+          
+          <button
+            onClick={() => {
+              if (spawnEmoteRef.current) {
+                const legendaryEmotes = getEmotesByRarity('legendary')
+                if (legendaryEmotes.length > 0) {
+                  const randomEmote = legendaryEmotes[Math.floor(Math.random() * legendaryEmotes.length)]
+                  const x = Math.random() * window.innerWidth
+                  const y = 100 + Math.random() * 200
+                  spawnEmoteRef.current(randomEmote.id, x, y)
+                }
+              }
+            }}
+            className="px-4 py-2 bg-yellow-500 text-page rounded border border-yellow-400 hover:bg-yellow-600 transition-colors text-sm font-theme shadow-lg shadow-yellow-500/50"
+          >
+            ⭐ Test Legendary
+          </button>
+          
+                <button
+                  onClick={() => {
+                    if (spawnEmoteRef.current) {
+                      // Mix of all rarities
+                      const commonEmotes = ['rage', 'segfault', '404', 'rmrf', 'compile', 'deploy']
+                      const rareEmotes = getEmotesByRarity('rare')
+                      const epicEmotes = getEmotesByRarity('epic')
+                      const legendaryEmotes = getEmotesByRarity('legendary')
+                      
+                      const allEmotes = [
+                        ...commonEmotes,
+                        ...rareEmotes.map(e => e.id),
+                        ...epicEmotes.map(e => e.id),
+                        ...legendaryEmotes.map(e => e.id)
+                      ]
+                      
+                      const randomEmote = allEmotes[Math.floor(Math.random() * allEmotes.length)]
+                      const x = Math.random() * window.innerWidth
+                      const y = 100 + Math.random() * 200
+                      spawnEmoteRef.current(randomEmote, x, y)
+                    }
+                  }}
+                  className="px-4 py-2 bg-primary text-page rounded border border-border hover:bg-primary-hover transition-colors text-sm font-theme"
+                >
+                  🎲 Random All
+                </button>
+                
+                <button
+                  onClick={() => {
+                    if (spawnEmoteRef.current) {
+                      const productOwnerEmote = getEmoteById('product_owner')
+                      if (productOwnerEmote) {
+                        const x = Math.random() * window.innerWidth
+                        const y = 100 + Math.random() * 200
+                        spawnEmoteRef.current('product_owner', x, y)
+                      } else {
+                        console.warn('Product Owner emote not found!')
+                      }
+                    }
+                  }}
+                  className="px-4 py-2 bg-gradient-to-r from-yellow-500 via-orange-500 to-red-500 text-white rounded border-2 border-yellow-400 hover:from-yellow-600 hover:via-orange-600 hover:to-red-600 transition-all text-sm font-theme shadow-lg shadow-yellow-500/50 font-bold"
+                >
+                  👑 Product Owner (Unique)
+                </button>
+        </div>
 
         {/* Overlay de status (não desmonta o canvas) */}
         {usersLoading && (
