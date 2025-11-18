@@ -1,0 +1,271 @@
+🎮 1. Social/Interação
+✔ Chat dentro dos jogos e no site
+
+modo global
+
+modo por jogo
+
+filtros automáticos anti-spam
+
+mensagens efêmeras (somem após X horas)
+
+sistema de “salas temáticas” baseadas nos temas (Hacker, Pixel, Neon etc.)
+
+✔ Sistema de Emotes Dev (exclusivos)
+
+</rage>
+
+:segfault:
+
+:merge_conflict:
+
+404_face_not_found
+
+rm-rf-laugh
+
+animações tema-aware (glitch, pixel, neon)
+
+✔ Offline Bubble
+
+Balãozinho “X está jogando agora” estilo Steam mini popup.
+
+♟️ 2. Xadrez Dev Edition
+✔ Xadrez Multiplayer ou IA
+
+Com:
+
+chat lateral
+
+emotes “tech provocativos”
+
+skins de peças dev (branch, bug, commit, patch)
+
+replay das últimas 10 jogadas
+
+rating estilo ELO dev (DLO — Dev Level Order 😂)
+
+✔ Personalização:
+
+temas aplicados nas peças
+
+neon
+
+pixel retro
+
+azul terminal
+
+⚠️ sem scroll no desktop na UI do tabuleiro!
+
+📚 3. FunWiki — Histórias da Comunidade
+
+Com:
+
+posts criados pelos usuários
+
+tags automáticas baseadas no conteúdo (AI safe)
+
+sistema de reações (pixel corações, neon stars, glitch likes)
+
+ranking das histórias mais nojentas/difíceis/hilarious “bugs da vida real”
+
+modo anônimo (opcional, com moderação)
+
+Eventos sazonais:
+
+“Desafio: conte seu pior deploy”
+
+“Dia do Bug Histórico”
+
+🏠 4. Home Page Lendária
+✔ Bolinhas dos últimos 10 usuários
+
+físicas reais (bouncing physics)
+
+colidem entre si
+
+caem de cima da tela
+
+podem ser arrastadas com o mouse
+
+foto circular recortada pixel/neon conforme tema
+
+aparecem somente no desktop (performance)
+
+⚠️ garantir que o header fixo não cause scroll!
+
+✔ Easter Eggs do header
+
+10% de chance do header “bugar” por 1 frame (tema Hacker)
+
+No tema Pixel: um sprite corre no header
+
+No tema Neon: linha luminosa percorre a borda da página
+
+🔨 5. Extravasar a Raiva
+✔ Pergunta no primeiro acesso:
+
+“Qual tecnologia você mais odeia?”
+
+✔ Substituir temporariamente a logo:
+
+aparece o ícone da tecnologia odiada
+
+animação reativa quando o usuário bate com o martelo pixelado
+
+o ícone quebra em fragmentos
+
+pontinhos de “stress aliviado” somem em partículas
+
+vibração leve na interface
+
+✔ Painel “Extravasar a Raiva”
+
+fica em Configurações
+
+escolher nova tecnologia para estraçalhar
+
+escolher estilo de martelo (pixel, neon, ascii)
+
+🎭 6. Features extras para explodir a criatividade do portal
+
+Essas são ALTAMENTE recomendadas:
+
+🌐 6.1. Perfil Dev Cinemático
+
+histórico visual de scores
+
+gráfico estilo “energia dev”
+
+avatar com animação tema-aware
+
+mini achievements desbloqueáveis
+
+🎁 6.2. Sistema de “Drops”
+
+Enquanto o usuário navega:
+
+um objeto pixelado cai
+
+o usuário pode clicar
+
+ganha coins/skins para jogos
+
+extremamente divertido e mantém engajamento
+
+🔒 6.3. Sala Secreta
+
+Uma página oculta, acessível só com:
+
+comando /open-sesame no chat
+ou
+
+achando um QR escondido no site
+
+Lá dentro:
+
+jogos protótipo
+
+badges secretos
+
+“story mode” sobre bugs lendários
+
+💬 6.4. Mensagem Randomizada de Boas-Vindas
+
+Tipo:
+
+“Seu commit ficou lindo hoje?”
+
+“A RAM pediu respeito.”
+
+“404 problemas encontrados. Você é perfeito.”
+
+Gerada com vibração temática.
+
+⌨️ 6.5. Modo Terminal Oculto
+
+Ao apertar ~:
+
+interface vira um terminal
+
+comandos customizados:
+
+play random
+
+stats me
+
+theme neon
+
+summon bug (spawn de sprite bug pixelizado na tela)
+
+🧩 6.6. Eventos Semanais
+
+“Semana do Bug”: tema hacker + partículas vermelhas
+
+“Semana Minimal”: tudo fica terminal
+
+“Semana Pixel”: jogos com filtro via canvas
+
+🛡️ 6.7. Modo Dev Sênior
+
+Depois do usuário bater X horas jogando:
+
+interface fica mais “segura”, cinza
+
+surgem piadas internas:
+
+“Não faça deploy às 18h.”
+
+“Você realmente quer apagar branch?”
+
+Simulador de PRs caóticos
+
+🧪 6.8. Laboratório Experimental
+
+Aba com protótipos:
+
+jogos incompletos
+
+ideias WIP
+
+mecânicas pra testar com usuários reais
+
+sistema de votação interna
+
+🚀 6.9. Painel Hacker Real-Time
+
+Mostra:
+
+quantos usuários online
+
+quais jogos ativos
+
+streams de log fake (decorativo):
+
+[INFO] Bug localizado
+
+[WARN] Commit suspeito detectado
+
+É visual, divertido e dá vida ao portal.
+
+🧲 6.10. Sistema de Cartões de Score Cinematográficos
+
+Cada score vira uma imagem:
+
+fractais
+
+glitch
+
+neon
+
+dados do run
+
+animação curta
+
+Ajuda no compartilhamento no X/Twitter (como você planejou).
+
+
+Implementar possibilidade de enviar audio no chat ou em qualquer lugar do site que tenha comentários. 
+
+
+Extravase - Sessão para falar mal dos colegas ou do chefe (Sempre anônimo pra qualquer um, tomar cuidado na hora de resgatar para não trazer nada que atrele ao usuário, o site é pra desenvolvedores, o cuidado precisa ser redobrado)
+

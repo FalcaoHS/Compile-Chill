@@ -1,0 +1,128 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User model for storing user data from X OAuth
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String
+  avatar    String?
+  xId       String   @unique
+  // Theme preference: 'cyber', 'pixel', 'neon', 'terminal', or 'blueprint'
+  theme            String?
+  // Privacy setting: controls whether game history is visible on public profile
+  showPublicHistory Boolean @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  // NextAuth relationships
+  accounts Account[]
+  sessions Session[]
+
+  // Game scores relationship
+  scores Score[]
+
+  // Score validation failures relationship
+  scoreValidationFails ScoreValidationFail[]
+
+  @@index([xId])
+  @@index([id])
+  @@map("users")
+}
+
+// NextAuth Account model for OAuth provider accounts
+model Account {
+  id                String  @id @default(cuid())
+  userId            Int
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+  @@map("accounts")
+}
+
+// NextAuth Session model for database sessions
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       Int
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([sessionToken])
+  @@map("sessions")
+}
+
+// NextAuth VerificationToken model (for email verification if needed in future)
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+// Score model for storing game scores
+model Score {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  gameId      String
+  score       Int
+  duration    Int?
+  moves       Int?
+  level       Int?
+  metadata    Json?
+  isBestScore Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relationship to User
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([gameId])
+  @@index([isBestScore])
+  @@index([userId, gameId, isBestScore])
+  @@map("scores")
+}
+
+// ScoreValidationFail model for tracking failed score validation attempts
+model ScoreValidationFail {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  gameId      String
+  count       Int      @default(1)
+  lastAttempt DateTime @default(now())
+  details     Json
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relationship to User
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([gameId])
+  @@index([userId, gameId])
+  @@map("score_validation_fails")
+}

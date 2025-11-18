@@ -1,0 +1,215 @@
+[
+  {
+    "level": 1,
+    "gridSize": 3,
+    "initialBlocks": [
+      { "id": "block1", "type": "function", "row": 0, "col": 0 },
+      { "id": "block2", "type": "import", "row": 0, "col": 1 },
+      { "id": "block3", "type": "const", "row": 0, "col": 2 }
+    ],
+    "targetBlocks": [
+      { "id": "block2", "type": "import", "row": 0, "col": 0 },
+      { "id": "block3", "type": "const", "row": 0, "col": 1 },
+      { "id": "block1", "type": "function", "row": 0, "col": 2 }
+    ],
+    "rules": "Organize blocks in order: imports → constants → functions"
+  },
+  {
+    "level": 2,
+    "gridSize": 3,
+    "initialBlocks": [
+      { "id": "block1", "type": "import", "row": 0, "col": 0 },
+      { "id": "block2", "type": "function", "row": 0, "col": 1 },
+      { "id": "block3", "type": "const", "row": 1, "col": 1 }
+    ],
+    "targetBlocks": [
+      { "id": "block1", "type": "import", "row": 0, "col": 0 },
+      { "id": "block3", "type": "const", "row": 0, "col": 1 },
+      { "id": "block2", "type": "function", "row": 0, "col": 2 }
+    ],
+    "rules": "Move the const block to the middle, function to the end"
+  },
+  {
+    "level": 3,
+    "gridSize": 4,
+    "initialBlocks": [
+      { "id": "block1", "type": "class", "row": 0, "col": 0 },
+      { "id": "block2", "type": "import", "row": 0, "col": 1 },
+      { "id": "block3", "type": "const", "row": 0, "col": 2 },
+      { "id": "block4", "type": "function", "row": 0, "col": 3 },
+      { "id": "block5", "type": "comment", "row": 1, "col": 0 }
+    ],
+    "targetBlocks": [
+      { "id": "block5", "type": "comment", "row": 0, "col": 0 },
+      { "id": "block2", "type": "import", "row": 0, "col": 1 },
+      { "id": "block3", "type": "const", "row": 0, "col": 2 },
+      { "id": "block4", "type": "function", "row": 0, "col": 3 },
+      { "id": "block1", "type": "class", "row": 1, "col": 0 }
+    ],
+    "rules": "Comments at top, then imports → constants → functions → classes"
+  },
+  {
+    "level": 4,
+    "gridSize": 4,
+    "initialBlocks": [
+      { "id": "block1", "type": "import", "row": 0, "col": 0 },
+      { "id": "block2", "type": "import", "row": 0, "col": 1 },
+      { "id": "block3", "type": "const", "row": 0, "col": 2 },
+      { "id": "block4", "type": "function", "row": 0, "col": 3 },
+      { "id": "block5", "type": "function", "row": 1, "col": 0 },
+      { "id": "block6", "type": "const", "row": 1, "col": 1 }
+    ],
+    "targetBlocks": [
+      { "id": "block1", "type": "import", "row": 0, "col": 0 },
+      { "id": "block2", "type": "import", "row": 0, "col": 1 },
+      { "id": "block3", "type": "const", "row": 0, "col": 2 },
+      { "id": "block6", "type": "const", "row": 0, "col": 3 },
+      { "id": "block4", "type": "function", "row": 1, "col": 0 },
+      { "id": "block5", "type": "function", "row": 1, "col": 1 }
+    ],
+    "rules": "Group by type: all imports, then all constants, then all functions"
+  },
+  {
+    "level": 5,
+    "gridSize": 5,
+    "initialBlocks": [
+      { "id": "block1", "type": "import", "row": 0, "col": 0 },
+      { "id": "block2", "type": "const", "row": 0, "col": 1 },
+      { "id": "block3", "type": "function", "row": 0, "col": 2 },
+      { "id": "block4", "type": "class", "row": 0, "col": 3 },
+      { "id": "block5", "type": "return", "row": 0, "col": 4 }
+    ],
+    "targetBlocks": [
+      { "id": "block1", "type": "import", "row": 0, "col": 0 },
+      { "id": "block2", "type": "const", "row": 0, "col": 1 },
+      { "id": "block3", "type": "function", "row": 0, "col": 2 },
+      { "id": "block4", "type": "class", "row": 0, "col": 3 },
+      { "id": "block5", "type": "return", "row": 0, "col": 4 }
+    ],
+    "rules": "Blocks are already in correct order - verify the arrangement"
+  },
+  {
+    "level": 6,
+    "gridSize": 5,
+    "initialBlocks": [
+      { "id": "block1", "type": "return", "row": 0, "col": 0 },
+      { "id": "block2", "type": "import", "row": 0, "col": 1 },
+      { "id": "block3", "type": "class", "row": 0, "col": 2 },
+      { "id": "block4", "type": "const", "row": 0, "col": 3 },
+      { "id": "block5", "type": "function", "row": 0, "col": 4 },
+      { "id": "block6", "type": "comment", "row": 1, "col": 0 },
+      { "id": "block7", "type": "import", "row": 1, "col": 1 }
+    ],
+    "targetBlocks": [
+      { "id": "block6", "type": "comment", "row": 0, "col": 0 },
+      { "id": "block2", "type": "import", "row": 0, "col": 1 },
+      { "id": "block7", "type": "import", "row": 0, "col": 2 },
+      { "id": "block4", "type": "const", "row": 0, "col": 3 },
+      { "id": "block3", "type": "class", "row": 0, "col": 4 },
+      { "id": "block5", "type": "function", "row": 1, "col": 0 },
+      { "id": "block1", "type": "return", "row": 1, "col": 1 }
+    ],
+    "rules": "Comments → imports → constants → classes → functions → returns"
+  },
+  {
+    "level": 7,
+    "gridSize": 4,
+    "initialBlocks": [
+      { "id": "block1", "type": "import", "row": 0, "col": 0 },
+      { "id": "block2", "type": "import", "row": 0, "col": 1 },
+      { "id": "block3", "type": "function", "row": 0, "col": 2 },
+      { "id": "block4", "type": "function", "row": 0, "col": 3 },
+      { "id": "block5", "type": "const", "row": 1, "col": 0 },
+      { "id": "block6", "type": "return", "row": 1, "col": 1 }
+    ],
+    "targetBlocks": [
+      { "id": "block1", "type": "import", "row": 0, "col": 0 },
+      { "id": "block2", "type": "import", "row": 0, "col": 1 },
+      { "id": "block5", "type": "const", "row": 0, "col": 2 },
+      { "id": "block3", "type": "function", "row": 0, "col": 3 },
+      { "id": "block4", "type": "function", "row": 1, "col": 0 },
+      { "id": "block6", "type": "return", "row": 1, "col": 1 }
+    ],
+    "rules": "Code with imports and functions - organize by type"
+  },
+  {
+    "level": 8,
+    "gridSize": 4,
+    "initialBlocks": [
+      { "id": "block1", "type": "class", "row": 0, "col": 0 },
+      { "id": "block2", "type": "return", "row": 0, "col": 1 },
+      { "id": "block3", "type": "return", "row": 0, "col": 2 },
+      { "id": "block4", "type": "class", "row": 0, "col": 3 },
+      { "id": "block5", "type": "const", "row": 1, "col": 0 },
+      { "id": "block6", "type": "function", "row": 1, "col": 1 }
+    ],
+    "targetBlocks": [
+      { "id": "block5", "type": "const", "row": 0, "col": 0 },
+      { "id": "block6", "type": "function", "row": 0, "col": 1 },
+      { "id": "block1", "type": "class", "row": 0, "col": 2 },
+      { "id": "block4", "type": "class", "row": 0, "col": 3 },
+      { "id": "block2", "type": "return", "row": 1, "col": 0 },
+      { "id": "block3", "type": "return", "row": 1, "col": 1 }
+    ],
+    "rules": "Code with classes and returns - organize properly"
+  },
+  {
+    "level": 9,
+    "gridSize": 5,
+    "initialBlocks": [
+      { "id": "block1", "type": "return", "row": 0, "col": 0 },
+      { "id": "block2", "type": "import", "row": 0, "col": 1 },
+      { "id": "block3", "type": "comment", "row": 0, "col": 2 },
+      { "id": "block4", "type": "class", "row": 0, "col": 3 },
+      { "id": "block5", "type": "const", "row": 0, "col": 4 },
+      { "id": "block6", "type": "function", "row": 1, "col": 0 },
+      { "id": "block7", "type": "import", "row": 1, "col": 1 },
+      { "id": "block8", "type": "return", "row": 1, "col": 2 },
+      { "id": "block9", "type": "function", "row": 1, "col": 3 }
+    ],
+    "targetBlocks": [
+      { "id": "block3", "type": "comment", "row": 0, "col": 0 },
+      { "id": "block2", "type": "import", "row": 0, "col": 1 },
+      { "id": "block7", "type": "import", "row": 0, "col": 2 },
+      { "id": "block5", "type": "const", "row": 0, "col": 3 },
+      { "id": "block6", "type": "function", "row": 0, "col": 4 },
+      { "id": "block9", "type": "function", "row": 1, "col": 0 },
+      { "id": "block4", "type": "class", "row": 1, "col": 1 },
+      { "id": "block1", "type": "return", "row": 1, "col": 2 },
+      { "id": "block8", "type": "return", "row": 1, "col": 3 }
+    ],
+    "rules": "Long code 5×5 complex - full refactoring challenge"
+  },
+  {
+    "level": 10,
+    "gridSize": 5,
+    "initialBlocks": [
+      { "id": "block1", "type": "return", "row": 0, "col": 0 },
+      { "id": "block2", "type": "class", "row": 0, "col": 1 },
+      { "id": "block3", "type": "import", "row": 0, "col": 2 },
+      { "id": "block4", "type": "function", "row": 0, "col": 3 },
+      { "id": "block5", "type": "const", "row": 0, "col": 4 },
+      { "id": "block6", "type": "comment", "row": 1, "col": 0 },
+      { "id": "block7", "type": "return", "row": 1, "col": 1 },
+      { "id": "block8", "type": "import", "row": 1, "col": 2 },
+      { "id": "block9", "type": "const", "row": 1, "col": 3 },
+      { "id": "block10", "type": "function", "row": 1, "col": 4 },
+      { "id": "block11", "type": "class", "row": 2, "col": 0 }
+    ],
+    "targetBlocks": [
+      { "id": "block6", "type": "comment", "row": 0, "col": 0 },
+      { "id": "block3", "type": "import", "row": 0, "col": 1 },
+      { "id": "block8", "type": "import", "row": 0, "col": 2 },
+      { "id": "block5", "type": "const", "row": 0, "col": 3 },
+      { "id": "block9", "type": "const", "row": 0, "col": 4 },
+      { "id": "block4", "type": "function", "row": 1, "col": 0 },
+      { "id": "block10", "type": "function", "row": 1, "col": 1 },
+      { "id": "block2", "type": "class", "row": 1, "col": 2 },
+      { "id": "block11", "type": "class", "row": 1, "col": 3 },
+      { "id": "block1", "type": "return", "row": 2, "col": 0 },
+      { "id": "block7", "type": "return", "row": 2, "col": 1 }
+    ],
+    "rules": "Final puzzle - full refactor with all block types"
+  }
+]
+

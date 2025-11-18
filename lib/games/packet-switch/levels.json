@@ -1,0 +1,266 @@
+[
+  {
+    "level": 1,
+    "nodes": [
+      { "id": "source", "x": 100, "y": 300, "type": "source" },
+      { "id": "router1", "x": 300, "y": 300, "type": "router" },
+      { "id": "destination", "x": 500, "y": 300, "type": "destination" }
+    ],
+    "links": [
+      { "from": "source", "to": "router1" },
+      { "from": "router1", "to": "destination" }
+    ],
+    "sourceNodeId": "source",
+    "destinationNodeId": "destination",
+    "packetsToSend": 1,
+    "difficulty": 1
+  },
+  {
+    "level": 2,
+    "nodes": [
+      { "id": "source", "x": 100, "y": 300, "type": "source" },
+      { "id": "router1", "x": 250, "y": 200, "type": "router" },
+      { "id": "router2", "x": 400, "y": 300, "type": "router" },
+      { "id": "destination", "x": 550, "y": 300, "type": "destination" }
+    ],
+    "links": [
+      { "from": "source", "to": "router1" },
+      { "from": "router1", "to": "router2" },
+      { "from": "router2", "to": "destination" }
+    ],
+    "sourceNodeId": "source",
+    "destinationNodeId": "destination",
+    "packetsToSend": 2,
+    "difficulty": 2
+  },
+  {
+    "level": 3,
+    "nodes": [
+      { "id": "source", "x": 100, "y": 300, "type": "source" },
+      { "id": "router1", "x": 250, "y": 200, "type": "router" },
+      { "id": "router2", "x": 250, "y": 400, "type": "router" },
+      { "id": "router3", "x": 400, "y": 300, "type": "router" },
+      { "id": "destination", "x": 550, "y": 300, "type": "destination" }
+    ],
+    "links": [
+      { "from": "source", "to": "router1" },
+      { "from": "source", "to": "router2" },
+      { "from": "router1", "to": "router3" },
+      { "from": "router2", "to": "router3" },
+      { "from": "router3", "to": "destination" }
+    ],
+    "sourceNodeId": "source",
+    "destinationNodeId": "destination",
+    "packetsToSend": 2,
+    "difficulty": 3
+  },
+  {
+    "level": 4,
+    "nodes": [
+      { "id": "source", "x": 100, "y": 300, "type": "source" },
+      { "id": "router1", "x": 200, "y": 200, "type": "router" },
+      { "id": "router2", "x": 200, "y": 400, "type": "router" },
+      { "id": "router3", "x": 350, "y": 300, "type": "router" },
+      { "id": "dest1", "x": 500, "y": 200, "type": "destination" },
+      { "id": "dest2", "x": 500, "y": 400, "type": "destination" }
+    ],
+    "links": [
+      { "from": "source", "to": "router1" },
+      { "from": "source", "to": "router2" },
+      { "from": "router1", "to": "router3" },
+      { "from": "router2", "to": "router3" },
+      { "from": "router3", "to": "dest1" },
+      { "from": "router3", "to": "dest2" }
+    ],
+    "sourceNodeId": "source",
+    "destinationNodeId": "dest1",
+    "packetsToSend": 3,
+    "difficulty": 4
+  },
+  {
+    "level": 5,
+    "nodes": [
+      { "id": "source", "x": 100, "y": 300, "type": "source" },
+      { "id": "router1", "x": 200, "y": 150, "type": "router" },
+      { "id": "router2", "x": 200, "y": 300, "type": "router" },
+      { "id": "router3", "x": 200, "y": 450, "type": "router" },
+      { "id": "router4", "x": 400, "y": 300, "type": "router" },
+      { "id": "dest1", "x": 550, "y": 200, "type": "destination" },
+      { "id": "dest2", "x": 550, "y": 400, "type": "destination" }
+    ],
+    "links": [
+      { "from": "source", "to": "router1" },
+      { "from": "source", "to": "router2" },
+      { "from": "source", "to": "router3" },
+      { "from": "router1", "to": "router4" },
+      { "from": "router2", "to": "router4" },
+      { "from": "router3", "to": "router4" },
+      { "from": "router4", "to": "dest1" },
+      { "from": "router4", "to": "dest2" }
+    ],
+    "sourceNodeId": "source",
+    "destinationNodeId": "dest1",
+    "packetsToSend": 2,
+    "difficulty": 5
+  },
+  {
+    "level": 6,
+    "nodes": [
+      { "id": "source", "x": 80, "y": 300, "type": "source" },
+      { "id": "router1", "x": 180, "y": 200, "type": "router" },
+      { "id": "router2", "x": 180, "y": 400, "type": "router" },
+      { "id": "router3", "x": 320, "y": 150, "type": "router" },
+      { "id": "router4", "x": 320, "y": 300, "type": "router" },
+      { "id": "router5", "x": 320, "y": 450, "type": "router" },
+      { "id": "destination", "x": 520, "y": 300, "type": "destination" }
+    ],
+    "links": [
+      { "from": "source", "to": "router1" },
+      { "from": "source", "to": "router2" },
+      { "from": "router1", "to": "router3" },
+      { "from": "router1", "to": "router4" },
+      { "from": "router2", "to": "router4" },
+      { "from": "router2", "to": "router5" },
+      { "from": "router3", "to": "destination" },
+      { "from": "router4", "to": "destination" },
+      { "from": "router5", "to": "destination" }
+    ],
+    "sourceNodeId": "source",
+    "destinationNodeId": "destination",
+    "packetsToSend": 3,
+    "difficulty": 6
+  },
+  {
+    "level": 7,
+    "nodes": [
+      { "id": "source", "x": 80, "y": 300, "type": "source" },
+      { "id": "router1", "x": 200, "y": 150, "type": "router" },
+      { "id": "router2", "x": 200, "y": 300, "type": "router" },
+      { "id": "router3", "x": 200, "y": 450, "type": "router" },
+      { "id": "bottleneck", "x": 350, "y": 300, "type": "router" },
+      { "id": "router4", "x": 500, "y": 200, "type": "router" },
+      { "id": "router5", "x": 500, "y": 400, "type": "router" },
+      { "id": "destination", "x": 650, "y": 300, "type": "destination" }
+    ],
+    "links": [
+      { "from": "source", "to": "router1" },
+      { "from": "source", "to": "router2" },
+      { "from": "source", "to": "router3" },
+      { "from": "router1", "to": "bottleneck" },
+      { "from": "router2", "to": "bottleneck" },
+      { "from": "router3", "to": "bottleneck" },
+      { "from": "bottleneck", "to": "router4" },
+      { "from": "bottleneck", "to": "router5" },
+      { "from": "router4", "to": "destination" },
+      { "from": "router5", "to": "destination" }
+    ],
+    "sourceNodeId": "source",
+    "destinationNodeId": "destination",
+    "packetsToSend": 4,
+    "difficulty": 7
+  },
+  {
+    "level": 8,
+    "nodes": [
+      { "id": "source", "x": 50, "y": 300, "type": "source" },
+      { "id": "router1", "x": 150, "y": 150, "type": "router" },
+      { "id": "router2", "x": 150, "y": 300, "type": "router" },
+      { "id": "router3", "x": 150, "y": 450, "type": "router" },
+      { "id": "router4", "x": 300, "y": 200, "type": "router" },
+      { "id": "router5", "x": 300, "y": 400, "type": "router" },
+      { "id": "router6", "x": 450, "y": 250, "type": "router" },
+      { "id": "router7", "x": 450, "y": 350, "type": "router" },
+      { "id": "destination", "x": 600, "y": 300, "type": "destination" }
+    ],
+    "links": [
+      { "from": "source", "to": "router1" },
+      { "from": "source", "to": "router2" },
+      { "from": "source", "to": "router3" },
+      { "from": "router1", "to": "router4" },
+      { "from": "router2", "to": "router4" },
+      { "from": "router2", "to": "router5" },
+      { "from": "router3", "to": "router5" },
+      { "from": "router4", "to": "router6" },
+      { "from": "router4", "to": "router7" },
+      { "from": "router5", "to": "router6" },
+      { "from": "router5", "to": "router7" },
+      { "from": "router6", "to": "destination" },
+      { "from": "router7", "to": "destination" }
+    ],
+    "sourceNodeId": "source",
+    "destinationNodeId": "destination",
+    "packetsToSend": 4,
+    "difficulty": 8
+  },
+  {
+    "level": 9,
+    "nodes": [
+      { "id": "source", "x": 50, "y": 300, "type": "source" },
+      { "id": "router1", "x": 150, "y": 200, "type": "router" },
+      { "id": "router2", "x": 150, "y": 300, "type": "router" },
+      { "id": "router3", "x": 150, "y": 400, "type": "router" },
+      { "id": "router4", "x": 300, "y": 150, "type": "router" },
+      { "id": "router5", "x": 300, "y": 300, "type": "router" },
+      { "id": "router6", "x": 300, "y": 450, "type": "router" },
+      { "id": "destination", "x": 550, "y": 300, "type": "destination" }
+    ],
+    "links": [
+      { "from": "source", "to": "router1" },
+      { "from": "source", "to": "router2" },
+      { "from": "source", "to": "router3" },
+      { "from": "router1", "to": "router4" },
+      { "from": "router1", "to": "router5" },
+      { "from": "router2", "to": "router4" },
+      { "from": "router2", "to": "router5" },
+      { "from": "router2", "to": "router6" },
+      { "from": "router3", "to": "router5" },
+      { "from": "router3", "to": "router6" },
+      { "from": "router4", "to": "destination" },
+      { "from": "router5", "to": "destination" },
+      { "from": "router6", "to": "destination" }
+    ],
+    "sourceNodeId": "source",
+    "destinationNodeId": "destination",
+    "packetsToSend": 5,
+    "difficulty": 9
+  },
+  {
+    "level": 10,
+    "nodes": [
+      { "id": "source", "x": 30, "y": 300, "type": "source" },
+      { "id": "router1", "x": 130, "y": 150, "type": "router" },
+      { "id": "router2", "x": 130, "y": 250, "type": "router" },
+      { "id": "router3", "x": 130, "y": 350, "type": "router" },
+      { "id": "router4", "x": 130, "y": 450, "type": "router" },
+      { "id": "router5", "x": 280, "y": 200, "type": "router" },
+      { "id": "router6", "x": 280, "y": 300, "type": "router" },
+      { "id": "router7", "x": 280, "y": 400, "type": "router" },
+      { "id": "router8", "x": 430, "y": 250, "type": "router" },
+      { "id": "router9", "x": 430, "y": 350, "type": "router" },
+      { "id": "destination", "x": 580, "y": 300, "type": "destination" }
+    ],
+    "links": [
+      { "from": "source", "to": "router1" },
+      { "from": "source", "to": "router2" },
+      { "from": "source", "to": "router3" },
+      { "from": "source", "to": "router4" },
+      { "from": "router1", "to": "router5" },
+      { "from": "router2", "to": "router5" },
+      { "from": "router2", "to": "router6" },
+      { "from": "router3", "to": "router6" },
+      { "from": "router3", "to": "router7" },
+      { "from": "router4", "to": "router7" },
+      { "from": "router5", "to": "router8" },
+      { "from": "router6", "to": "router8" },
+      { "from": "router6", "to": "router9" },
+      { "from": "router7", "to": "router9" },
+      { "from": "router8", "to": "destination" },
+      { "from": "router9", "to": "destination" }
+    ],
+    "sourceNodeId": "source",
+    "destinationNodeId": "destination",
+    "packetsToSend": 6,
+    "difficulty": 10
+  }
+]
+

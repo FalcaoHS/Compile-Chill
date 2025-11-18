@@ -1,0 +1,13 @@
+version: 2.1.1
+last_compiled: 2025-11-17 21:59:16
+
+# ================================================
+# Compiled with the following settings:
+#
+# To change these settings, run ~/agent-os/scripts/project-update.sh to re-compile your project with the new settings.
+# ================================================
+profile: default
+claude_code_commands: no
+use_claude_code_subagents: no
+agent_os_commands: true
+standards_as_claude_code_skills: false
