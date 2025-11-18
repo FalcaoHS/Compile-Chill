@@ -1,12 +1,13 @@
 "use client"
 
 import { useSession } from "next-auth/react"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import Link from "next/link"
 import { LoginButton } from "@/components/LoginButton"
 import { GameCard } from "@/components/GameCard"
 import { getAllGames } from "@/lib/games"
 import { DevOrbsCanvas } from "@/components/DevOrbsCanvas"
+import { ShakeButton } from "@/components/ShakeButton"
 
 interface UserData {
   userId: number
@@ -17,6 +18,7 @@ interface UserData {
 
 export default function Home() {
   const { data: session, status } = useSession()
+  const handleShakeRef = useRef<(() => void) | null>(null)
   const games = getAllGames()
   const [users, setUsers] = useState<UserData[]>([])
   const [usersLoading, setUsersLoading] = useState(true)
@@ -62,7 +64,21 @@ export default function Home() {
       {/* Physics Area - Replaces Hero Section */}
       <div className="w-full relative" style={{ height: "calc(100vh - 96px)", minHeight: "400px" }}>
         {/* Canvas sempre montado para não resetar física/orbs em cada refetch */}
-        <DevOrbsCanvas users={users} />
+        <DevOrbsCanvas 
+          users={users} 
+          onShakeReady={(handleShake) => {
+            handleShakeRef.current = handleShake
+          }}
+        />
+        
+        {/* Shake Button */}
+        <ShakeButton 
+          onShake={() => {
+            if (handleShakeRef.current) {
+              handleShakeRef.current()
+            }
+          }}
+        />
 
         {/* Overlay de status (não desmonta o canvas) */}
         {usersLoading && (

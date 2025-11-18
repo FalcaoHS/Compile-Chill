@@ -9,17 +9,13 @@ import {
   createOrbBody,
   getPhysicsConfig,
   updatePhysics,
-  createDragConstraint,
   calculateThrowForce,
-  applyThrowForce,
-  isPointInBody,
   getBodyPosition,
   addBodyToWorld,
-  removeBodyFromWorld,
   isMobileDevice,
 } from "@/lib/physics/orbs-engine"
 
-const { Bodies, World, Engine, Events, Body } = Matter
+const { Bodies, Body } = Matter
 
 interface UserData {
   userId: number
@@ -40,6 +36,7 @@ interface Orb {
 
 interface DevOrbsCanvasProps {
   users: UserData[]
+  onShakeReady?: (handleShake: () => void) => void
 }
 
 const MAX_ORBS = 10
@@ -53,7 +50,7 @@ const SPAWN_INTERVAL_MS = 1000 // 1 second
  * Renders physics-based Dev Orbs on canvas with Matter.js integration.
  * Canvas fits viewport height minus header height (no scroll).
  */
-export function DevOrbsCanvas({ users }: DevOrbsCanvasProps) {
+export function DevOrbsCanvas({ users, onShakeReady }: DevOrbsCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const engineRef = useRef<Matter.Engine | null>(null)
   const worldRef = useRef<Matter.World | null>(null)
@@ -68,50 +65,39 @@ export function DevOrbsCanvas({ users }: DevOrbsCanvasProps) {
   const spawnIndexRef = useRef<number>(0)
   
   // Drag state
-  const dragConstraintRef = useRef<Matter.Constraint | null>(null)
   const dragStartRef = useRef<{ x: number; y: number } | null>(null)
   const isDraggingRef = useRef<boolean>(false)
   const draggedOrbRef = useRef<Orb | null>(null)
   
-  // Basket state
-  const basketHitboxRef = useRef<{ x: number; y: number; width: number; height: number } | null>(null)
-  const basketShakeRef = useRef<number>(0)
-  const hudMessageRef = useRef<string | null>(null)
-  const hudMessageTimerRef = useRef<NodeJS.Timeout | null>(null)
-  
-  // Physics bodies for basket
-  const backboardBodyRef = useRef<Matter.Body | null>(null)
-  const rimBodiesRef = useRef<Matter.Body[]>([])
-  const sensorBodyRef = useRef<Matter.Body | null>(null)
-  
   // Score state
-  const [currentScore, setCurrentScore] = useState(0)
-  const [bestScore, setBestScore] = useState(() => {
-    if (typeof window === "undefined") return 0
-    const saved = localStorage.getItem("compilechill_home_hoop_score")
-    return saved ? parseInt(saved, 10) : 0
-  })
-  const [combo, setCombo] = useState(0)
+  const scoreRef = useRef<number>(0)
+  const bestScoreRef = useRef<number>(
+    typeof window !== "undefined" 
+      ? (() => {
+          const saved = localStorage.getItem("dev-orbs-best-score")
+          return saved ? parseInt(saved, 10) : 0
+        })()
+      : 0
+  )
+  const sensorBodyRef = useRef<Matter.Body | null>(null)
+  const scoredOrbsRef = useRef<Set<string>>(new Set())
   
-  // Track orb entry into sensor
-  const orbSensorStateRef = useRef<Map<number, { enteredFromTop: boolean; entryY: number }>>(new Map())
+  // Rim support colliders (left and right physical supports)
+  const leftSupportBodyRef = useRef<Matter.Body | null>(null)
+  const rightSupportBodyRef = useRef<Matter.Body | null>(null)
   
-  // Combo reset timer
-  const comboResetTimerRef = useRef<NodeJS.Timeout | null>(null)
+  // Animation refs for score effects
+  const rimGlowRef = useRef<number>(8) // Default shadowBlur (elegant, less spread)
+  const rimAlphaRef = useRef<number>(1) // Default alpha
+  const backboardFlashRef = useRef<number>(0) // Flash intensity (0-1)
+  const scoreboardShakeRef = useRef<number>(0) // Shake offset
+  const digitScaleRef = useRef<number>(1) // Scale for digit pulse animation
+  const digitGlowRef = useRef<number>(10) // Glow for digits (10 default, 20 on score)
   
-  // Particle system
-  interface Particle {
-    x: number
-    y: number
-    vx: number
-    vy: number
-    life: number
-    maxLife: number
-    size: number
-    color: string
-  }
-  const particlesRef = useRef<Particle[]>([])
-  const activeFireworksRef = useRef<number>(0)
+  // Shake animation refs
+  const rimShakeRef = useRef<number>(0) // Rim shake offset
+  const backboardShakeRef = useRef<number>(0) // Backboard shake offset
+  const isShakingRef = useRef<boolean>(false) // Shake state
   
   const { theme: themeId } = useThemeStore()
   const [canvasSize, setCanvasSize] = useState({ width: 0, height: 0 })
@@ -301,65 +287,6 @@ export function DevOrbsCanvas({ users }: DevOrbsCanvasProps) {
     return () => window.removeEventListener("resize", handleResize)
   }, [isMounted])
 
-  // Handle valid basket (orb passed through sensor correctly)
-  const handleValidBasket = useCallback((orbBody: Matter.Body) => {
-    // Limit to 1-2 firework effects simultaneously
-    if (activeFireworksRef.current >= 2) return
-
-    // Update score
-    setCurrentScore((prev) => {
-      const newScore = prev + 1
-      // Update best score
-      setBestScore((currentBest) => {
-        if (newScore > currentBest) {
-          const newBest = newScore
-          if (typeof window !== "undefined") {
-            localStorage.setItem("compilechill_home_hoop_score", newBest.toString())
-          }
-          return newBest
-        }
-        return currentBest
-      })
-      return newScore
-    })
-    
-    // Update combo and reset timer
-    setCombo((prev) => {
-      const newCombo = prev + 1
-      // Reset combo after 5 seconds of no baskets
-      if (comboResetTimerRef.current) {
-        clearTimeout(comboResetTimerRef.current)
-      }
-      comboResetTimerRef.current = setTimeout(() => {
-        setCombo(0)
-      }, 5000)
-      return newCombo
-    })
-
-    // Trigger basket shake animation
-    basketShakeRef.current = 1.0
-
-    // Show HUD message
-    hudMessageRef.current = "Cesta! 🏀"
-
-    // Clear previous timer
-    if (hudMessageTimerRef.current) {
-      clearTimeout(hudMessageTimerRef.current)
-    }
-
-    // Clear message after 2 seconds
-    hudMessageTimerRef.current = setTimeout(() => {
-      hudMessageRef.current = null
-    }, 2000)
-
-    // Create fireworks effect at sensor position
-    const pos = getBodyPosition(orbBody)
-    createFireworks(pos.x, pos.y)
-    activeFireworksRef.current++
-
-    // Keep orb bouncing (don't remove it)
-    // Orbs stay on screen after scoring
-  }, [])
 
   // Initialize physics engine (runs once after mount)
   useEffect(() => {
@@ -389,178 +316,154 @@ export function DevOrbsCanvas({ users }: DevOrbsCanvasProps) {
       Matter.World.add(engine.world, boundary)
     })
 
-    // Create basket physics bodies
-    const basketWidth = 120
-    const basketHeight = 40
-    const basketX = size.width / 2 - basketWidth / 2
-    const basketY = 180 // Moved down from 120
-    const rimRadius = basketWidth / 2
-    const backboardWidth = 80
-    const backboardHeight = 40 // Reduced height to not block basket
-    const backboardX = size.width / 2 - backboardWidth / 2
-    const backboardY = basketY - 40 // Moved higher to not block basket opening
-
-    // Create backboard (solid, static) - smaller and positioned to not block the basket opening
-    const backboard = Bodies.rectangle(
-      backboardX + backboardWidth / 2,
-      backboardY + backboardHeight / 2,
-      backboardWidth,
-      backboardHeight,
+    // Create rim support colliders and sensor
+    // Position matches the rim position (dentro do backboard)
+    const headerHeight = 96
+    const backboardY = headerHeight + 20
+    const backboardHeight = 140 // Increased by 50% then +30% then +20% (60 * 1.5 * 1.3 * 1.2 = 140.4 ≈ 140)
+    const backboardBottom = backboardY + backboardHeight
+    const rimCenterY = backboardBottom - 15 // Aro fica 15px dentro do backboard
+    const rimCenterX = size.width / 2
+    const rimRadius = 60
+    
+    // Support collider dimensions
+    const supportWidth = 10
+    const supportHeight = 25
+    const supportOffsetX = supportWidth / 2 // Offset to center the support
+    
+    // Left support collider (left side of rim)
+    const leftSupportX = rimCenterX - rimRadius + supportOffsetX
+    const leftSupportY = rimCenterY
+    const leftSupport = Bodies.rectangle(
+      leftSupportX,
+      leftSupportY,
+      supportWidth,
+      supportHeight,
       {
         isStatic: true,
-        restitution: 0.7,
-        collisionFilter: {
-          category: 0x0002, // Category for backboard
-          mask: 0xFFFFFFFF, // Collide with everything
-        },
-        render: { visible: false },
+        isSensor: false, // Physical collision
+        restitution: 0.2,
+        friction: 0.5,
+        render: { visible: false }, // Invisible (visual is drawn separately)
+        label: 'rim-left-support',
       }
     )
-    backboardBodyRef.current = backboard
-    Matter.World.add(engine.world, backboard)
-
-    // Create rim (semicircle, segmented into multiple bodies for better collision)
-    // Use much smaller radius and skip middle segments to create very large opening
-    const rimPhysicalRadius = rimRadius * 0.70 // Rim is 70% of visual radius (creates very large opening)
-    const rimSegments = 8
-    const rimBodies: Matter.Body[] = []
-    const skipMiddle = true
+    Matter.World.add(engine.world, leftSupport)
+    leftSupportBodyRef.current = leftSupport
     
-    for (let i = 0; i < rimSegments; i++) {
-      const angle = (Math.PI / rimSegments) * i
-      const normalizedAngle = angle / Math.PI // 0 to 1
-      
-      // Skip segments in the middle (center 50% - only keep outer 25% on each side)
-      if (skipMiddle && normalizedAngle > 0.25 && normalizedAngle < 0.75) {
-        continue // Skip this segment to create large opening
-      }
-      
-      const segmentAngle = Math.PI / rimSegments
-      const x1 = basketX + basketWidth / 2 + Math.cos(angle) * rimPhysicalRadius
-      const y1 = basketY + Math.sin(angle) * rimPhysicalRadius
-      const x2 = basketX + basketWidth / 2 + Math.cos(angle + segmentAngle) * rimPhysicalRadius
-      const y2 = basketY + Math.sin(angle + segmentAngle) * rimPhysicalRadius
-
-      const midX = (x1 + x2) / 2
-      const midY = (y1 + y2) / 2
-      const segmentLength = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
-
-      const segment = Bodies.rectangle(midX, midY, segmentLength, 2, { // Even thinner rim (2px) to reduce obstruction
+    // Right support collider (right side of rim)
+    const rightSupportX = rimCenterX + rimRadius - supportOffsetX
+    const rightSupportY = rimCenterY
+    const rightSupport = Bodies.rectangle(
+      rightSupportX,
+      rightSupportY,
+      supportWidth,
+      supportHeight,
+      {
         isStatic: true,
-        restitution: 0.7,
-        angle: angle + segmentAngle / 2,
-        collisionFilter: {
-          category: 0x0004, // Category for rim
-          mask: 0xFFFFFFFF, // Collide with everything
-        },
-        render: { visible: false },
-      })
-      rimBodies.push(segment)
-      Matter.World.add(engine.world, segment)
-    }
-    rimBodiesRef.current = rimBodies
+        isSensor: false, // Physical collision
+        restitution: 0.2,
+        friction: 0.5,
+        render: { visible: false }, // Invisible (visual is drawn separately)
+        label: 'rim-right-support',
+      }
+    )
+    Matter.World.add(engine.world, rightSupport)
+    rightSupportBodyRef.current = rightSupport
+    
+    // Sensor for basket detection (inside the rim arc)
+    const sensorWidth = 70
+    const sensorHeight = 10
+    const sensorX = rimCenterX - sensorWidth / 2
+    const sensorY = rimCenterY + 5 // Sensor fica logo abaixo do centro do aro
 
-    // Create inner sensor (thin rectangle inside rim, isSensor: true)
-    // Make sensor wider to match the larger opening
-    const sensorWidth = rimPhysicalRadius * 1.8 // Even wider sensor for the large opening
-    const sensorHeight = 25 // Taller sensor for easier detection
     const sensor = Bodies.rectangle(
-      basketX + basketWidth / 2,
-      basketY + sensorHeight / 2,
+      sensorX + sensorWidth / 2,
+      sensorY + sensorHeight / 2,
       sensorWidth,
       sensorHeight,
       {
         isStatic: true,
-        isSensor: true, // Key: doesn't block physics, just detects
-        render: { visible: false },
+        isSensor: true, // Sensor doesn't create physical collisions
+        render: { visible: false }, // Invisible
+        label: 'basket-sensor',
       }
     )
-    sensorBodyRef.current = sensor
+    
     Matter.World.add(engine.world, sensor)
+    sensorBodyRef.current = sensor
 
-    // Setup collision detection for sensor
-    Matter.Events.on(engine, "collisionStart", (event) => {
-      const pairs = event.pairs
-      for (const pair of pairs) {
+    // Setup collision detection for scoring
+    Matter.Events.on(engine, 'collisionStart', (event) => {
+      event.pairs.forEach((pair) => {
         const { bodyA, bodyB } = pair
-        const sensorBody = sensorBodyRef.current
-        if (!sensorBody) continue
+        const sensor = sensorBodyRef.current
+        
+        if (!sensor) return
 
-        // Check if one body is the sensor and the other is an orb
-        let orbBody: Matter.Body | null = null
-        if (bodyA.id === sensorBody.id) {
-          orbBody = bodyB
-        } else if (bodyB.id === sensorBody.id) {
-          orbBody = bodyA
-        }
-
-        if (orbBody) {
-          // Find the orb in our orbs array
-          const orb = orbsRef.current.find((o) => o.body.id === orbBody!.id)
-          if (orb) {
-            // Check if orb entered from above (velocity Y > 0 means moving down)
-            const velocityY = orbBody.velocity.y
-            const orbY = orbBody.position.y
-
-            if (velocityY > 0 && orbY < sensorBody.position.y) {
-              // Orb entered sensor from above
-              orbSensorStateRef.current.set(orbBody.id, {
-                enteredFromTop: true,
-                entryY: orbY,
-              })
+        // Check if collision involves sensor and an orb
+        if ((bodyA === sensor || bodyB === sensor)) {
+          const orbBody = bodyA === sensor ? bodyB : bodyA
+          
+          // Find the orb
+          const orb = orbsRef.current.find((o) => o.body === orbBody)
+          if (orb && !scoredOrbsRef.current.has(orb.id)) {
+            // Mark as scored to prevent double scoring
+            scoredOrbsRef.current.add(orb.id)
+            
+            // Increment score
+            scoreRef.current += 1
+            
+            // Update best score
+            if (scoreRef.current > bestScoreRef.current) {
+              bestScoreRef.current = scoreRef.current
+              // Save to localStorage
+              if (typeof window !== "undefined") {
+                localStorage.setItem("dev-orbs-best-score", bestScoreRef.current.toString())
+              }
             }
+            
+            // Trigger visual effects on score
+            // Rim pulse glow (300ms) - increase from 8 to 16
+            rimGlowRef.current = 16
+            setTimeout(() => {
+              rimGlowRef.current = 8
+            }, 300)
+            
+            // Rim alpha pulse (200ms)
+            rimAlphaRef.current = 1.2
+            setTimeout(() => {
+              rimAlphaRef.current = 1
+            }, 200)
+            
+            // Backboard flash (200ms)
+            backboardFlashRef.current = 1
+            setTimeout(() => {
+              backboardFlashRef.current = 0
+            }, 200)
+            
+            // Digit pulse animation (150ms) - scale 1.0 → 1.05 → 1.0
+            digitScaleRef.current = 1.05
+            setTimeout(() => {
+              digitScaleRef.current = 1.0
+            }, 150)
+            
+            // Digit glow pulse (150ms) - shadowBlur 10 → 20 → 10
+            digitGlowRef.current = 20
+            setTimeout(() => {
+              digitGlowRef.current = 10
+            }, 150)
           }
         }
-      }
+      })
     })
-
-    Matter.Events.on(engine, "collisionEnd", (event) => {
-      const pairs = event.pairs
-      for (const pair of pairs) {
-        const { bodyA, bodyB } = pair
-        const sensorBody = sensorBodyRef.current
-        if (!sensorBody) continue
-
-        // Check if one body is the sensor and the other is an orb
-        let orbBody: Matter.Body | null = null
-        if (bodyA.id === sensorBody.id) {
-          orbBody = bodyB
-        } else if (bodyB.id === sensorBody.id) {
-          orbBody = bodyA
-        }
-
-        if (orbBody) {
-          const state = orbSensorStateRef.current.get(orbBody.id)
-          if (state && state.enteredFromTop) {
-            // Check if orb exited downward (velocity Y > 0 and orb is below sensor)
-            const velocityY = orbBody.velocity.y
-            const orbY = orbBody.position.y
-
-            if (velocityY > 0 && orbY > sensorBody.position.y) {
-              // Valid basket! Orb entered from top and exited downward
-              handleValidBasket(orbBody)
-              orbSensorStateRef.current.delete(orbBody.id)
-            }
-          }
-        }
-      }
-    })
-
-    // Store hitbox for visual rendering
-    basketHitboxRef.current = {
-      x: basketX,
-      y: basketY,
-      width: basketWidth,
-      height: basketHeight,
-    }
 
     // Cleanup only on unmount
     return () => {
       if (spawnTimerRef.current) {
         clearInterval(spawnTimerRef.current)
       }
-      Matter.Events.off(engine, "collisionStart")
-      Matter.Events.off(engine, "collisionEnd")
+      Matter.Events.off(engine, 'collisionStart')
       console.log("DevOrbsCanvas: cleaning up physics engine. Clearing orbs. Current count:", orbsRef.current.length)
       if (engineRef.current) {
         Matter.Engine.clear(engineRef.current)
@@ -568,8 +471,8 @@ export function DevOrbsCanvas({ users }: DevOrbsCanvasProps) {
         worldRef.current = null
       }
       orbsRef.current = []
-      backboardBodyRef.current = null
-      rimBodiesRef.current = []
+      leftSupportBodyRef.current = null
+      rightSupportBodyRef.current = null
       sensorBodyRef.current = null
     }
   }, [isMounted])
@@ -600,6 +503,66 @@ export function DevOrbsCanvas({ users }: DevOrbsCanvasProps) {
     }
   }, [users.length, startSpawnSequence]) // Only depend on users.length, not the whole users array
 
+  // Handle shake function - throws all orbs upward with strong force
+  const handleShake = useCallback(() => {
+    if (!engineRef.current || !worldRef.current || isShakingRef.current) return
+    
+    isShakingRef.current = true
+    
+    // Apply strong upward impulses to all orbs (jogar todas pro alto)
+    orbsRef.current.forEach((orb) => {
+      // Random horizontal component (left/right spread) - DOUBLED
+      const horizontalSpread = (Math.random() - 0.5) * 16 // -8 to +8 (dobrado)
+      // Strong upward force (accentuated) - DOUBLED
+      const upwardForce = 30 + Math.random() * 20 // 30-50 (dobrado, muito forte para cima)
+      
+      // Apply strong impulse upward with some horizontal spread
+      Body.applyForce(orb.body, orb.body.position, {
+        x: horizontalSpread * 0.001,
+        y: -upwardForce * 0.001, // Negative Y = upward
+      })
+      
+      // Also apply velocity directly for immediate effect
+      const currentVel = orb.body.velocity
+      Body.setVelocity(orb.body, {
+        x: currentVel.x + horizontalSpread * 0.3,
+        y: currentVel.y - upwardForce * 0.4, // Strong upward velocity
+      })
+      
+      // Temporarily increase bounce significantly
+      orb.body.restitution = Math.min(orb.body.restitution * 1.8, 0.95)
+    })
+    
+    // Vibrate rim slightly
+    rimShakeRef.current = 3
+    setTimeout(() => {
+      rimShakeRef.current = 0
+    }, 100)
+    
+    // Shake backboard slightly
+    backboardShakeRef.current = 2
+    setTimeout(() => {
+      backboardShakeRef.current = 0
+    }, 100)
+    
+    // Reset after 0.8s
+    setTimeout(() => {
+      // Restore original restitution
+      orbsRef.current.forEach((orb) => {
+        const config = getPhysicsConfig()
+        orb.body.restitution = config.restitution
+      })
+      isShakingRef.current = false
+    }, 800)
+  }, [])
+
+  // Expose handleShake to parent component
+  useEffect(() => {
+    if (onShakeReady && handleShake) {
+      onShakeReady(handleShake)
+    }
+  }, [onShakeReady, handleShake])
+
   // Update canvas dimensions and boundaries on resize
   useEffect(() => {
     if (!isMounted || !engineRef.current || !worldRef.current) return
@@ -609,130 +572,114 @@ export function DevOrbsCanvas({ users }: DevOrbsCanvasProps) {
       canvasRef.current.height = canvasSize.height
     }
 
-    // Recreate boundaries if engine exists
+    // Recreate boundaries and sensor if engine exists
     if (engineRef.current && worldRef.current) {
-      // Remove old boundaries
+      // Remove old boundaries (but keep supports and sensor for now - they're removed explicitly below)
       const bodies = Matter.Composite.allBodies(engineRef.current.world)
       bodies.forEach((body) => {
-        if (body.isStatic) {
+        // Remove static bodies that are boundaries (not sensor, not supports, not orbs)
+        // Boundaries don't have labels, supports and sensor have labels
+        if (body.isStatic && !body.label && body.circleRadius === undefined) {
           Matter.World.remove(engineRef.current!.world, body)
         }
       })
+      
+      // Remove old rim supports and sensor
+      if (leftSupportBodyRef.current) {
+        Matter.World.remove(engineRef.current.world, leftSupportBodyRef.current)
+        leftSupportBodyRef.current = null
+      }
+      if (rightSupportBodyRef.current) {
+        Matter.World.remove(engineRef.current.world, rightSupportBodyRef.current)
+        rightSupportBodyRef.current = null
+      }
+      if (sensorBodyRef.current) {
+        Matter.World.remove(engineRef.current.world, sensorBodyRef.current)
+        sensorBodyRef.current = null
+      }
 
       // Add new boundaries
       const boundaries = createBoundaries(canvasSize.width, canvasSize.height)
       boundaries.forEach((boundary) => {
         Matter.World.add(engineRef.current!.world, boundary)
       })
-
-      // Recreate basket physics bodies on resize
-      if (engineRef.current && worldRef.current) {
-        // Remove old basket bodies
-        if (backboardBodyRef.current) {
-          Matter.World.remove(worldRef.current, backboardBodyRef.current)
+      
+      // Recreate rim support colliders and sensor
+      // Position matches the rim position (dentro do backboard)
+      const headerHeight = 96
+      const backboardY = headerHeight + 20
+      const backboardHeight = 140 // Increased by 50% then +30% then +20% (60 * 1.5 * 1.3 * 1.2 = 140.4 ≈ 140)
+      const backboardBottom = backboardY + backboardHeight
+      const rimCenterY = backboardBottom - 15 // Aro fica 15px dentro do backboard
+      const rimCenterX = canvasSize.width / 2
+      const rimRadius = 60
+      
+      // Support collider dimensions
+      const supportWidth = 10
+      const supportHeight = 25
+      const supportOffsetX = supportWidth / 2 // Offset to center the support
+      
+      // Left support collider (left side of rim)
+      const leftSupportX = rimCenterX - rimRadius + supportOffsetX
+      const leftSupportY = rimCenterY
+      const leftSupport = Bodies.rectangle(
+        leftSupportX,
+        leftSupportY,
+        supportWidth,
+        supportHeight,
+        {
+          isStatic: true,
+          isSensor: false, // Physical collision
+          restitution: 0.2,
+          friction: 0.5,
+          render: { visible: false }, // Invisible (visual is drawn separately)
+          label: 'rim-left-support',
         }
-        rimBodiesRef.current.forEach((body) => {
-          Matter.World.remove(worldRef.current, body)
-        })
-        if (sensorBodyRef.current) {
-          Matter.World.remove(worldRef.current, sensorBodyRef.current)
+      )
+      Matter.World.add(engineRef.current.world, leftSupport)
+      leftSupportBodyRef.current = leftSupport
+      
+      // Right support collider (right side of rim)
+      const rightSupportX = rimCenterX + rimRadius - supportOffsetX
+      const rightSupportY = rimCenterY
+      const rightSupport = Bodies.rectangle(
+        rightSupportX,
+        rightSupportY,
+        supportWidth,
+        supportHeight,
+        {
+          isStatic: true,
+          isSensor: false, // Physical collision
+          restitution: 0.2,
+          friction: 0.5,
+          render: { visible: false }, // Invisible (visual is drawn separately)
+          label: 'rim-right-support',
         }
+      )
+      Matter.World.add(engineRef.current.world, rightSupport)
+      rightSupportBodyRef.current = rightSupport
+      
+      // Sensor for basket detection (inside the rim arc)
+      const sensorWidth = 70
+      const sensorHeight = 10
+      const sensorX = rimCenterX - sensorWidth / 2
+      const sensorY = rimCenterY + 5 // Sensor fica logo abaixo do centro do aro
 
-         // Recreate basket (same logic as initialization)
-         const basketWidth = 120
-         const basketHeight = 40
-         const basketX = canvasSize.width / 2 - basketWidth / 2
-         const basketY = 180 // Moved down from 120
-        const rimRadius = basketWidth / 2
-        const backboardWidth = 80
-        const backboardHeight = 40 // Reduced height to not block basket
-        const backboardX = canvasSize.width / 2 - backboardWidth / 2
-        const backboardY = basketY - 40 // Moved higher to not block basket opening
-
-        // Backboard - smaller and positioned to not block the basket opening
-        const backboard = Bodies.rectangle(
-          backboardX + backboardWidth / 2,
-          backboardY + backboardHeight / 2,
-          backboardWidth,
-          backboardHeight,
-          {
-            isStatic: true,
-            restitution: 0.7,
-            collisionFilter: {
-              category: 0x0002, // Category for backboard
-              mask: 0xFFFFFFFF, // Collide with everything
-            },
-            render: { visible: false },
-          }
-        )
-        backboardBodyRef.current = backboard
-        Matter.World.add(worldRef.current, backboard)
-
-         // Rim segments (use smaller radius and skip middle for very large opening)
-         const rimPhysicalRadius = rimRadius * 0.70
-         const rimSegments = 8
-         const rimBodies: Matter.Body[] = []
-         const skipMiddle = true
-         
-         for (let i = 0; i < rimSegments; i++) {
-           const angle = (Math.PI / rimSegments) * i
-           const normalizedAngle = angle / Math.PI // 0 to 1
-           
-           // Skip segments in the middle (center 50% - only keep outer 25% on each side)
-           if (skipMiddle && normalizedAngle > 0.25 && normalizedAngle < 0.75) {
-             continue // Skip this segment to create large opening
-           }
-          
-          const segmentAngle = Math.PI / rimSegments
-          const x1 = basketX + basketWidth / 2 + Math.cos(angle) * rimPhysicalRadius
-          const y1 = basketY + Math.sin(angle) * rimPhysicalRadius
-          const x2 = basketX + basketWidth / 2 + Math.cos(angle + segmentAngle) * rimPhysicalRadius
-          const y2 = basketY + Math.sin(angle + segmentAngle) * rimPhysicalRadius
-
-          const midX = (x1 + x2) / 2
-          const midY = (y1 + y2) / 2
-          const segmentLength = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
-
-          const segment = Bodies.rectangle(midX, midY, segmentLength, 2, { // Even thinner rim (2px) to reduce obstruction
-            isStatic: true,
-            restitution: 0.7,
-            angle: angle + segmentAngle / 2,
-            collisionFilter: {
-              category: 0x0004, // Category for rim
-              mask: 0xFFFFFFFF, // Collide with everything
-            },
-            render: { visible: false },
-          })
-          rimBodies.push(segment)
-          Matter.World.add(worldRef.current, segment)
+      const sensor = Bodies.rectangle(
+        sensorX + sensorWidth / 2,
+        sensorY + sensorHeight / 2,
+        sensorWidth,
+        sensorHeight,
+        {
+          isStatic: true,
+          isSensor: true,
+          render: { visible: false },
+          label: 'basket-sensor',
         }
-        rimBodiesRef.current = rimBodies
-
-        // Sensor (wider and taller for easier detection)
-        const sensorWidth = rimPhysicalRadius * 1.8
-        const sensorHeight = 25
-        const sensor = Bodies.rectangle(
-          basketX + basketWidth / 2,
-          basketY + sensorHeight / 2,
-          sensorWidth,
-          sensorHeight,
-          {
-            isStatic: true,
-            isSensor: true,
-            render: { visible: false },
-          }
-        )
-        sensorBodyRef.current = sensor
-        Matter.World.add(worldRef.current, sensor)
-
-        // Update hitbox
-        basketHitboxRef.current = {
-          x: basketX,
-          y: basketY,
-          width: basketWidth,
-          height: basketHeight,
-        }
-      }
+      )
+      
+      Matter.World.add(engineRef.current.world, sensor)
+      sensorBodyRef.current = sensor
     }
   }, [canvasSize, isMounted])
 
@@ -838,26 +785,34 @@ export function DevOrbsCanvas({ users }: DevOrbsCanvasProps) {
         const dy = pos.y - orbPos.y
         const distance = Math.sqrt(dx * dx + dy * dy)
         
-        // Add 5px tolerance for easier clicking
-        if (distance <= radius + 5) {
-          // Stop the orb's current motion
-          Body.setVelocity(orb.body, { x: 0, y: 0 })
-          Body.setAngularVelocity(orb.body, 0)
-          
-          // Make body static temporarily so it can be dragged
-          Body.setStatic(orb.body, true)
-          
-          isDraggingRef.current = true
-          draggedOrbRef.current = orb
-          dragStartRef.current = pos
+          // Add 5px tolerance for easier clicking
+          if (distance <= radius + 5) {
+            // Stop the orb's current motion
+            Body.setVelocity(orb.body, { x: 0, y: 0 })
+            Body.setAngularVelocity(orb.body, 0)
+            
+            // Make body static temporarily so it can be dragged
+            // Also disable collisions temporarily to prevent interference during drag
+            Body.setStatic(orb.body, true)
+            // Store original collision filter to restore later
+            if (!orb.body.collisionFilter) {
+              orb.body.collisionFilter = { category: 0x0001, mask: 0xFFFFFFFF }
+            }
+            // Disable collisions during drag
+            orb.body.collisionFilter.category = 0x0000
+            orb.body.collisionFilter.mask = 0x0000
+            
+            isDraggingRef.current = true
+            draggedOrbRef.current = orb
+            dragStartRef.current = pos
 
-          // Set position immediately
-          Body.setPosition(orb.body, pos)
-          
-          e.preventDefault()
-          e.stopPropagation()
-          return
-        }
+            // Set position immediately
+            Body.setPosition(orb.body, pos)
+            
+            e.preventDefault()
+            e.stopPropagation()
+            return
+          }
       }
     }
 
@@ -869,6 +824,7 @@ export function DevOrbsCanvas({ users }: DevOrbsCanvasProps) {
       if (!pos) return
 
       // Update the body position directly for immediate response
+      // Keep body static during drag to prevent physics interference
       Body.setPosition(draggedOrbRef.current.body, pos)
       
       e.preventDefault()
@@ -884,8 +840,13 @@ export function DevOrbsCanvas({ users }: DevOrbsCanvasProps) {
       const pos = getPointerPos(e)
       const orb = draggedOrbRef.current
       
-      // Restore body to dynamic
+      // Restore body to dynamic and collision category
       Body.setStatic(orb.body, false)
+      // Restore collision filter
+      if (orb.body.collisionFilter) {
+        orb.body.collisionFilter.category = 0x0001 // Restore orb collision category
+        orb.body.collisionFilter.mask = 0xFFFFFFFF // Restore collision mask
+      }
       
       // Calculate throw force based on drag distance
       if (pos && dragStartRef.current) {
@@ -929,534 +890,486 @@ export function DevOrbsCanvas({ users }: DevOrbsCanvasProps) {
     }
   }, [isMounted, canvasSize.width, canvasSize.height]) // Re-run when canvas is ready
 
-  // Create fireworks particles
-  const createFireworks = useCallback((x: number, y: number) => {
-    const colors = getThemeColors()
-    if (!colors) return
 
-    const isMobile = isMobileDevice()
-    const particleCount = isMobile ? 15 : 30 // Fewer particles on mobile
-
-    for (let i = 0; i < particleCount; i++) {
-      const angle = (Math.PI * 2 * i) / particleCount
-      const speed = 2 + Math.random() * 3
-      
-      let particleColor = colors.accent
-      let particleSize = 3
-
-      // Theme-specific particle styles
-      if (themeId === "cyber") {
-        // Matrix rain style
-        particleColor = "#00ff00"
-        particleSize = 2
-      } else if (themeId === "pixel") {
-        // Pixel square particles
-        particleColor = colors.primary
-        particleSize = 4
-      } else if (themeId === "neon") {
-        // Bright neon particles
-        particleColor = colors.accent
-        particleSize = 4
-      } else if (themeId === "terminal") {
-        // Random character particles (handled in render)
-        particleColor = colors.text
-        particleSize = 2
-      }
-
-      particlesRef.current.push({
-        x,
-        y,
-        vx: Math.cos(angle) * speed,
-        vy: Math.sin(angle) * speed,
-        life: 1.0,
-        maxLife: 1.0,
-        size: particleSize,
-        color: particleColor,
-      })
-    }
-  }, [themeId])
-
-  // Check basket collision
-  const checkBasketCollision = useCallback((orb: Orb) => {
-    if (!basketHitboxRef.current) return false
-
-    const pos = getBodyPosition(orb.body)
-    const isMobile = isMobileDevice()
-    const radius = isMobile ? ORB_RADIUS_MOBILE : ORB_RADIUS_DESKTOP
-
-    // Check if orb center is within basket hitbox
-    const hitbox = basketHitboxRef.current
-    return (
-      pos.x >= hitbox.x &&
-      pos.x <= hitbox.x + hitbox.width &&
-      pos.y >= hitbox.y &&
-      pos.y <= hitbox.y + hitbox.height
-    )
-  }, [])
-
-  // Handle basket hit (old method - kept for rim/backboard collisions, but doesn't score)
-  const handleBasketHit = useCallback((orb: Orb) => {
-    // Rim/backboard collisions don't score, just bounce
-    // This is handled by physics automatically
-    // Reset combo on miss
-    setCombo(0)
-  }, [])
-
-  // Update and render particles
-  const renderParticles = useCallback((ctx: CanvasRenderingContext2D, colors: ReturnType<typeof getThemeColors>) => {
-    if (!colors) return
-
-    // Update particles
-    particlesRef.current = particlesRef.current.filter((particle) => {
-      // Update position
-      particle.x += particle.vx
-      particle.y += particle.vy
-      
-      // Apply gravity
-      particle.vy += 0.2
-      
-      // Update life
-      particle.life -= 0.02
-      
-      // Remove dead particles
-      return particle.life > 0
-    })
-
-    // Update active fireworks count (decrement when particles die)
-    const particlesBefore = particlesRef.current.length
-    // Count is based on particle count (each firework has ~30 particles)
-    activeFireworksRef.current = Math.min(2, Math.ceil(particlesRef.current.length / 30))
-
-    // Render particles
-    particlesRef.current.forEach((particle) => {
-      ctx.save()
-
-      const alpha = particle.life
-      const size = particle.size * alpha
-
-      if (themeId === "terminal") {
-        // Random character particles
-        ctx.fillStyle = colors.text
-        ctx.globalAlpha = alpha
-        ctx.font = `${size * 2}px monospace`
-        ctx.textAlign = "center"
-        ctx.textBaseline = "middle"
-        const chars = "!@#$%^&*()[]{}|\\/<>?~`"
-        const char = chars[Math.floor(Math.random() * chars.length)]
-        ctx.fillText(char, particle.x, particle.y)
-      } else if (themeId === "pixel") {
-        // Pixel square particles
-        ctx.fillStyle = particle.color
-        ctx.globalAlpha = alpha
-        ctx.fillRect(particle.x - size / 2, particle.y - size / 2, size, size)
-      } else {
-        // Circular particles with glow
-        ctx.fillStyle = particle.color
-        ctx.globalAlpha = alpha
-        ctx.shadowBlur = size * 2
-        ctx.shadowColor = particle.color
-        ctx.beginPath()
-        ctx.arc(particle.x, particle.y, size, 0, Math.PI * 2)
-        ctx.fill()
-        ctx.shadowBlur = 0
-      }
-
-      ctx.globalAlpha = 1
-      ctx.restore()
-    })
-  }, [themeId])
-
-  // Render backboard
-  const renderBackboard = useCallback((ctx: CanvasRenderingContext2D, backboard: Matter.Body, colors: ReturnType<typeof getThemeColors>) => {
-    if (!colors) return
-
+  // Draw a single LED segment
+  const drawSegment = useCallback((ctx: CanvasRenderingContext2D, x: number, y: number, width: number, height: number, angle: number, neonColor: string, isActive: boolean = true) => {
     ctx.save()
-
-    const pos = getBodyPosition(backboard)
-    const width = 80
-    const height = 60
-
-    // Theme-specific backboard styling
-    let boardColor = colors.bgSecondary
-    let borderColor = colors.accent
-    let glowIntensity = 4
-
-    if (themeId === "neon") {
-      boardColor = "rgba(0, 0, 20, 0.8)"
-      borderColor = "#ff00ff"
-      glowIntensity = 8
-    } else if (themeId === "pixel") {
-      boardColor = colors.bgSecondary
-      borderColor = colors.primary
-      glowIntensity = 2
-    } else if (themeId === "cyber") {
-      boardColor = "rgba(0, 10, 0, 0.8)"
-      borderColor = "#00ff00"
-      glowIntensity = 6
-    } else if (themeId === "blueprint") {
-      boardColor = "rgba(10, 20, 40, 0.8)"
-      borderColor = "#ffffff"
-      glowIntensity = 3
-    }
-
-    // Draw backboard
-    ctx.fillStyle = boardColor
-    ctx.strokeStyle = borderColor
-    ctx.lineWidth = 2
-    ctx.shadowBlur = glowIntensity
-    ctx.shadowColor = colors.glow
-
-    ctx.fillRect(pos.x - width / 2, pos.y - height / 2, width, height)
-    ctx.strokeRect(pos.x - width / 2, pos.y - height / 2, width, height)
-
-    // Theme-specific textures
-    if (themeId === "cyber") {
-      // Scanlines
-      ctx.strokeStyle = "rgba(0, 255, 0, 0.2)"
-      ctx.lineWidth = 1
-      for (let i = 0; i < height; i += 2) {
-        ctx.beginPath()
-        ctx.moveTo(pos.x - width / 2, pos.y - height / 2 + i)
-        ctx.lineTo(pos.x + width / 2, pos.y - height / 2 + i)
-        ctx.stroke()
-      }
-    } else if (themeId === "pixel") {
-      // Pixel grid
-      ctx.fillStyle = colors.accent
-      const cellSize = 4
-      for (let py = pos.y - height / 2; py < pos.y + height / 2; py += cellSize) {
-        for (let px = pos.x - width / 2; px < pos.x + width / 2; px += cellSize) {
-          if (Math.random() > 0.9) {
-            ctx.fillRect(px, py, cellSize - 1, cellSize - 1)
-          }
-        }
-      }
-    }
-
-    ctx.shadowBlur = 0
-    ctx.restore()
-  }, [themeId])
-
-  // Render scoreboard
-  const renderScoreboard = useCallback((ctx: CanvasRenderingContext2D, hitbox: { x: number; y: number; width: number; height: number }, colors: ReturnType<typeof getThemeColors>) => {
-    if (!colors) return
-
-    ctx.save()
-
-    const scoreboardX = hitbox.x + hitbox.width + 20 // Right of basket
-    const scoreboardY = hitbox.y - 10
-    const scoreboardWidth = 140
-    const scoreboardHeight = 80
-
-    // Theme-specific scoreboard styling
-    let bgColor = colors.bgSecondary
-    let textColor = colors.text
-    let accentColor = colors.accent
-    let glowIntensity = 4
-
-    if (themeId === "neon") {
-      bgColor = "rgba(0, 0, 20, 0.9)"
-      textColor = "#ff00ff"
-      accentColor = "#00ffff"
-      glowIntensity = 8
-    } else if (themeId === "pixel") {
-      bgColor = colors.bgSecondary
-      textColor = colors.primary
-      accentColor = colors.accent
-      glowIntensity = 2
-    } else if (themeId === "cyber") {
-      bgColor = "rgba(0, 10, 0, 0.9)"
-      textColor = "#00ff00"
-      accentColor = "#00ff00"
-      glowIntensity = 6
-    } else if (themeId === "blueprint") {
-      bgColor = "rgba(10, 20, 40, 0.9)"
-      textColor = "#ffffff"
-      accentColor = "#4a90e2"
-      glowIntensity = 3
-    }
-
-    // Draw scoreboard background
-    ctx.fillStyle = bgColor
-    ctx.strokeStyle = accentColor
-    ctx.lineWidth = 2
-    ctx.shadowBlur = glowIntensity
-    ctx.shadowColor = colors.glow
-
-    ctx.fillRect(scoreboardX, scoreboardY, scoreboardWidth, scoreboardHeight)
-    ctx.strokeRect(scoreboardX, scoreboardY, scoreboardWidth, scoreboardHeight)
-
-    // Draw text
-    ctx.fillStyle = textColor
-    ctx.font = "bold 12px monospace"
-    ctx.textAlign = "left"
-    ctx.textBaseline = "top"
-    ctx.shadowBlur = glowIntensity * 0.5
-
-    // Current Score
-    ctx.fillText("Score:", scoreboardX + 8, scoreboardY + 8)
-    ctx.fillStyle = accentColor
-    ctx.font = "bold 16px monospace"
-    ctx.fillText(currentScore.toString(), scoreboardX + 8, scoreboardY + 24)
-
-    // Best Score
-    ctx.fillStyle = textColor
-    ctx.font = "bold 12px monospace"
-    ctx.fillText("Best:", scoreboardX + 8, scoreboardY + 44)
-    ctx.fillStyle = accentColor
-    ctx.font = "bold 16px monospace"
-    ctx.fillText(bestScore.toString(), scoreboardX + 8, scoreboardY + 60)
-
-    // Combo (if > 0)
-    if (combo > 0) {
-      ctx.fillStyle = textColor
-      ctx.font = "bold 10px monospace"
-      ctx.fillText(`Combo: ${combo}x`, scoreboardX + 8, scoreboardY + 78)
-    }
-
-    ctx.shadowBlur = 0
-    ctx.restore()
-  }, [themeId, currentScore, bestScore, combo])
-
-  // Render basket with theme-specific styling and 3D depth
-  const renderBasket = useCallback((ctx: CanvasRenderingContext2D, hitbox: { x: number; y: number; width: number; height: number }, colors: ReturnType<typeof getThemeColors>) => {
-    if (!colors) return
-
-    ctx.save()
-
-    // Calculate shake offset
-    const shakeOffset = basketShakeRef.current > 0 ? (Math.random() - 0.5) * basketShakeRef.current * 4 : 0
-    basketShakeRef.current = Math.max(0, basketShakeRef.current - 0.05)
-
-    const centerX = hitbox.x + hitbox.width / 2 + shakeOffset
-    const topY = hitbox.y
-    const width = hitbox.width
-    const rimRadius = width / 2
-    const rimPhysicalRadius = rimRadius * 0.70 // Physical rim is much smaller (very large opening) - matches physics
-    const rimThickness = 8 // Thick top rim
-    const depth = 25 // Interior depth
-    const sideAngle = 0.15 // Side angle (15% incline)
-
-    // Theme-specific colors and effects
-    let rimColor = colors.accent
-    let interiorColor = colors.bgSecondary
-    let glowColor = colors.glow
-    let glowIntensity = 4
-    let borderColor = colors.primary
-
-    if (themeId === "neon") {
-      // Neon Future: Pink/blue neon with glow
-      rimColor = "#ff00ff"
-      borderColor = "#00ffff"
-      glowColor = "#ff00ff"
-      glowIntensity = 12
-      interiorColor = "rgba(0, 0, 20, 0.9)"
-    } else if (themeId === "pixel") {
-      // Pixel Lab: Pixelated 8-bit style
-      rimColor = colors.primary
-      borderColor = colors.accent
-      glowColor = colors.primary
-      glowIntensity = 2
-      interiorColor = "rgba(0, 0, 0, 0.8)"
-    } else if (themeId === "cyber") {
-      // Cyber Hacker: Green with glitch
-      rimColor = "#00ff00"
-      borderColor = "#00ff00"
-      glowColor = "#00ff00"
-      glowIntensity = 8
-      interiorColor = "rgba(0, 10, 0, 0.9)"
-    } else if (themeId === "blueprint") {
-      // Blueprint: Dark blue with white lines
-      rimColor = "#1e3a5f"
-      borderColor = "#ffffff"
-      glowColor = "#4a90e2"
-      glowIntensity = 3
-      interiorColor = "rgba(10, 20, 40, 0.9)"
-    } else {
-      // Terminal/default
-      rimColor = colors.accent
-      borderColor = colors.text
-      glowColor = colors.glow
-      glowIntensity = 4
-      interiorColor = colors.bgSecondary
-    }
-
-    // Draw interior (dark hole with depth)
-    // Use rimPhysicalRadius for interior to match the larger opening
-    ctx.fillStyle = interiorColor
+    
+    // Translate and rotate to position
+    ctx.translate(x, y)
+    ctx.rotate(angle)
+    
+    const radius = 3 // cap radius
+    const w = width
+    const h = height
+    const xPos = -w / 2
+    const yPos = -h / 2
+    
+    // Draw stroke for depth (dark stroke behind)
+    ctx.strokeStyle = 'rgba(0, 0, 0, 0.35)'
+    ctx.lineWidth = 6
     ctx.beginPath()
-    // Top curve (semi-circle) - use physical radius for larger opening
-    ctx.arc(centerX, topY, rimPhysicalRadius - rimThickness, 0, Math.PI)
-    // Left side (slightly angled inward)
-    ctx.lineTo(centerX - rimPhysicalRadius + rimThickness + (depth * sideAngle), topY + depth)
-    // Bottom curve (semi-circle at bottom)
-    ctx.arc(centerX, topY + depth, rimPhysicalRadius - rimThickness - (depth * sideAngle), Math.PI, 0, true)
-    // Right side (slightly angled inward)
-    ctx.lineTo(centerX + rimPhysicalRadius - rimThickness, topY)
+    ctx.moveTo(xPos + radius, yPos)
+    ctx.lineTo(xPos + w - radius, yPos)
+    ctx.arc(xPos + w - radius, yPos + radius, radius, -Math.PI / 2, 0)
+    ctx.lineTo(xPos + w, yPos + h - radius)
+    ctx.arc(xPos + w - radius, yPos + h - radius, radius, 0, Math.PI / 2)
+    ctx.lineTo(xPos + radius, yPos + h)
+    ctx.arc(xPos + radius, yPos + h - radius, radius, Math.PI / 2, Math.PI)
+    ctx.lineTo(xPos, yPos + radius)
+    ctx.arc(xPos + radius, yPos + radius, radius, Math.PI, -Math.PI / 2)
+    ctx.closePath()
+    ctx.stroke()
+    
+    // Draw segment with rounded corners and glow
+    if (isActive) {
+      ctx.fillStyle = neonColor
+      ctx.shadowBlur = digitGlowRef.current // Dynamic glow (10 default, 20 on score)
+      ctx.shadowColor = neonColor
+    } else {
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.06)' // Unlit segments
+      ctx.shadowBlur = 0
+    }
+    
+    ctx.beginPath()
+    ctx.moveTo(xPos + radius, yPos)
+    ctx.lineTo(xPos + w - radius, yPos)
+    ctx.arc(xPos + w - radius, yPos + radius, radius, -Math.PI / 2, 0)
+    ctx.lineTo(xPos + w, yPos + h - radius)
+    ctx.arc(xPos + w - radius, yPos + h - radius, radius, 0, Math.PI / 2)
+    ctx.lineTo(xPos + radius, yPos + h)
+    ctx.arc(xPos + radius, yPos + h - radius, radius, Math.PI / 2, Math.PI)
+    ctx.lineTo(xPos, yPos + radius)
+    ctx.arc(xPos + radius, yPos + radius, radius, Math.PI, -Math.PI / 2)
+    ctx.closePath()
+    ctx.fill()
+    
+    ctx.restore()
+  }, [])
+
+  // Draw a digit using 7-segment display (exact dimensions: 60px height, 35px width)
+  const drawDigit = useCallback((ctx: CanvasRenderingContext2D, x: number, y: number, value: number, neonColor: string, scale: number = 1) => {
+    ctx.save()
+    
+    // Apply scale for pulse animation
+    const centerX = x + 35 / 2
+    const centerY = y + 60 / 2
+    ctx.translate(centerX, centerY)
+    ctx.scale(scale, scale)
+    ctx.translate(-centerX, -centerY)
+    
+    // Exact dimensions
+    const digitWidth = 35
+    const digitHeight = 60
+    const segThickness = 6 // Segment thickness
+    const spacing = 3 // Internal spacing
+    
+    // Calculate positions for 7-segment layout
+    //   A
+    // F   B
+    //   G
+    // E   C
+    //   D
+    
+    const centerXLocal = x + digitWidth / 2
+    const segLength = digitWidth - segThickness * 2 // Length of horizontal segments
+    const segHeight = (digitHeight - segThickness * 3) / 2 // Height of vertical segments
+    
+    // Define segments positions
+    const segments: { [key: string]: { x: number; y: number; width: number; height: number; angle: number } } = {
+      A: { x: centerXLocal, y: y + segThickness / 2, width: segLength, height: segThickness, angle: 0 }, // Top
+      B: { x: x + digitWidth - segThickness / 2, y: y + segThickness + segHeight / 2, width: segHeight, height: segThickness, angle: Math.PI / 2 }, // Top-right
+      C: { x: x + digitWidth - segThickness / 2, y: y + segThickness * 2 + segHeight + segHeight / 2, width: segHeight, height: segThickness, angle: Math.PI / 2 }, // Bottom-right
+      D: { x: centerXLocal, y: y + digitHeight - segThickness / 2, width: segLength, height: segThickness, angle: 0 }, // Bottom
+      E: { x: x + segThickness / 2, y: y + segThickness * 2 + segHeight + segHeight / 2, width: segHeight, height: segThickness, angle: Math.PI / 2 }, // Bottom-left
+      F: { x: x + segThickness / 2, y: y + segThickness + segHeight / 2, width: segHeight, height: segThickness, angle: Math.PI / 2 }, // Top-left
+      G: { x: centerXLocal, y: y + segThickness + segHeight + segThickness / 2, width: segLength, height: segThickness, angle: 0 }, // Middle
+    }
+    
+    // Define which segments are active for each digit
+    const digitSegments: { [key: number]: string[] } = {
+      0: ['A', 'B', 'C', 'D', 'E', 'F'],
+      1: ['B', 'C'],
+      2: ['A', 'B', 'G', 'E', 'D'],
+      3: ['A', 'B', 'G', 'C', 'D'],
+      4: ['F', 'G', 'B', 'C'],
+      5: ['A', 'F', 'G', 'C', 'D'],
+      6: ['A', 'F', 'G', 'C', 'D', 'E'],
+      7: ['A', 'B', 'C'],
+      8: ['A', 'B', 'C', 'D', 'E', 'F', 'G'],
+      9: ['A', 'B', 'C', 'D', 'F', 'G'],
+    }
+    
+    // Draw all segments (active and inactive)
+    const allSegments = ['A', 'B', 'C', 'D', 'E', 'F', 'G']
+    const activeSegments = digitSegments[value] || []
+    
+    allSegments.forEach((segName) => {
+      const seg = segments[segName]
+      if (seg) {
+        const isActive = activeSegments.includes(segName)
+        drawSegment(ctx, seg.x, seg.y, seg.width, seg.height, seg.angle, neonColor, isActive)
+      }
+    })
+    
+    ctx.restore()
+  }, [drawSegment])
+
+  // Draw backboard with integrated LED scoreboard
+  const drawBackboard = useCallback((ctx: CanvasRenderingContext2D, colors: ReturnType<typeof getThemeColors>) => {
+    if (!colors) return
+
+    const headerHeight = 96
+    // Apply shake offset to backboard (shake backboard)
+    const shakeOffsetX = backboardShakeRef.current > 0 ? (Math.random() - 0.5) * backboardShakeRef.current : 0
+    const shakeOffsetY = backboardShakeRef.current > 0 ? (Math.random() - 0.5) * backboardShakeRef.current : 0
+    const x = canvasSize.width / 2 - 150 + shakeOffsetX // Width stays the same
+    const y = headerHeight + 20 + shakeOffsetY
+    const width = 300 // Width stays the same
+    const height = 140 // Increased by 50% then +30% then +20% (60 * 1.5 * 1.3 * 1.2 = 140.4 ≈ 140) - only height increased
+    const cornerRadius = 4
+
+    ctx.save()
+    
+    // Apply flash effect if active
+    const flashIntensity = backboardFlashRef.current
+    ctx.globalAlpha = 0.85 + (flashIntensity * 0.15) // Flash increases alpha, base 0.85
+
+    // Draw external shadow (soft glow around backboard)
+    ctx.shadowBlur = 18
+    // Convert hex color to rgba for shadow (22 = ~13% opacity in hex - subtle)
+    const shadowColor = colors.accent.startsWith('#') 
+      ? colors.accent + '22' 
+      : colors.accent.replace(')', ', 0.13)').replace('rgb', 'rgba')
+    ctx.shadowColor = shadowColor
+    ctx.shadowOffsetX = 0
+    ctx.shadowOffsetY = 0
+
+    // Draw internal shadow first (for depth)
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.4)'
+    ctx.shadowBlur = 20
+    ctx.shadowOffsetX = 0
+    ctx.shadowOffsetY = 6
+    
+    // Draw backboard rectangle with rounded corners
+    ctx.fillStyle = '#0b1116'
+    ctx.beginPath()
+    // Top-left corner
+    ctx.moveTo(x + cornerRadius, y)
+    // Top edge
+    ctx.lineTo(x + width - cornerRadius, y)
+    // Top-right corner
+    ctx.arc(x + width - cornerRadius, y + cornerRadius, cornerRadius, -Math.PI / 2, 0)
+    // Right edge
+    ctx.lineTo(x + width, y + height - cornerRadius)
+    // Bottom-right corner
+    ctx.arc(x + width - cornerRadius, y + height - cornerRadius, cornerRadius, 0, Math.PI / 2)
+    // Bottom edge
+    ctx.lineTo(x + cornerRadius, y + height)
+    // Bottom-left corner
+    ctx.arc(x + cornerRadius, y + height - cornerRadius, cornerRadius, Math.PI / 2, Math.PI)
+    // Left edge
+    ctx.lineTo(x, y + cornerRadius)
+    // Top-left corner
+    ctx.arc(x + cornerRadius, y + cornerRadius, cornerRadius, Math.PI, -Math.PI / 2)
     ctx.closePath()
     ctx.fill()
 
-    // Theme-specific interior textures
-    if (themeId === "cyber") {
-      // Grid pattern
-      ctx.strokeStyle = "rgba(0, 255, 0, 0.2)"
-      ctx.lineWidth = 1
-      for (let i = 0; i < 5; i++) {
-        const gridY = topY + (depth / 5) * i
-        ctx.beginPath()
-        ctx.moveTo(centerX - rimPhysicalRadius + rimThickness, gridY)
-        ctx.lineTo(centerX + rimPhysicalRadius - rimThickness, gridY)
-        ctx.stroke()
-      }
-      // Scanlines
-      for (let i = 0; i < depth; i += 2) {
-        ctx.beginPath()
-        ctx.moveTo(centerX - rimPhysicalRadius + rimThickness, topY + i)
-        ctx.lineTo(centerX + rimPhysicalRadius - rimThickness, topY + i)
-        ctx.stroke()
-      }
-    } else if (themeId === "pixel") {
-      // Pixelated grid
-      ctx.fillStyle = colors.accent
-      const cellSize = 4
-      for (let py = topY; py < topY + depth; py += cellSize) {
-        for (let px = centerX - rimPhysicalRadius + rimThickness; px < centerX + rimPhysicalRadius - rimThickness; px += cellSize) {
-          if (Math.random() > 0.7) {
-            ctx.fillRect(px, py, cellSize - 1, cellSize - 1)
-          }
-        }
-      }
-    } else if (themeId === "blueprint") {
-      // Hatching lines
-      ctx.strokeStyle = "rgba(255, 255, 255, 0.3)"
-      ctx.lineWidth = 1
-      for (let i = 0; i < 8; i++) {
-        const angle = (Math.PI / 8) * i
-        const startX = centerX - rimPhysicalRadius + rimThickness
-        const startY = topY + depth / 2
-        ctx.beginPath()
-        ctx.moveTo(startX, startY)
-        ctx.lineTo(startX + Math.cos(angle) * (rimPhysicalRadius * 0.6), startY + Math.sin(angle) * (rimPhysicalRadius * 0.6))
-        ctx.stroke()
-      }
-    } else if (themeId === "neon") {
-      // Gradient effect
-      const gradient = ctx.createLinearGradient(centerX, topY, centerX, topY + depth)
-      gradient.addColorStop(0, "rgba(255, 0, 255, 0.3)")
-      gradient.addColorStop(1, "rgba(0, 0, 0, 0.9)")
-      ctx.fillStyle = gradient
-      ctx.beginPath()
-      ctx.arc(centerX, topY, rimPhysicalRadius - rimThickness, 0, Math.PI)
-      ctx.arc(centerX, topY + depth, rimPhysicalRadius - rimThickness - (depth * sideAngle), Math.PI, 0, true)
-      ctx.closePath()
-      ctx.fill()
-    }
-
-    // Draw thick top rim with glow
-    ctx.shadowBlur = glowIntensity
-    ctx.shadowColor = glowColor
-    ctx.strokeStyle = rimColor
-    ctx.lineWidth = rimThickness
-    ctx.lineCap = "round"
-    
-    // Top rim arc (thick)
-    ctx.beginPath()
-    ctx.arc(centerX, topY, rimRadius, 0, Math.PI)
-    ctx.stroke()
-
-    // Rim border (outer edge)
-    ctx.shadowBlur = glowIntensity * 0.5
-    ctx.strokeStyle = borderColor
-    ctx.lineWidth = 2
-    ctx.beginPath()
-    ctx.arc(centerX, topY, rimRadius, 0, Math.PI)
-    ctx.stroke()
-
-    // Rim border (inner edge)
-    ctx.beginPath()
-    ctx.arc(centerX, topY, rimRadius - rimThickness, 0, Math.PI)
-    ctx.stroke()
-
-    // Draw angled sides
-    ctx.strokeStyle = rimColor
-    ctx.lineWidth = 3
-    ctx.shadowBlur = glowIntensity * 0.7
-    
-    // Left side
-    ctx.beginPath()
-    ctx.moveTo(centerX - rimRadius, topY)
-    ctx.lineTo(centerX - rimRadius + (depth * sideAngle), topY + depth)
-    ctx.stroke()
-    
-    // Right side
-    ctx.beginPath()
-    ctx.moveTo(centerX + rimRadius, topY)
-    ctx.lineTo(centerX + rimRadius - (depth * sideAngle), topY + depth)
-    ctx.stroke()
-
-    // Bottom curve (semi-circle at bottom)
-    ctx.beginPath()
-    ctx.arc(centerX, topY + depth, rimRadius - (depth * sideAngle), Math.PI, 0, true)
-    ctx.stroke()
-
-    // Theme-specific rim decorations
-    // Neon: keep rim clean (no vertical bars) to avoid blocking visual path
-    if (themeId === "cyber") {
-      // Glitch effect on rim
-      ctx.strokeStyle = "#00ff00"
-      ctx.lineWidth = 1
-      for (let i = 0; i < 3; i++) {
-        const glitchX = centerX - rimRadius + Math.random() * rimRadius * 2
-        ctx.beginPath()
-        ctx.moveTo(glitchX, topY - 2)
-        ctx.lineTo(glitchX + (Math.random() - 0.5) * 4, topY + 2)
-        ctx.stroke()
-      }
-    } else if (themeId === "blueprint") {
-      // Coordinate points
-      ctx.fillStyle = "#ffffff"
-      ctx.shadowBlur = 0
-      const points = [
-        { x: centerX - rimRadius, y: topY },
-        { x: centerX + rimRadius, y: topY },
-        { x: centerX, y: topY },
-      ]
-      points.forEach((point) => {
-        ctx.beginPath()
-        ctx.arc(point.x, point.y, 2, 0, Math.PI * 2)
-        ctx.fill()
-      })
-    }
-
+    // Reset shadow for borders (neon borders drawn after)
     ctx.shadowBlur = 0
-    ctx.restore()
-  }, [themeId])
+    ctx.shadowOffsetX = 0
+    ctx.shadowOffsetY = 0
 
-  // Render HUD message
-  const renderHUDMessage = useCallback((ctx: CanvasRenderingContext2D, message: string, colors: ReturnType<typeof getThemeColors>) => {
+    // Draw top border (lighter - holographic highlight)
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.10)'
+    ctx.lineWidth = 1
+    ctx.beginPath()
+    ctx.moveTo(x + cornerRadius, y)
+    ctx.lineTo(x + width - cornerRadius, y)
+    ctx.stroke()
+
+    // Draw bottom border (darker)
+    ctx.strokeStyle = 'rgba(0, 0, 0, 0.35)'
+    ctx.lineWidth = 1
+    ctx.beginPath()
+    ctx.moveTo(x + cornerRadius, y + height)
+    ctx.lineTo(x + width - cornerRadius, y + height)
+    ctx.stroke()
+
+    // Draw scanlines (horizontal lines inside - thinner and more subtle)
+    ctx.strokeStyle = colors.border
+    ctx.globalAlpha = 0.12 // Opacity 0.12
+    ctx.lineWidth = 1 // Height 1px
+    const scanlineSpacing = 6 // Spacing 6px
+    const startY = y + scanlineSpacing
+    
+    for (let scanlineY = startY; scanlineY < y + height; scanlineY += scanlineSpacing) {
+      ctx.beginPath()
+      ctx.moveTo(x + 10, scanlineY)
+      ctx.lineTo(x + width - 10, scanlineY)
+      ctx.stroke()
+    }
+
+    ctx.globalAlpha = 1
+
+    // Draw two modules side by side inside backboard
+    const margin = 10 // Backboard margin
+    const moduleGap = 12 // Gap between modules
+    const modulePadding = 12 // Internal padding of each module
+    const innerWidth = width - margin * 2 // 300 - 20 = 280
+    const moduleWidth = (innerWidth - moduleGap) / 2 // Each module width
+    const moduleY = y + margin // Align with top of backboard
+    
+    // Title settings
+    const titleHeight = 12
+    const titleGap = 8 // Gap between title and digits
+    const titleY = y + margin + 14 // Fixed title Y position
+    
+    // Calculate available height for digits
+    const availableHeight = height - margin * 2 - titleHeight - titleGap
+    const digitHeight = 60
+    const digitY = y + margin + titleHeight + titleGap + (availableHeight - digitHeight) / 2 // Center vertically
+
+    // Left module: HI-SCORE
+    const leftModuleX = x + margin
+    
+    // Draw title (centered in module)
+    ctx.fillStyle = colors.accent // Use neon color (slightly less saturated would be ideal, but using accent for now)
+    ctx.font = '600 11px "JetBrains Mono", monospace'
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'top'
+    ctx.fillText('HI-SCORE', leftModuleX + moduleWidth / 2, titleY)
+
+    // Draw 2 LED digits for HI-SCORE (best score)
+    const digitWidth = 35
+    const digitGap = 6 // Space between digits
+    const leftDigitsStartX = leftModuleX + modulePadding + (moduleWidth - modulePadding * 2 - (digitWidth * 2 + digitGap)) / 2 // Center the 2 digits
+    const bestStr = bestScoreRef.current.toString().padStart(2, '0').slice(-2) // Last 2 digits
+    for (let i = 0; i < 2; i++) {
+      const digitX = leftDigitsStartX + i * (digitWidth + digitGap)
+      const digitValue = parseInt(bestStr[i] || '0')
+      drawDigit(ctx, digitX, digitY, digitValue, colors.accent, digitScaleRef.current)
+    }
+
+    // Right module: SCORE
+    const rightModuleX = x + margin + moduleWidth + moduleGap
+    
+    // Draw title (centered in module)
+    ctx.textAlign = 'center'
+    ctx.fillText('SCORE', rightModuleX + moduleWidth / 2, titleY)
+
+    // Draw 2 LED digits for SCORE (current score)
+    const rightDigitsStartX = rightModuleX + modulePadding + (moduleWidth - modulePadding * 2 - (digitWidth * 2 + digitGap)) / 2 // Center the 2 digits
+    const scoreStr = scoreRef.current.toString().padStart(2, '0').slice(-2) // Last 2 digits
+    for (let i = 0; i < 2; i++) {
+      const digitX = rightDigitsStartX + i * (digitWidth + digitGap)
+      const digitValue = parseInt(scoreStr[i] || '0')
+      drawDigit(ctx, digitX, digitY, digitValue, colors.accent, digitScaleRef.current)
+    }
+
+    ctx.restore()
+  }, [canvasSize.width, drawDigit])
+
+  // Draw floor (stylized court floor)
+  const drawFloor = useCallback((ctx: CanvasRenderingContext2D, colors: ReturnType<typeof getThemeColors>) => {
     if (!colors) return
+
+    const floorHeight = canvasSize.height * 0.2 // 20% of canvas height
+    const floorY = canvasSize.height - floorHeight
+    const floorX = 0
+    const floorWidth = canvasSize.width
 
     ctx.save()
 
-    const x = canvasSize.width / 2
-    const y = canvasSize.height / 2
+    // Draw floor gradient (transparent at top to neon at bottom)
+    const gradient = ctx.createLinearGradient(floorX, floorY, floorX, canvasSize.height)
+    
+    // Convert hex to rgba for gradient stops
+    const primaryColor = colors.primary
+    let primaryRgba = primaryColor
+    if (primaryColor.startsWith('#')) {
+      // Convert hex to rgba
+      const r = parseInt(primaryColor.slice(1, 3), 16)
+      const g = parseInt(primaryColor.slice(3, 5), 16)
+      const b = parseInt(primaryColor.slice(5, 7), 16)
+      primaryRgba = `rgba(${r}, ${g}, ${b}, 0.15)` // 15% opacity
+    } else if (primaryColor.startsWith('rgb')) {
+      primaryRgba = primaryColor.replace('rgb', 'rgba').replace(')', ', 0.15)')
+    } else {
+      primaryRgba = primaryColor
+    }
+    
+    gradient.addColorStop(0, 'transparent')
+    gradient.addColorStop(1, primaryRgba)
+    
+    ctx.fillStyle = gradient
+    ctx.fillRect(floorX, floorY, floorWidth, floorHeight)
 
-    // Background
-    ctx.fillStyle = "rgba(0, 0, 0, 0.7)"
-    ctx.fillRect(x - 150, y - 30, 300, 60)
-
-    // Text
-    ctx.fillStyle = colors.accent
-    ctx.font = "bold 24px monospace"
-    ctx.textAlign = "center"
-    ctx.textBaseline = "middle"
+    // Draw neon top border line (2-3px) with glow - baseline of court
+    ctx.strokeStyle = colors.primary
+    ctx.lineWidth = 2.5
     ctx.shadowBlur = 8
-    ctx.shadowColor = colors.glow
-    ctx.fillText(message, x, y)
-    ctx.shadowBlur = 0
+    ctx.shadowColor = colors.primary
+    ctx.beginPath()
+    ctx.moveTo(floorX, floorY)
+    ctx.lineTo(floorX + floorWidth, floorY)
+    ctx.stroke()
 
+    // Reset shadow
+    ctx.shadowBlur = 0
     ctx.restore()
-  }, [canvasSize])
+  }, [canvasSize.width, canvasSize.height])
+
+  // Draw backboard side supports (two vertical neon poles behind backboard)
+  const drawBackboardSideSupports = useCallback((ctx: CanvasRenderingContext2D, colors: ReturnType<typeof getThemeColors>) => {
+    if (!colors) return
+
+    const headerHeight = 96
+    const backboardY = headerHeight + 20
+    const backboardHeight = 140
+    const backboardBottom = backboardY + backboardHeight
+    const backboardX = canvasSize.width / 2 - 150
+    const backboardWidth = 300
+    const backboardCenterX = backboardX + backboardWidth / 2 // Center of backboard
+    
+    const floorHeight = canvasSize.height * 0.2
+    const floorY = canvasSize.height - floorHeight
+    
+    // Calculate spacing: 35% of backboard width between the two supports
+    const spacing = backboardWidth * 0.35
+    const leftSupportX = backboardCenterX - spacing / 2
+    const rightSupportX = backboardCenterX + spacing / 2
+    
+    // Both supports start at backboard base and go down to floor line
+    const supportStartY = backboardBottom
+    const supportEndY = floorY
+
+    ctx.save()
+    
+    // Set neon styling with glow
+    ctx.strokeStyle = colors.primary
+    ctx.lineWidth = 3.5 // Between 3-4px
+    ctx.shadowBlur = 12 // Between 10-14
+    // Convert shadow color with opacity 0.7
+    let shadowColorRgba = colors.primary
+    if (colors.primary.startsWith('#')) {
+      const r = parseInt(colors.primary.slice(1, 3), 16)
+      const g = parseInt(colors.primary.slice(3, 5), 16)
+      const b = parseInt(colors.primary.slice(5, 7), 16)
+      shadowColorRgba = `rgba(${r}, ${g}, ${b}, 0.7)`
+    } else if (colors.primary.startsWith('rgb')) {
+      shadowColorRgba = colors.primary.replace('rgb', 'rgba').replace(')', ', 0.7)')
+    }
+    ctx.shadowColor = shadowColorRgba
+    
+    // Draw left vertical support pole
+    ctx.beginPath()
+    ctx.moveTo(leftSupportX, supportStartY)
+    ctx.lineTo(leftSupportX, supportEndY)
+    ctx.stroke()
+    
+    // Draw right vertical support pole
+    ctx.beginPath()
+    ctx.moveTo(rightSupportX, supportStartY)
+    ctx.lineTo(rightSupportX, supportEndY)
+    ctx.stroke()
+    
+    ctx.restore()
+  }, [canvasSize.width, canvasSize.height])
+
+  // Draw minimalist basketball court (neon Tron style)
+  const drawCourt = useCallback((ctx: CanvasRenderingContext2D, colors: ReturnType<typeof getThemeColors>) => {
+    if (!colors) return
+
+    const floorHeight = canvasSize.height * 0.2
+    const floorY = canvasSize.height - floorHeight
+    const centerX = canvasSize.width / 2
+    
+    // Free throw arc (half circle inverted downward) - top of arc touches floor line
+    const arcY = floorY // Arc top touches the floor line
+    const arcRadius = canvasSize.width * 0.08 // 8% of canvas width (between 7-9%)
+
+    ctx.save()
+    
+    // Set opacity and neon styling
+    ctx.globalAlpha = 0.8
+    ctx.strokeStyle = colors.primary
+    ctx.lineWidth = 3
+    ctx.shadowBlur = 12 // Between 10-14
+    // Convert shadow color with opacity 0.7
+    let shadowColorRgba = colors.primary
+    if (colors.primary.startsWith('#')) {
+      const r = parseInt(colors.primary.slice(1, 3), 16)
+      const g = parseInt(colors.primary.slice(3, 5), 16)
+      const b = parseInt(colors.primary.slice(5, 7), 16)
+      shadowColorRgba = `rgba(${r}, ${g}, ${b}, 0.7)`
+    } else if (colors.primary.startsWith('rgb')) {
+      shadowColorRgba = colors.primary.replace('rgb', 'rgba').replace(')', ', 0.7)')
+    }
+    ctx.shadowColor = shadowColorRgba
+    
+    // Draw inverted arc (half circle pointing downward) - from left to right, bottom half
+    ctx.beginPath()
+    ctx.arc(centerX, arcY, arcRadius, 0, Math.PI, false) // 0 to Math.PI = bottom half circle (inverted)
+    ctx.stroke()
+    
+    ctx.restore()
+  }, [canvasSize.width, canvasSize.height])
+
+  // Draw rim (basket hoop)
+  const drawRim = useCallback((ctx: CanvasRenderingContext2D, colors: ReturnType<typeof getThemeColors>) => {
+    if (!colors) return
+
+    const headerHeight = 96
+    const backboardY = headerHeight + 20
+    const backboardHeight = 140 // Increased by 50% then +30% then +20% (60 * 1.5 * 1.3 * 1.2 = 140.4 ≈ 140)
+    const backboardBottom = backboardY + backboardHeight
+    
+    // Aro dentro do backboard (subido um pouco)
+    // Apply shake offset (vibrate rim)
+    const shakeOffset = rimShakeRef.current > 0 ? (Math.random() - 0.5) * rimShakeRef.current : 0
+    const centerX = canvasSize.width / 2 + shakeOffset
+    const centerY = backboardBottom - 15 // Aro fica 15px dentro do backboard
+    const radius = 60
+    const arcSpacing = 3 // Espaçamento vertical entre arcos
+
+    ctx.save()
+
+    // Apply pulse alpha effect
+    ctx.globalAlpha = rimAlphaRef.current
+
+    // Layer 1: Main neon arc (thick)
+    ctx.strokeStyle = colors.accent
+    ctx.lineWidth = 6
+    ctx.shadowBlur = rimGlowRef.current // Dynamic glow (8 default, 16 on score)
+    ctx.shadowOffsetY = 4 // Vertical offset for depth
+    ctx.shadowColor = colors.accent // Use neon color directly
+    ctx.beginPath()
+    ctx.arc(centerX, centerY, radius, 0, Math.PI)
+    ctx.stroke()
+
+    // Layer 2: Secondary neon arc (thin, 3px below)
+    ctx.strokeStyle = colors.accent
+    ctx.lineWidth = 2
+    ctx.shadowBlur = rimGlowRef.current * 0.5 // Half glow for inner arc
+    ctx.shadowOffsetY = 2 // Smaller offset
+    ctx.beginPath()
+    ctx.arc(centerX, centerY + arcSpacing, radius - 8, 0, Math.PI)
+    ctx.stroke()
+
+    // Layer 3: Internal shadow arc (very thin, dark, 3px below layer 2) - creates depth
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)'
+    ctx.lineWidth = 2
+    ctx.shadowBlur = 0 // No glow for shadow
+    ctx.shadowOffsetY = 0
+    ctx.beginPath()
+    ctx.arc(centerX, centerY + (arcSpacing * 2), radius - 8, 0, Math.PI)
+    ctx.stroke()
+
+    ctx.globalAlpha = 1
+    ctx.restore()
+  }, [canvasSize.width])
+
 
   // Render orb with theme-specific styling
   const renderOrb = useCallback((ctx: CanvasRenderingContext2D, orb: Orb, colors: ReturnType<typeof getThemeColors>) => {
@@ -1507,11 +1420,11 @@ export function DevOrbsCanvas({ users }: DevOrbsCanvasProps) {
       ctx.fill()
     }
 
-    // Draw border with glow
+    // Draw border with reduced glow (consistent with rim)
     ctx.strokeStyle = borderColor
     ctx.lineWidth = borderWidth
-    ctx.shadowBlur = glowIntensity
-    ctx.shadowColor = colors.glow
+    ctx.shadowBlur = 12 // Reduced glow for orbs
+    ctx.shadowColor = colors.accent // Use same neon color as rim for consistency
     ctx.stroke()
     ctx.shadowBlur = 0
 
@@ -1565,10 +1478,26 @@ export function DevOrbsCanvas({ users }: DevOrbsCanvasProps) {
           : 60
 
       if (avgFps < 40) {
-        // Fallback: render static background only
+        // Fallback: render static background only with radial gradient
         const colors = getThemeColors()
         if (colors) {
-          ctx.fillStyle = colors.bg
+          const headerHeight = 96
+          const backboardY = headerHeight + 20
+          const backboardHeight = 140 // Increased by 50% then +30% then +20% (60 * 1.5 * 1.3 * 1.2 = 140.4 ≈ 140)
+          const backboardBottom = backboardY + backboardHeight
+          const rimCenterY = backboardBottom - 15 // Match rim position (dentro do backboard)
+          const gradientCenterX = canvas.width / 2
+          const gradientCenterY = rimCenterY
+          
+          const gradient = ctx.createRadialGradient(
+            gradientCenterX, gradientCenterY, 0,
+            gradientCenterX, gradientCenterY, Math.max(canvas.width, canvas.height)
+          )
+          
+          gradient.addColorStop(0, '#0d1b2a')
+          gradient.addColorStop(1, '#000814')
+          
+          ctx.fillStyle = gradient
           ctx.fillRect(0, 0, canvas.width, canvas.height)
         }
         animationFrameId = requestAnimationFrame(render)
@@ -1585,10 +1514,28 @@ export function DevOrbsCanvas({ users }: DevOrbsCanvasProps) {
         lastOrbsCountRef.current = currentOrbsCount
       }
 
-      // Clear canvas
+      // Clear canvas with radial gradient
       const colors = getThemeColors()
       if (colors) {
-        ctx.fillStyle = colors.bg
+        // Create radial gradient (centered behind the rim)
+        const headerHeight = 96
+        const backboardY = headerHeight + 20
+        const backboardHeight = 140 // Increased by 50% then +30% then +20% (60 * 1.5 * 1.3 * 1.2 = 140.4 ≈ 140)
+        const backboardBottom = backboardY + backboardHeight
+        const rimCenterY = backboardBottom - 15 // Match rim position (dentro do backboard)
+        const gradientCenterX = canvas.width / 2
+        const gradientCenterY = rimCenterY
+        
+        const gradient = ctx.createRadialGradient(
+          gradientCenterX, gradientCenterY, 0, // Center point (behind rim)
+          gradientCenterX, gradientCenterY, Math.max(canvas.width, canvas.height) // Outer radius
+        )
+        
+        // Gradient from darker center to darkest edges
+        gradient.addColorStop(0, '#0d1b2a') // Darker center
+        gradient.addColorStop(1, '#000814') // Darkest edges
+        
+        ctx.fillStyle = gradient
         ctx.fillRect(0, 0, canvas.width, canvas.height)
       } else {
         ctx.clearRect(0, 0, canvas.width, canvas.height)
@@ -1599,26 +1546,74 @@ export function DevOrbsCanvas({ users }: DevOrbsCanvasProps) {
 
       // Only render visuals if visible (but physics keeps running)
       if (isVisible) {
-        // Render orbs
         if (colors) {
+          // Draw floor (before everything so it's behind)
+          drawFloor(ctx, colors)
+          
+          // Draw minimalist basketball court (neon Tron style)
+          drawCourt(ctx, colors)
+          
+          // Draw backboard side supports (behind backboard and rim)
+          drawBackboardSideSupports(ctx, colors)
+          
+          // Draw basket elements (backboard with integrated LED scoreboard, rim)
+          drawBackboard(ctx, colors) // Scoreboard is now inside backboard
+          drawRim(ctx, colors)
+          
+          // Render orbs
           orbsRef.current.forEach((orb) => {
             renderOrb(ctx, orb, colors)
+            
+            // Draw orb reflection on floor (optional aesthetic)
+            const pos = getBodyPosition(orb.body)
+            const isMobile = isMobileDevice()
+            const radius = isMobile ? ORB_RADIUS_MOBILE : ORB_RADIUS_DESKTOP
+            const floorHeight = canvasSize.height * 0.2
+            const floorY = canvasSize.height - floorHeight
+            
+            // Only draw reflection if orb is above floor
+            if (pos.y < floorY) {
+              ctx.save()
+              
+              // Set clipping to floor area only
+              ctx.beginPath()
+              ctx.rect(0, floorY, canvasSize.width, floorHeight)
+              ctx.clip()
+              
+              // Calculate reflection position (mirrored across floor line, 10px below)
+              const distanceFromFloor = floorY - pos.y
+              const reflectionY = floorY + distanceFromFloor + 10
+              
+              // Draw inverted orb (reflection) with blur
+              ctx.globalAlpha = 0.08 // 8% opacity
+              ctx.filter = 'blur(6px)' // 6px blur
+              
+              // Draw orb circle (reflection) - inverted vertically
+              ctx.save()
+              ctx.translate(pos.x, reflectionY)
+              ctx.scale(1, -1) // Invert vertically
+              ctx.translate(-pos.x, -reflectionY)
+              
+              ctx.beginPath()
+              ctx.arc(pos.x, reflectionY, radius, 0, Math.PI * 2)
+              
+              // Draw avatar if loaded
+              if (orb.imageLoaded && orb.image) {
+                ctx.save()
+                ctx.beginPath()
+                ctx.arc(pos.x, reflectionY, radius - 2, 0, Math.PI * 2)
+                ctx.clip()
+                ctx.drawImage(orb.image, pos.x - radius + 2, reflectionY - radius + 2, (radius - 2) * 2, (radius - 2) * 2)
+                ctx.restore()
+              } else {
+                ctx.fillStyle = colors.primary
+                ctx.fill()
+              }
+              
+              ctx.restore()
+              ctx.restore()
+            }
           })
-        }
-
-        // Render basket (on top of orbs)
-        if (colors && basketHitboxRef.current) {
-          renderBasket(ctx, basketHitboxRef.current, colors)
-        }
-
-        // Render particles/fireworks
-        if (colors) {
-          renderParticles(ctx, colors)
-        }
-
-        // Render HUD message
-        if (colors && hudMessageRef.current) {
-          renderHUDMessage(ctx, hudMessageRef.current, colors)
         }
       }
 
@@ -1632,7 +1627,7 @@ export function DevOrbsCanvas({ users }: DevOrbsCanvasProps) {
         cancelAnimationFrame(animationFrameId)
       }
     }
-  }, [canvasSize, themeId, renderOrb, isVisible])
+  }, [canvasSize, themeId, renderOrb, isVisible, drawBackboard, drawRim, drawBackboardSideSupports, drawFloor, drawCourt])
 
   // Apply theme to canvas
   useEffect(() => {
@@ -1679,8 +1674,8 @@ export function DevOrbsCanvas({ users }: DevOrbsCanvasProps) {
           transition-all
           backdrop-blur-sm
         "
-        title={isVisible ? "Esconder orbs e cesta" : "Mostrar orbs e cesta"}
-        aria-label={isVisible ? "Esconder orbs e cesta" : "Mostrar orbs e cesta"}
+        title={isVisible ? "Esconder orbs" : "Mostrar orbs"}
+        aria-label={isVisible ? "Esconder orbs" : "Mostrar orbs"}
       >
         {isVisible ? "👁️" : "👁️‍🗨️"}
       </button>

@@ -169,3 +169,261 @@ body {
   transition: scrollbar-color 350ms ease;
 }
 
+/* ============================================
+   SHAKE BUTTON - Base Styles
+   ============================================ */
+.shake-button {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: none;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  z-index: 1000;
+  pointer-events: auto;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.shake-button:hover {
+  transform: scale(1.05);
+}
+
+.shake-button:active {
+  transform: scale(0.98);
+}
+
+/* Mobile: Larger button */
+@media (max-width: 768px) {
+  .shake-button {
+    width: 56px;
+    height: 56px;
+    font-size: 9px;
+  }
+}
+
+/* ============================================
+   SHAKE BUTTON - Cyber Hacker Theme
+   ============================================ */
+.shake-button--cyber {
+  background: linear-gradient(135deg, #0a0f1a 0%, #070912 100%);
+  color: #00ff66;
+  border: 2px solid #00ff66;
+  box-shadow: 
+    0 0 10px rgba(0, 255, 102, 0.4),
+    inset 0 0 20px rgba(0, 255, 102, 0.1),
+    0 2px 8px rgba(0, 0, 0, 0.5);
+  text-shadow: 0 0 8px rgba(0, 255, 102, 0.8);
+}
+
+.shake-button--cyber:hover {
+  box-shadow: 
+    0 0 20px rgba(0, 255, 102, 0.6),
+    inset 0 0 30px rgba(0, 255, 102, 0.15),
+    0 4px 12px rgba(0, 0, 0, 0.6);
+}
+
+.shake-button--cyber::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 50%;
+  background: 
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0, 255, 102, 0.03) 2px,
+      rgba(0, 255, 102, 0.03) 4px
+    );
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* ============================================
+   SHAKE BUTTON - Neon Future Theme
+   ============================================ */
+.shake-button--neon {
+  background: radial-gradient(circle at center, rgba(0, 234, 255, 0.15) 0%, rgba(10, 14, 39, 0.95) 100%);
+  color: #00eaff;
+  border: 2px solid #00eaff;
+  box-shadow: 
+    0 0 15px rgba(0, 234, 255, 0.5),
+    0 0 30px rgba(0, 234, 255, 0.3),
+    inset 0 0 25px rgba(0, 234, 255, 0.1),
+    0 2px 8px rgba(0, 0, 0, 0.5);
+  text-shadow: 0 0 10px rgba(0, 234, 255, 0.9);
+}
+
+.shake-button--neon:hover {
+  box-shadow: 
+    0 0 25px rgba(0, 234, 255, 0.7),
+    0 0 50px rgba(0, 234, 255, 0.4),
+    inset 0 0 35px rgba(0, 234, 255, 0.15),
+    0 4px 12px rgba(0, 0, 0, 0.6);
+}
+
+/* ============================================
+   SHAKE BUTTON - Pixel Lab Theme
+   ============================================ */
+.shake-button--pixel {
+  background: #1a1a2e;
+  color: #ff6b9d;
+  border: 3px solid #ff6b9d;
+  border-radius: 0;
+  box-shadow: 
+    4px 4px 0px #c44569,
+    0 0 10px rgba(255, 107, 157, 0.4),
+    inset 0 0 15px rgba(255, 107, 157, 0.1);
+  text-shadow: 2px 2px 0px #c44569, 0 0 8px rgba(255, 107, 157, 0.8);
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+}
+
+.shake-button--pixel:hover {
+  transform: translate(2px, 2px) scale(1.05);
+  box-shadow: 
+    2px 2px 0px #c44569,
+    0 0 15px rgba(255, 107, 157, 0.6),
+    inset 0 0 20px rgba(255, 107, 157, 0.15);
+}
+
+.shake-button--pixel::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: 
+    repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255, 107, 157, 0.05) 2px, rgba(255, 107, 157, 0.05) 4px),
+    repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(255, 107, 157, 0.05) 2px, rgba(255, 107, 157, 0.05) 4px);
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* ============================================
+   SHAKE BUTTON - Terminal Retro Theme
+   ============================================ */
+.shake-button--terminal {
+  background: #1e1e1e;
+  color: #ffdd55;
+  border: 2px solid #ffdd55;
+  border-radius: 0;
+  box-shadow: 
+    0 0 8px rgba(255, 221, 85, 0.3),
+    inset 0 0 20px rgba(255, 221, 85, 0.05),
+    0 2px 6px rgba(0, 0, 0, 0.5);
+  text-shadow: 0 0 6px rgba(255, 221, 85, 0.7);
+  font-family: 'Fira Code', 'Consolas', monospace;
+  font-weight: 900;
+  position: relative;
+}
+
+.shake-button--terminal:hover {
+  box-shadow: 
+    0 0 15px rgba(255, 221, 85, 0.5),
+    inset 0 0 30px rgba(255, 221, 85, 0.1),
+    0 4px 10px rgba(0, 0, 0, 0.6);
+}
+
+.shake-button--terminal::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: 
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 1px,
+      rgba(255, 221, 85, 0.03) 1px,
+      rgba(255, 221, 85, 0.03) 2px
+    );
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* ============================================
+   SHAKE BUTTON - Blueprint Dev Theme
+   ============================================ */
+.shake-button--blueprint {
+  background: linear-gradient(135deg, #223344 0%, #1a2332 100%);
+  color: #4a9eff;
+  border: 2px solid #4a9eff;
+  box-shadow: 
+    0 0 12px rgba(74, 158, 255, 0.4),
+    inset 0 0 20px rgba(74, 158, 255, 0.1),
+    0 2px 8px rgba(0, 0, 0, 0.5);
+  text-shadow: 0 0 8px rgba(74, 158, 255, 0.8);
+}
+
+.shake-button--blueprint:hover {
+  box-shadow: 
+    0 0 20px rgba(74, 158, 255, 0.6),
+    inset 0 0 30px rgba(74, 158, 255, 0.15),
+    0 4px 12px rgba(0, 0, 0, 0.6);
+}
+
+.shake-button--blueprint::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 50%;
+  background-image: 
+    repeating-linear-gradient(0deg, transparent, transparent 4px, rgba(74, 158, 255, 0.05) 4px, rgba(74, 158, 255, 0.05) 8px),
+    repeating-linear-gradient(90deg, transparent, transparent 4px, rgba(74, 158, 255, 0.05) 4px, rgba(74, 158, 255, 0.05) 8px);
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* ============================================
+   SHAKE BUTTON - Vaporwave Theme
+   ============================================ */
+.shake-button--vaporwave {
+  background: linear-gradient(135deg, rgba(255, 20, 147, 0.2) 0%, rgba(0, 191, 255, 0.2) 100%);
+  color: #ff14ff;
+  border: 2px solid #ff14ff;
+  box-shadow: 
+    0 0 15px rgba(255, 20, 255, 0.6),
+    0 0 30px rgba(0, 191, 255, 0.4),
+    inset 0 0 25px rgba(255, 20, 255, 0.15),
+    0 2px 8px rgba(0, 0, 0, 0.5);
+  text-shadow: 
+    0 0 10px rgba(255, 20, 255, 0.9),
+    0 0 20px rgba(0, 191, 255, 0.5);
+}
+
+.shake-button--vaporwave:hover {
+  box-shadow: 
+    0 0 25px rgba(255, 20, 255, 0.8),
+    0 0 50px rgba(0, 191, 255, 0.6),
+    inset 0 0 35px rgba(255, 20, 255, 0.2),
+    0 4px 12px rgba(0, 0, 0, 0.6);
+}
+
+.shake-button--vaporwave::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 50%;
+  background: 
+    repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 3px,
+      rgba(255, 20, 255, 0.1) 3px,
+      rgba(0, 191, 255, 0.1) 6px
+    );
+  pointer-events: none;
+  z-index: -1;
+  opacity: 0.5;
+}
+
