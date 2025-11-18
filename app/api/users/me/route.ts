@@ -1,4 +1,4 @@
-import { NextRequest } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { withAuth } from "@/lib/api-auth"
 import { handleApiError } from "@/lib/api-errors"
@@ -21,6 +21,7 @@ export const GET = withAuth(async (request: NextRequest, user) => {
         name: true,
         avatar: true,
         xId: true,
+        xUsername: true,
         theme: true,
         showPublicHistory: true,
         createdAt: true,
@@ -28,7 +29,7 @@ export const GET = withAuth(async (request: NextRequest, user) => {
     })
 
     if (!dbUser) {
-      return Response.json(
+      return NextResponse.json(
         {
           error: {
             code: "not_found",
@@ -39,13 +40,15 @@ export const GET = withAuth(async (request: NextRequest, user) => {
       )
     }
 
-    return Response.json(
+    return NextResponse.json(
       {
         user: {
           id: dbUser.id,
           name: dbUser.name,
           avatar: dbUser.avatar,
-          handle: dbUser.xId, // xId is used as handle/username
+          handle: dbUser.xUsername || dbUser.xId, // Prefer xUsername, fallback to xId
+          xId: dbUser.xId,
+          xUsername: dbUser.xUsername,
           theme: dbUser.theme,
           showPublicHistory: dbUser.showPublicHistory,
           joinDate: dbUser.createdAt,

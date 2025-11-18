@@ -12,6 +12,8 @@ import { useDrops } from '@/hooks/useDrops'
 import { useThemeStore } from '@/lib/theme-store'
 import { useMobileModeStore } from '@/lib/performance/mobile-mode'
 import { useFPSGuardianStore } from '@/lib/performance/fps-guardian'
+import { useMultiTabStore } from '@/lib/performance/multi-tab'
+import { handleCanvasCrash, getRetryDelay, resetCrashState } from '@/lib/performance/canvas-crash-resilience'
 import { GrantRewardCallback } from '@/lib/canvas/drops/types'
 
 interface DropsCanvasProps {
@@ -43,6 +45,7 @@ export function DropsCanvas({
   const { theme: themeId } = useThemeStore()
   const { mode: mobileMode, init: initMobileMode } = useMobileModeStore()
   const { level: fpsLevel } = useFPSGuardianStore()
+  const shouldPause = useMultiTabStore((state) => state.shouldPause())
   const [canvasSize, setCanvasSize] = useState({ width: 0, height: 0 })
   const [isMounted, setIsMounted] = useState(false)
   const animationFrameRef = useRef<number>()
@@ -147,25 +150,43 @@ export function DropsCanvas({
     canvas.height = canvasSize.height
 
     const render = () => {
-      // In mobile lite mode or FPS Level 2, render static background only
-      if (isLiteMode || isFPSLevel2) {
-        // Clear canvas with theme background
-        ctx.clearRect(0, 0, canvas.width, canvas.height)
+      // Multi-tab protection: pause if we're not the owner
+      if (shouldPause) {
         animationFrameRef.current = requestAnimationFrame(render)
         return
       }
       
-      // Check for active drops and update pointer events state
-      const count = getActiveCount()
-      setHasActiveDrop(count > 0)
+      try {
+        // Reset crash state on successful render
+        resetCrashState()
+        
+        // In mobile lite mode or FPS Level 2, render static background only
+        if (isLiteMode || isFPSLevel2) {
+          // Clear canvas with theme background
+          ctx.clearRect(0, 0, canvas.width, canvas.height)
+          animationFrameRef.current = requestAnimationFrame(render)
+          return
+        }
+        
+        // Check for active drops and update pointer events state
+        const count = getActiveCount()
+        setHasActiveDrop(count > 0)
 
-      // Clear canvas (transparent - drops render on top of DevOrbs)
-      ctx.clearRect(0, 0, canvas.width, canvas.height)
+        // Clear canvas (transparent - drops render on top of DevOrbs)
+        ctx.clearRect(0, 0, canvas.width, canvas.height)
 
-      // Render drops
-      draw(ctx)
+        // Render drops
+        draw(ctx)
 
-      animationFrameRef.current = requestAnimationFrame(render)
+        animationFrameRef.current = requestAnimationFrame(render)
+      } catch (error) {
+        console.error('DropsCanvas render error:', error)
+        if (handleCanvasCrash(error as Error, 'DropsCanvas')) {
+          setTimeout(() => {
+            animationFrameRef.current = requestAnimationFrame(render)
+          }, getRetryDelay())
+        }
+      }
     }
 
     animationFrameRef.current = requestAnimationFrame(render)
@@ -175,7 +196,7 @@ export function DropsCanvas({
         cancelAnimationFrame(animationFrameRef.current)
       }
     }
-  }, [canvasSize, draw, getActiveCount, isLiteMode, isFPSLevel2, fpsLevel])
+  }, [canvasSize, draw, getActiveCount, isLiteMode, isFPSLevel2, fpsLevel, shouldPause])
 
   // Apply theme to canvas
   useEffect(() => {

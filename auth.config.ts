@@ -24,6 +24,14 @@ export const authConfig: NextAuthConfig = {
               : null) || 
             (typeof user.image === "string" ? user.image : null) || 
             null
+          
+          // Extract X username (slug) from profile
+          // Twitter/X OAuth profile may have username in different fields
+          const xUsername = 
+            (profile as any)?.screen_name || 
+            (profile as any)?.username || 
+            (profile as any)?.data?.username ||
+            null
 
           // Debug: Log account token info (without exposing full token)
           if (account.access_token) {
@@ -39,10 +47,13 @@ export const authConfig: NextAuthConfig = {
             console.warn("⚠️ No access_token in account object during signIn")
           }
 
-          // Add xId to user object so adapter can use it
-          // This ensures the adapter creates the user with xId
+          // Add xId and xUsername to user object so adapter can use it
+          // This ensures the adapter creates the user with xId and xUsername
           if (!user.id) {
             (user as any).xId = xId
+            if (xUsername) {
+              (user as any).xUsername = xUsername
+            }
           }
           
           // Update user object with correct name and image for adapter
@@ -52,14 +63,33 @@ export const authConfig: NextAuthConfig = {
           // If user already exists (has id), update their data
           if (user.id) {
             const userId = parseInt(user.id)
-            await prisma.user.update({
-              where: { id: userId },
-              data: {
-                name,
-                avatar,
-                updatedAt: new Date(),
-              },
-            })
+            // Try to update with xUsername, but don't fail if field doesn't exist yet
+            try {
+              await prisma.user.update({
+                where: { id: userId },
+                data: {
+                  name,
+                  avatar,
+                  ...(xUsername ? { xUsername } : {}), // Only include if provided
+                  updatedAt: new Date(),
+                },
+              })
+            } catch (updateError) {
+              // If xUsername field doesn't exist, update without it
+              if (updateError instanceof Error && updateError.message.includes('xUsername')) {
+                console.warn("⚠️ xUsername field not found. Updating user without it.")
+                await prisma.user.update({
+                  where: { id: userId },
+                  data: {
+                    name,
+                    avatar,
+                    updatedAt: new Date(),
+                  },
+                })
+              } else {
+                throw updateError // Re-throw if it's a different error
+              }
+            }
 
             // Ensure account is linked (create or update)
             // This is necessary because NextAuth may not call linkAccount if user already exists
@@ -114,6 +144,38 @@ export const authConfig: NextAuthConfig = {
             stack: error instanceof Error ? error.stack : undefined,
             xId: account.providerAccountId,
           })
+          
+          // If error is about missing field (xUsername), try without it
+          if (error instanceof Error && error.message.includes('xUsername')) {
+            console.warn("⚠️ xUsername field not found in database. Attempting sign in without it.")
+            try {
+              // Retry without xUsername - user will be created/updated with just xId
+              if (user.id) {
+                const userId = parseInt(user.id)
+                const retryName = profile?.name || user.name || ""
+                const retryAvatar = 
+                  (typeof profile?.profile_image_url_https === "string" 
+                    ? profile.profile_image_url_https 
+                    : null) || 
+                  (typeof user.image === "string" ? user.image : null) || 
+                  null
+                const updateData: any = {
+                  updatedAt: new Date(),
+                }
+                if (retryName) updateData.name = retryName
+                if (retryAvatar) updateData.avatar = retryAvatar
+                await prisma.user.update({
+                  where: { id: userId },
+                  data: updateData,
+                })
+              }
+              return true // Allow sign in even without xUsername
+            } catch (retryError) {
+              console.error("Retry failed:", retryError)
+              return false
+            }
+          }
+          
           // Return false to prevent sign in on error
           return false
         }

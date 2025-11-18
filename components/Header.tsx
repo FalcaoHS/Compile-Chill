@@ -47,10 +47,22 @@ export function Header() {
               Home
             </Link>
             <Link
-              href="/"
+              href="/jogos"
               className="text-sm font-medium text-text-secondary hover:text-text transition-colors"
             >
               Jogos
+            </Link>
+            <Link
+              href="/sobre"
+              className="text-sm font-medium text-text-secondary hover:text-text transition-colors"
+            >
+              Sobre
+            </Link>
+            <Link
+              href="/blog"
+              className="text-sm font-medium text-text-secondary hover:text-text transition-colors"
+            >
+              Blog
             </Link>
             <Link
               href="/ranking"
@@ -60,7 +72,7 @@ export function Header() {
             </Link>
             {session && (
               <Link
-                href="/perfil"
+                href="/profile"
                 className="text-sm font-medium text-text-secondary hover:text-text transition-colors"
               >
                 Perfil

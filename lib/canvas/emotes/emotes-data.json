@@ -1,0 +1,412 @@
+[
+  {
+    "id": "rage_close_tag",
+    "label": "</rage>",
+    "rarity": "common",
+    "category": "emotions",
+    "description": "A raiva devidamente fechada com tag.",
+    "themeStyle": "mono"
+  },
+  {
+    "id": "segfault",
+    "label": ":segfault:",
+    "rarity": "common",
+    "category": "errors",
+    "description": "Clássico. A alma do dev deixou o corpo.",
+    "themeStyle": "mono"
+  },
+  {
+    "id": "face_not_found",
+    "label": "404_face_not_found",
+    "rarity": "common",
+    "category": "errors",
+    "description": "Emote não encontrado. Dev provavelmente também não.",
+    "themeStyle": "mono"
+  },
+  {
+    "id": "rm_rf_lol",
+    "label": "rm -rf lol",
+    "rarity": "common",
+    "category": "chaos",
+    "description": "Ação irreversível. Riso nervoso.",
+    "themeStyle": "hacker"
+  },
+  {
+    "id": "compile_basic",
+    "label": ":compile:",
+    "rarity": "common",
+    "category": "rituals",
+    "description": "A reza diária do dev.",
+    "themeStyle": "mono"
+  },
+  {
+    "id": "deploy_basic",
+    "label": ":deploy:",
+    "rarity": "common",
+    "category": "rituals",
+    "description": "Um simples botão. Um grande medo.",
+    "themeStyle": "mono"
+  },
+  {
+    "id": "merge_conflict",
+    "label": ":merge_conflict:",
+    "rarity": "common",
+    "category": "errors",
+    "description": "Quando parece pessoal.",
+    "themeStyle": "pixel"
+  },
+  {
+    "id": "stack_overflow_ref",
+    "label": ":stack_overflow:",
+    "rarity": "common",
+    "category": "memes",
+    "description": "A segunda casa do dev.",
+    "themeStyle": "mono"
+  },
+  {
+    "id": "console_log_life",
+    "label": ":console.log(life):",
+    "rarity": "common",
+    "category": "rituals",
+    "description": "Debugando a existência, uma linha por vez.",
+    "themeStyle": "mono"
+  },
+  {
+    "id": "null_pointer_heart",
+    "label": ":null_pointer_heart:",
+    "rarity": "common",
+    "category": "errors",
+    "description": "Quando o coração também retorna null.",
+    "themeStyle": "pixel"
+  },
+  {
+    "id": "on_my_machine",
+    "label": ":works_on_my_machine:",
+    "rarity": "rare",
+    "category": "memes",
+    "description": "Ambiente controlado: só o seu.",
+    "themeStyle": "pixel"
+  },
+  {
+    "id": "rubber_duck_confession",
+    "label": ":rubber_duck_confession:",
+    "rarity": "rare",
+    "category": "emotions",
+    "description": "Desabafo para o pato.",
+    "themeStyle": "neon"
+  },
+  {
+    "id": "unexpected_token",
+    "label": ":unexpected_token:",
+    "rarity": "rare",
+    "category": "errors",
+    "description": "Você também não esperava.",
+    "themeStyle": "mono"
+  },
+  {
+    "id": "ghost_bug",
+    "label": ":ghost_bug:",
+    "rarity": "rare",
+    "category": "errors",
+    "description": "O bug que só aparece quando quer.",
+    "themeStyle": "pixel"
+  },
+  {
+    "id": "linting_soul",
+    "label": ":linting_my_soul:",
+    "rarity": "rare",
+    "category": "rituals",
+    "description": "Limpando um pouco da bagunça interna.",
+    "themeStyle": "neon"
+  },
+  {
+    "id": "panic_push",
+    "label": ":panic_push:",
+    "rarity": "rare",
+    "category": "chaos",
+    "description": "Aperta e torce pelo melhor.",
+    "themeStyle": "glitch"
+  },
+  {
+    "id": "infinite_loop",
+    "label": ":infinite_looping:",
+    "rarity": "rare",
+    "category": "errors",
+    "description": "O dev gira junto.",
+    "themeStyle": "mono"
+  },
+  {
+    "id": "cpu_melting",
+    "label": ":cpu_melting:",
+    "rarity": "rare",
+    "category": "chaos",
+    "description": "Mais quente que produção às 18h.",
+    "themeStyle": "hacker"
+  },
+  {
+    "id": "ticket_of_suffering",
+    "label": ":ticket_of_eternal_suffering:",
+    "rarity": "rare",
+    "category": "memes",
+    "description": "Chamado aberto desde 2012.",
+    "themeStyle": "mono"
+  },
+  {
+    "id": "coffee_overflow",
+    "label": ":coffee_overflow:",
+    "rarity": "rare",
+    "category": "rituals",
+    "description": "Stack trace movido a cafeína.",
+    "themeStyle": "pixel"
+  },
+  {
+    "id": "debug_sobbing",
+    "label": ":debug_sobbing:",
+    "rarity": "rare",
+    "category": "emotions",
+    "description": "Choro com breakpoints.",
+    "themeStyle": "mono"
+  },
+  {
+    "id": "npm_install_waiting",
+    "label": ":npm_install_waiting:",
+    "rarity": "rare",
+    "category": "rituals",
+    "description": "Aguardando o fim dos tempos.",
+    "themeStyle": "neon"
+  },
+  {
+    "id": "git_blame_anxiety",
+    "label": ":git_blame_anxiety:",
+    "rarity": "rare",
+    "category": "emotions",
+    "description": "A culpa é sempre sua.",
+    "themeStyle": "hacker"
+  },
+  {
+    "id": "deadline_approaching",
+    "label": ":deadline_approaching:",
+    "rarity": "rare",
+    "category": "chaos",
+    "description": "O relógio não para. O código também não.",
+    "themeStyle": "glitch"
+  },
+  {
+    "id": "pixel_tears",
+    "label": ":pixel_tears:",
+    "rarity": "rare",
+    "category": "pixel",
+    "description": "Lágrimas em 8 bits doem igual.",
+    "themeStyle": "pixel"
+  },
+  {
+    "id": "merge_wizard",
+    "label": ":merge_wizard:",
+    "rarity": "epic",
+    "category": "magic",
+    "description": "Conjura fusões que não explodem.",
+    "themeStyle": "neon"
+  },
+  {
+    "id": "bug_exorcism",
+    "label": ":bug_exorcism:",
+    "rarity": "epic",
+    "category": "magic",
+    "description": "Banindo bugs para outra dimensão.",
+    "themeStyle": "hacker"
+  },
+  {
+    "id": "refactor_spell",
+    "label": ":refactor_spell:",
+    "rarity": "epic",
+    "category": "magic",
+    "description": "Evoca legibilidade instantânea.",
+    "themeStyle": "glitch"
+  },
+  {
+    "id": "docker_anxiety",
+    "label": ":docker_ps_anxiety:",
+    "rarity": "epic",
+    "category": "chaos",
+    "description": "25 containers rodando. Sem motivo.",
+    "themeStyle": "mono"
+  },
+  {
+    "id": "node_modules_monster",
+    "label": ":node_modules_monster:",
+    "rarity": "epic",
+    "category": "memes",
+    "description": "Ele cresce quando você não olha.",
+    "themeStyle": "pixel"
+  },
+  {
+    "id": "burning_jira",
+    "label": ":burning_jira:",
+    "rarity": "epic",
+    "category": "chaos",
+    "description": "A chama da produtividade.",
+    "themeStyle": "neon"
+  },
+  {
+    "id": "wifi_suffering",
+    "label": ":wifi_desesperou:",
+    "rarity": "epic",
+    "category": "errors",
+    "description": "O sinal caiu. O dev também.",
+    "themeStyle": "mono"
+  },
+  {
+    "id": "0xdeadbeef",
+    "label": "0xDEADBEEF",
+    "rarity": "epic",
+    "category": "hacker",
+    "description": "O clássico dos clássicos.",
+    "themeStyle": "hacker"
+  },
+  {
+    "id": "pixel_fail",
+    "label": ":pixel_fail:",
+    "rarity": "epic",
+    "category": "pixel",
+    "description": "Um erro em 8 bits dói igual.",
+    "themeStyle": "pixel"
+  },
+  {
+    "id": "compile_charm",
+    "label": ":compile_charm:",
+    "rarity": "epic",
+    "category": "magic",
+    "description": "Conserta coisas que não deviam funcionar.",
+    "themeStyle": "neon"
+  },
+  {
+    "id": "glitch_smile",
+    "label": ":glitch_smile:",
+    "rarity": "epic",
+    "category": "hacker",
+    "description": "Um sorriso corrompido no HD.",
+    "themeStyle": "glitch"
+  },
+  {
+    "id": "whiteboard_madness",
+    "label": ":whiteboard_madness:",
+    "rarity": "epic",
+    "category": "memes",
+    "description": "Diagrama espontâneo.",
+    "themeStyle": "mono"
+  },
+  {
+    "id": "quantum_debugger",
+    "label": ":quantum_debugger:",
+    "rarity": "epic",
+    "category": "special",
+    "description": "O bug existe e não existe ao mesmo tempo.",
+    "themeStyle": "glitch"
+  },
+  {
+    "id": "pr_summoning",
+    "label": ":pr_summoning_circle:",
+    "rarity": "epic",
+    "category": "magic",
+    "description": "Conjurando revisões positivas.",
+    "themeStyle": "neon"
+  },
+  {
+    "id": "neon_burnout",
+    "label": ":neon_burnout:",
+    "rarity": "epic",
+    "category": "neon",
+    "description": "Brilhando até apagar.",
+    "themeStyle": "neon"
+  },
+  {
+    "id": "golden_bug",
+    "label": ":golden_bug:",
+    "rarity": "legendary",
+    "category": "achievements",
+    "description": "Encontrado apenas pelos devs mais persistentes.",
+    "themeStyle": "neon"
+  },
+  {
+    "id": "legendary_commit",
+    "label": ":legendary_commit:",
+    "rarity": "legendary",
+    "category": "achievements",
+    "description": "O commit perfeito.",
+    "themeStyle": "neon"
+  },
+  {
+    "id": "devmaster_99",
+    "label": ":devmaster_99:",
+    "rarity": "legendary",
+    "category": "achievements",
+    "description": "Desbloqueado ao atingir 99 cestas.",
+    "themeStyle": "glitch"
+  },
+  {
+    "id": "galactic_overflow",
+    "label": ":galactic_overflow:",
+    "rarity": "legendary",
+    "category": "special",
+    "description": "Stack overflow em escala astronômica.",
+    "themeStyle": "hacker"
+  },
+  {
+    "id": "cosmic_compile",
+    "label": ":cosmic_compile:",
+    "rarity": "legendary",
+    "category": "special",
+    "description": "O compilador olhou pra você e sorriu.",
+    "themeStyle": "neon"
+  },
+  {
+    "id": "infinite_pr_queue",
+    "label": ":infinite_pr_queue:",
+    "rarity": "legendary",
+    "category": "chaos",
+    "description": "A fila que nunca acaba.",
+    "themeStyle": "glitch"
+  },
+  {
+    "id": "shiny_refactor",
+    "label": ":shiny_refactor:",
+    "rarity": "legendary",
+    "category": "magic",
+    "description": "Mudou tudo. Quebrou nada.",
+    "themeStyle": "neon"
+  },
+  {
+    "id": "pixel_crown",
+    "label": ":pixel_crown:",
+    "rarity": "legendary",
+    "category": "pixel",
+    "description": "Para devs que merecem respeito em 8 bits.",
+    "themeStyle": "pixel"
+  },
+  {
+    "id": "root_access",
+    "label": ":root_access:",
+    "rarity": "legendary",
+    "category": "hacker",
+    "description": "Seu poder agora é ilimitado.",
+    "themeStyle": "hacker"
+  },
+  {
+    "id": "secret_emote",
+    "label": ":???",
+    "rarity": "legendary",
+    "category": "special",
+    "description": "Um emote que só aparece em condições desconhecidas.",
+    "themeStyle": "glitch"
+  },
+  {
+    "id": "product_owner",
+    "label": ":product_owner:",
+    "rarity": "unique",
+    "category": "special",
+    "description": "O emote definitivo. Só o Product Owner pode usar. Todos os efeitos lendários combinados em uma experiência épica única.",
+    "themeStyle": "neon",
+    "ownerXId": "shuktv"
+  }
+]
+

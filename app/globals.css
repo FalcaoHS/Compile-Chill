@@ -325,7 +325,9 @@ body {
   text-shadow: 0 0 6px rgba(255, 221, 85, 0.7);
   font-family: 'Fira Code', 'Consolas', monospace;
   font-weight: 900;
-  position: relative;
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
 }
 
 .shake-button--terminal:hover {

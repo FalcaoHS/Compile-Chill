@@ -1,4 +1,4 @@
-import { NextRequest } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { handleApiError, ApiErrors } from "@/lib/api-errors"
 
@@ -40,7 +40,7 @@ export async function GET(
 
     // If privacy is disabled, return minimal data
     if (!dbUser.showPublicHistory) {
-      return Response.json(
+      return NextResponse.json(
         {
           user: {
             id: dbUser.id,

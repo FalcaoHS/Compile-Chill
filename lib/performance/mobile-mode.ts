@@ -62,7 +62,7 @@ export const useMobileModeStore = create<MobileModeStore>()(
         set({ isMobile, mode })
         
         // Listen for window resize to update mode (only add listener once)
-        if (typeof window !== "undefined" && !window.__mobileModeResizeListener) {
+        if (typeof window !== "undefined" && !(window as any).__mobileModeResizeListener) {
           let resizeTimeout: NodeJS.Timeout | null = null
           
           const handleResize = () => {

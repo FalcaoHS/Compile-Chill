@@ -15,11 +15,13 @@ export function GameCard({ game }: GameCardProps) {
       animate={{ opacity: 1, y: 0 }}
       whileHover={{ scale: 1.02, y: -4 }}
       transition={{ duration: 0.2 }}
+      className="h-full"
     >
       <Link
         href={game.route}
         className="
           block
+          h-full
           p-6 rounded-lg
           bg-page-secondary
           border-2 border-border
@@ -34,7 +36,7 @@ export function GameCard({ game }: GameCardProps) {
         role="button"
         aria-label={`Jogar ${game.name}`}
       >
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-3 h-full">
           {/* Icon and Name */}
           <div className="flex items-center gap-3">
             <span className="text-3xl group-hover:scale-110 transition-transform duration-200">
@@ -46,7 +48,7 @@ export function GameCard({ game }: GameCardProps) {
           </div>
           
           {/* Description */}
-          <p className="text-sm text-text-secondary line-clamp-2">
+          <p className="text-sm text-text-secondary line-clamp-2 flex-grow">
             {game.description}
           </p>
           

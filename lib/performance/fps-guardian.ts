@@ -9,6 +9,7 @@
  */
 
 import { create } from 'zustand'
+import { logFPSLow } from './light-logging'
 
 export type FPSLevel = 0 | 1 | 2
 
@@ -93,6 +94,10 @@ export const useFPSGuardianStore = create<FPSGuardianStore>()((set, get) => ({
           averageFPS: average,
           fpsHistory: newHistory
         })
+        // Log FPS low event when transitioning to Level 1 or 2
+        if (newLevel > 0 && currentLevel === 0) {
+          logFPSLow(newLevel, average)
+        }
         pendingLevel = null
         levelChangeTimestamp = null
       } else {

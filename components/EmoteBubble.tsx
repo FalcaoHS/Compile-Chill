@@ -12,6 +12,8 @@ import { useEmotes } from '@/hooks/useEmotes'
 import { useThemeStore } from '@/lib/theme-store'
 import { useMobileModeStore } from '@/lib/performance/mobile-mode'
 import { useFPSGuardianStore } from '@/lib/performance/fps-guardian'
+import { useMultiTabStore } from '@/lib/performance/multi-tab'
+import { handleCanvasCrash, getRetryDelay, resetCrashState } from '@/lib/performance/canvas-crash-resilience'
 import { EMOTE_TEXT_MAP } from '@/lib/canvas/emotes/emote-types'
 
 interface EmoteBubbleProps {
@@ -43,6 +45,7 @@ export function EmoteBubble({
   const { theme: themeId } = useThemeStore()
   const { mode: mobileMode, init: initMobileMode } = useMobileModeStore()
   const { level: fpsLevel } = useFPSGuardianStore()
+  const shouldPause = useMultiTabStore((state) => state.shouldPause())
   const [canvasSize, setCanvasSize] = useState({ width: 0, height: 0 })
   const [isMounted, setIsMounted] = useState(false)
   const animationFrameRef = useRef<number>()
@@ -122,21 +125,39 @@ export function EmoteBubble({
     canvas.height = canvasSize.height
 
     const render = () => {
-      // In mobile lite mode or FPS Level 2, render static background only
-      if (isLiteMode || isFPSLevel2) {
-        // Clear canvas with theme background
-        ctx.clearRect(0, 0, canvas.width, canvas.height)
+      // Multi-tab protection: pause if we're not the owner
+      if (shouldPause) {
         animationFrameRef.current = requestAnimationFrame(render)
         return
       }
       
-      // Clear canvas (transparent - emotes render on top of other layers)
-      ctx.clearRect(0, 0, canvas.width, canvas.height)
+      try {
+        // Reset crash state on successful render
+        resetCrashState()
+        
+        // In mobile lite mode or FPS Level 2, render static background only
+        if (isLiteMode || isFPSLevel2) {
+          // Clear canvas with theme background
+          ctx.clearRect(0, 0, canvas.width, canvas.height)
+          animationFrameRef.current = requestAnimationFrame(render)
+          return
+        }
+        
+        // Clear canvas (transparent - emotes render on top of other layers)
+        ctx.clearRect(0, 0, canvas.width, canvas.height)
 
-      // Render emotes
-      draw(ctx)
+        // Render emotes
+        draw(ctx)
 
-      animationFrameRef.current = requestAnimationFrame(render)
+        animationFrameRef.current = requestAnimationFrame(render)
+      } catch (error) {
+        console.error('EmoteBubble render error:', error)
+        if (handleCanvasCrash(error as Error, 'EmoteBubble')) {
+          setTimeout(() => {
+            animationFrameRef.current = requestAnimationFrame(render)
+          }, getRetryDelay())
+        }
+      }
     }
 
     animationFrameRef.current = requestAnimationFrame(render)
@@ -146,7 +167,7 @@ export function EmoteBubble({
         cancelAnimationFrame(animationFrameRef.current)
       }
     }
-  }, [canvasSize, draw, isLiteMode, isFPSLevel2, fpsLevel])
+  }, [canvasSize, draw, isLiteMode, isFPSLevel2, fpsLevel, shouldPause])
 
   // Apply theme to canvas
   useEffect(() => {

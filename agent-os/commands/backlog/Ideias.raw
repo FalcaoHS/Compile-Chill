@@ -1,271 +1,282 @@
-🎮 1. Social/Interação
-✔ Chat dentro dos jogos e no site
+🎮 Social / Interação (faltantes / necessários)
 
-modo global
+ Chat: moderação & segurança
 
-modo por jogo
+fila de moderação automática (AI + heurísticas)
 
-filtros automáticos anti-spam
+report/ban UI para moderadores
 
-mensagens efêmeras (somem após X horas)
+rate limit por usuário (Upstash)
 
-sistema de “salas temáticas” baseadas nos temas (Hacker, Pixel, Neon etc.)
+blocklist de palavras/regex
 
-✔ Sistema de Emotes Dev (exclusivos)
+sanitização e escaping de mensagens (XSS)
 
-</rage>
+ Persistência & histórico
 
-:segfault:
+store de mensagens (Postgres) + TTL para efêmeras
 
-:merge_conflict:
+paginação + fetch incremental (only last N on open)
 
-404_face_not_found
+ Emotes: infra & integração
 
-rm-rf-laugh
+API de emotes (catalog, raridade, ownership)
 
-animações tema-aware (glitch, pixel, neon)
+endpoint para usar emote no chat (rate-limited)
 
-✔ Offline Bubble
+ Mensagens efêmeras
 
-Balãozinho “X está jogando agora” estilo Steam mini popup.
+job para deletar (cron/Lambda) ou TTL DB
 
-♟️ 2. Xadrez Dev Edition
-✔ Xadrez Multiplayer ou IA
+ Salas temáticas
 
-Com:
+criação/room metadata, permissões, limite de membros
 
-chat lateral
+ Anti-spam
 
-emotes “tech provocativos”
+Captcha challenge / rate-limit escalonável
 
-skins de peças dev (branch, bug, commit, patch)
+heurísticas: messages/sec, similarity, new-account limits
 
-replay das últimas 10 jogadas
+ Audio messages
 
-rating estilo ELO dev (DLO — Dev Level Order 😂)
+upload/streaming: WebRTC or MediaRecorder + signed upload to S3
 
-✔ Personalização:
+transcription (optional) + moderation (speech-to-text + AI)
 
-temas aplicados nas peças
+storage + TTL & quota
 
-neon
+ Privacy / opt-out for chat data (GDPR)
 
-pixel retro
+♟️ Xadrez Dev Edition (faltantes)
 
-azul terminal
+ Matchmaking / multiplayer
 
-⚠️ sem scroll no desktop na UI do tabuleiro!
+lobby, invites, sockets (WebSocket / Pusher)
 
-📚 3. FunWiki — Histórias da Comunidade
+reconnection handling
 
-Com:
+ Anti-cheat / replay validation
 
-posts criados pelos usuários
+store PGN / moves history
 
-tags automáticas baseadas no conteúdo (AI safe)
+server-side validation against legal moves
 
-sistema de reações (pixel corações, neon stars, glitch likes)
+ Elo-like rating system (DLO)
 
-ranking das histórias mais nojentas/difíceis/hilarious “bugs da vida real”
+formula + DB migration + UI
 
-modo anônimo (opcional, com moderação)
+ Spectator mode
 
-Eventos sazonais:
+watch games w/ limited events
 
-“Desafio: conte seu pior deploy”
+ Match chat moderation & emotes
 
-“Dia do Bug Histórico”
+ No-scroll guarantee: QA + CSS locked layout
 
-🏠 4. Home Page Lendária
-✔ Bolinhas dos últimos 10 usuários
+📚 FunWiki (faltantes)
 
-físicas reais (bouncing physics)
+ Moderation pipeline
 
-colidem entre si
+auto-tagging + human review queue
 
-caem de cima da tela
+abuse reports + admin dashboard
 
-podem ser arrastadas com o mouse
+ Content model
 
-foto circular recortada pixel/neon conforme tema
+WYSIWYG editor or Markdown + sanitization
 
-aparecem somente no desktop (performance)
+ Search / tags
 
-⚠️ garantir que o header fixo não cause scroll!
+full-text search (Postgres or Elastic) + tagging suggestions
 
-✔ Easter Eggs do header
+ Anonymous posting
 
-10% de chance do header “bugar” por 1 frame (tema Hacker)
+rate limits, stricter moderation, captcha
 
-No tema Pixel: um sprite corre no header
+ Versioning / edits / rollback
 
-No tema Neon: linha luminosa percorre a borda da página
+🏠 Home Page Lendária (faltantes)
 
-🔨 5. Extravasar a Raiva
-✔ Pergunta no primeiro acesso:
+ Performance guardrails
 
-“Qual tecnologia você mais odeia?”
+server-side endpoint /api/users/recent (cached)
 
-✔ Substituir temporariamente a logo:
+fallback if <N users
 
-aparece o ícone da tecnologia odiada
+ Mobile behavior
 
-animação reativa quando o usuário bate com o martelo pixelado
+static fallback or lightweight physics (already discussed)
 
-o ícone quebra em fragmentos
+ Accessibility
 
-pontinhos de “stress aliviado” somem em partículas
+keyboard drag fallback, aria labels for orbs
 
-vibração leve na interface
+ Consent & privacy
 
-✔ Painel “Extravasar a Raiva”
+opt-out for showing user avatar in orbs
 
-fica em Configurações
+ Easter egg telemetry
 
-escolher nova tecnologia para estraçalhar
+track triggers (opt-in)
 
-escolher estilo de martelo (pixel, neon, ascii)
+🔨 Extravasar a Raiva (faltantes)
 
-🎭 6. Features extras para explodir a criatividade do portal
+ Asset management
 
-Essas são ALTAMENTE recomendadas:
+library of icons for techs (copyright safe)
 
-🌐 6.1. Perfil Dev Cinemático
+ Interaction & persistence
 
-histórico visual de scores
+save preference in profile + local override
 
-gráfico estilo “energia dev”
+ Moderation
 
-avatar com animação tema-aware
+ensure hammer animations don't allow harassment; restrict content to tech logos only
 
-mini achievements desbloqueáveis
+ Accessibility & UX
 
-🎁 6.2. Sistema de “Drops”
+provide alternative non-violent interaction (e.g., "squeeze stress ball")
 
-Enquanto o usuário navega:
+🎭 Features extras (6.x) — backlog técnico
 
-um objeto pixelado cai
+ Perfil Dev Cinemático
 
-o usuário pode clicar
+metrics store, charting lib config (recharts), export PNG
 
-ganha coins/skins para jogos
+ Drops (in-game rewards)
 
-extremamente divertido e mantém engajamento
+signed URLs for asset claims, rate-limited claim endpoint, rarity RNG
 
-🔒 6.3. Sala Secreta
+ Sala Secreta
 
-Uma página oculta, acessível só com:
+route protection, secret token generation
 
-comando /open-sesame no chat
-ou
+ Terminal Oculto
 
-achando um QR escondido no site
+command whitelist + rate-limit + audit log
 
-Lá dentro:
+ Eventos Semanais
 
-jogos protótipo
+feature flags + scheduling UI
 
-badges secretos
+ Laboratório Experimental
 
-“story mode” sobre bugs lendários
+A/B testing / feature flags toggles + telemetry
 
-💬 6.4. Mensagem Randomizada de Boas-Vindas
+ Painel Hacker Real-Time
 
-Tipo:
+endpoints: /api/metrics/online, /api/games/active; caching + websockets for live updates
 
-“Seu commit ficou lindo hoje?”
+ Cartões de Score Cinematográficos
 
-“A RAM pediu respeito.”
+server-side canvas render (html-to-image on backend) + signed URL for share image
 
-“404 problemas encontrados. Você é perfeito.”
+🔒 Segurança & Compliance (faltantes críticos)
 
-Gerada com vibração temática.
+ CORS allowlist e revisão de políticas
 
-⌨️ 6.5. Modo Terminal Oculto
+ CSP configurada (prod + staging)
 
-Ao apertar ~:
+ CSRF tokens para rotas mutáveis (se fora NextAuth)
 
-interface vira um terminal
+ Sanitização completa (user input mostrado no canvas/DOM)
 
-comandos customizados:
+ Env validation (Zod) consolidada e fail-fast
 
-play random
+ Audit logs básicos (login fails, score fails, canvas crashes)
 
-stats me
+ Session renewal strategy (silent refresh / warning)
 
-theme neon
+ SRI para recursos externos (fonts)
 
-summon bug (spawn de sprite bug pixelizado na tela)
+ HSTS / Security headers completos
 
-🧩 6.6. Eventos Semanais
+ Dependency audit & fix high CVEs
 
-“Semana do Bug”: tema hacker + partículas vermelhas
+📈 Observability & Ops (faltantes)
 
-“Semana Minimal”: tudo fica terminal
+ Metrics
 
-“Semana Pixel”: jogos com filtro via canvas
+request latency, errors, FPS incidents count, particle budget breaches
 
-🛡️ 6.7. Modo Dev Sênior
+ Error tracking
 
-Depois do usuário bater X horas jogando:
+Sentry setup for frontend + backend (canvas errors, crashes)
 
-interface fica mais “segura”, cinza
+ Log retention & rotation
 
-surgem piadas internas:
+ Health checks & uptime alerts
 
-“Não faça deploy às 18h.”
+ Backups for DB & critical data
 
-“Você realmente quer apagar branch?”
+ Rate-limit monitoring (Upstash dashboard + alerts)
 
-Simulador de PRs caóticos
+♿ Acessibilidade & Internacionalização (faltantes)
 
-🧪 6.8. Laboratório Experimental
+ WCAG checks basics: color contrast, keyboard nav, aria labels
 
-Aba com protótipos:
+ Captions/transcripts for audio messages
 
-jogos incompletos
+ i18n framework + strings file (pt-BR first, en-US)
 
-ideias WIP
+ Screen-reader friendly fallback for canvas interactions
 
-mecânicas pra testar com usuários reais
+🧪 QA / Testing (faltantes)
 
-sistema de votação interna
+ E2E tests (Playwright) para flows críticos (login, save score, chat)
 
-🚀 6.9. Painel Hacker Real-Time
+ Unit tests para validation (Zod) + score validation
 
-Mostra:
+ Load testing (k6) on score endpoints + /api/users/recent
 
-quantos usuários online
+ Security scanning in CI (Snyk/npm audit)
 
-quais jogos ativos
+ Visual regression checks for no-scroll UI across resolutions
 
-streams de log fake (decorativo):
+🔁 Infra / CI-CD (faltantes)
 
-[INFO] Bug localizado
+ CI pipeline (lint, test, build, audit)
 
-[WARN] Commit suspeito detectado
+ Staging environment mirror of prod
 
-É visual, divertido e dá vida ao portal.
+ Feature flags (LaunchDarkly / simple DB flags)
 
-🧲 6.10. Sistema de Cartões de Score Cinematográficos
+ Deploy rollback plan + DB migration backups
 
-Cada score vira uma imagem:
+💸 Monetização / Payments (se for futuro)
 
-fractais
+ Stripe setup safe (if needed)
 
-glitch
+ Free tier / paid perks design (emotes, skins)
 
-neon
+ Receipts & tax compliance
 
-dados do run
+📣 Social / Virality (faltantes)
 
-animação curta
+ Share image generator (server-side) for OG + X share (PNG)
 
-Ajuda no compartilhamento no X/Twitter (como você planejou).
+ Deep-linking to share specific runs
 
+ Prebuilt tweet templates with hashtags and @shuktv
 
-Implementar possibilidade de enviar audio no chat ou em qualquer lugar do site que tenha comentários. 
+🧾 Doc & Product (faltantes)
 
+ README / developer onboarding (how to run, envs, migrations)
 
-Extravase - Sessão para falar mal dos colegas ou do chefe (Sempre anônimo pra qualquer um, tomar cuidado na hora de resgatar para não trazer nada que atrele ao usuário, o site é pra desenvolvedores, o cuidado precisa ser redobrado)
+ API docs (OpenAPI) for /api/* endpoints
 
+ Moderation guide for community managers
+
+ Roadmap public page (short bullets + status)
+
+✅ Prioridade sugerida (p/ backlog)
+
+Crítico (implementar antes do pentest / launch):
+CORS, CSP, CSRF, sanitização, env validation, SRI, HSTS, audit logs, session renewal, dependency fixes.
+
+Alto: Chat moderation infra, score fail-safe, multi-tab protection, Upstash limits monitoring, observability (Sentry), load tests.
+
+Médio: Audio moderation/transcription, drops infra, features do xadrez/multiplayer, cartoes share server-side.
+
+Baixo: Gamification extras, secret rooms, advanced analytics, monetização.

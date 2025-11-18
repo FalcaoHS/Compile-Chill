@@ -1,4 +1,4 @@
-import { NextRequest } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { withAuth } from "@/lib/api-auth"
 import { handleApiError } from "@/lib/api-errors"
@@ -60,7 +60,7 @@ export const GET = withAuth(async (request: NextRequest, user) => {
     })
 
     if (!account) {
-      return Response.json(
+      return NextResponse.json(
         {
           error: {
             code: "no_account",
@@ -72,7 +72,7 @@ export const GET = withAuth(async (request: NextRequest, user) => {
     }
 
     if (!account.access_token) {
-      return Response.json(
+      return NextResponse.json(
         {
           error: {
             code: "no_token",
@@ -109,7 +109,7 @@ export const GET = withAuth(async (request: NextRequest, user) => {
       
       // Handle rate limiting
       if (response.status === 429) {
-        return Response.json(
+        return NextResponse.json(
           {
             error: {
               code: "rate_limit",
@@ -122,7 +122,7 @@ export const GET = withAuth(async (request: NextRequest, user) => {
 
       // Handle invalid/expired token
       if (response.status === 401 || response.status === 403) {
-        return Response.json(
+        return NextResponse.json(
           {
             error: {
               code: "invalid_token",
@@ -133,7 +133,7 @@ export const GET = withAuth(async (request: NextRequest, user) => {
         )
       }
 
-      return Response.json(
+      return NextResponse.json(
         {
           error: {
             code: "twitter_api_error",
@@ -148,7 +148,7 @@ export const GET = withAuth(async (request: NextRequest, user) => {
     const data: TwitterResponse = await response.json()
 
     if (data.errors && data.errors.length > 0) {
-      return Response.json(
+      return NextResponse.json(
         {
           error: {
             code: "twitter_api_error",
@@ -171,7 +171,7 @@ export const GET = withAuth(async (request: NextRequest, user) => {
       },
     }))
 
-    return Response.json(
+    return NextResponse.json(
       {
         tweets,
         count: data.meta?.result_count || 0,

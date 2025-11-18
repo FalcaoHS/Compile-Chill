@@ -4,6 +4,9 @@ import { useEffect, useRef, useState, useCallback } from "react"
 import { useThemeStore } from "@/lib/theme-store"
 import { useMobileModeStore } from "@/lib/performance/mobile-mode"
 import { useFPSGuardianStore } from "@/lib/performance/fps-guardian"
+import { useParticleBudgetStore, allocateParticles, deallocateParticles } from "@/lib/performance/particle-budget"
+import { useMultiTabStore, shouldPauseAnimations } from "@/lib/performance/multi-tab"
+import { handleCanvasCrash, getRetryDelay, resetCrashState, isInFallback, forceReset } from "@/lib/performance/canvas-crash-resilience"
 import Matter from "matter-js"
 import {
   createPhysicsEngine,
@@ -50,6 +53,8 @@ interface StaticOrb {
 interface DevOrbsCanvasProps {
   users: UserData[]
   onShakeReady?: (handleShake: () => void) => void
+  onScoreChange?: (score: number) => void
+  onTest99Baskets?: () => void
 }
 
 const MAX_ORBS = 10
@@ -63,7 +68,7 @@ const SPAWN_INTERVAL_MS = 1000 // 1 second
  * Renders physics-based Dev Orbs on canvas with Matter.js integration.
  * Canvas fits viewport height minus header height (no scroll).
  */
-export function DevOrbsCanvas({ users, onShakeReady }: DevOrbsCanvasProps) {
+export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Baskets }: DevOrbsCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const engineRef = useRef<Matter.Engine | null>(null)
   const worldRef = useRef<Matter.World | null>(null)
@@ -152,6 +157,9 @@ export function DevOrbsCanvas({ users, onShakeReady }: DevOrbsCanvasProps) {
   const isFPSLevel0 = fpsLevel === 0 // FPS ≥ 50: everything enabled
   const isFPSLevel1 = fpsLevel === 1 // 40 ≤ FPS < 50: smooth degradation
   const isFPSLevel2 = fpsLevel === 2 // FPS < 40: aggressive fallback
+  
+  // Multi-tab protection: check if we should pause
+  const shouldPause = useMultiTabStore((state) => state.shouldPause())
 
   // Ensure component is mounted (client-side only)
   useEffect(() => {
@@ -397,6 +405,26 @@ export function DevOrbsCanvas({ users, onShakeReady }: DevOrbsCanvasProps) {
   }, [isMounted])
 
 
+  // Listen for test 99 baskets event
+  useEffect(() => {
+    const handleTest99 = () => {
+      if (onTest99Baskets) {
+        onTest99Baskets()
+      } else {
+        // Force score to 98, then increment to 99 to trigger easter egg
+        const prevScore = scoreRef.current
+        scoreRef.current = 98
+        // Trigger increment to 99
+        if (onScoreChange) {
+          onScoreChange(99)
+        }
+      }
+    }
+
+    window.addEventListener('trigger99Baskets', handleTest99)
+    return () => window.removeEventListener('trigger99Baskets', handleTest99)
+  }, [onTest99Baskets, onScoreChange])
+
   // Initialize physics engine (runs once after mount)
   useEffect(() => {
     if (!isMounted) return
@@ -535,7 +563,21 @@ export function DevOrbsCanvas({ users, onShakeReady }: DevOrbsCanvasProps) {
             }
             
             // Increment score
+            const prevScore = scoreRef.current
             scoreRef.current += 1
+            
+            // Check for 99 baskets easter egg
+            if (prevScore < 99 && scoreRef.current === 99) {
+              if (typeof window !== "undefined") {
+                const eggUnlocked = localStorage.getItem('compilechill_egg_99_v1')
+                if (!eggUnlocked) {
+                  // Trigger easter egg
+                  if (onScoreChange) {
+                    onScoreChange(99)
+                  }
+                }
+              }
+            }
             
             // Update best score
             if (scoreRef.current > bestScoreRef.current) {
@@ -544,6 +586,11 @@ export function DevOrbsCanvas({ users, onShakeReady }: DevOrbsCanvasProps) {
               if (typeof window !== "undefined") {
                 localStorage.setItem("dev-orbs-best-score", bestScoreRef.current.toString())
               }
+            }
+            
+            // Notify score change
+            if (onScoreChange) {
+              onScoreChange(scoreRef.current)
             }
             
             // Trigger visual effects on score
@@ -1456,24 +1503,45 @@ export function DevOrbsCanvas({ users, onShakeReady }: DevOrbsCanvasProps) {
   const createFireworks = useCallback((x: number, y: number, colors: ReturnType<typeof getThemeColors>) => {
     if (!colors) return
     
-    // FPS Guardian Level 1: Limit fireworks to 3 simultaneous
-    const maxFireworks = isFPSLevel1 ? 3 : 6
+    // Firework limits: 6 desktop, 2 mobile, 3 at FPS Level 1
+    const isMobile = useMobileModeStore.getState().isMobile
+    const baseMaxFireworks = isMobile ? 2 : 6
+    const maxFireworks = isFPSLevel1 ? 3 : baseMaxFireworks
     if (fireworksRef.current.length > maxFireworks * 30) {
       // Remove oldest fireworks (fade out gradually)
       const oldestCount = Math.floor(fireworksRef.current.length * 0.3)
+      const removedParticles = fireworksRef.current.slice(0, oldestCount)
       fireworksRef.current = fireworksRef.current.slice(oldestCount)
+      // Deallocate removed particles
+      deallocateParticles('fireworks', removedParticles.length)
     }
     
     // FPS Guardian Level 1: Reduce particle count by half
     const baseParticleCount = 30
     const particleCount = isFPSLevel1 ? Math.floor(baseParticleCount / 2) : baseParticleCount
+    
+    // Check particle budget before creating
+    if (!allocateParticles('fireworks', particleCount)) {
+      // Budget exceeded, reduce particle count
+      const available = useParticleBudgetStore.getState().getAvailable('fireworks')
+      if (available <= 0) {
+        return // No budget available
+      }
+      const adjustedCount = Math.min(particleCount, available)
+      if (!allocateParticles('fireworks', adjustedCount)) {
+        return // Still can't allocate
+      }
+    }
+    
     const particles: FireworkParticle[] = []
     
     // Create particles in all directions
     for (let i = 0; i < particleCount; i++) {
       const angle = (Math.PI * 2 * i) / particleCount + (Math.random() - 0.5) * 0.5
       const speed = 2 + Math.random() * 4
-      const life = 40 + Math.random() * 20 // 40-60 frames
+      // Particle TTL: 1200-2000ms (1.2-2s) for better performance
+      const lifeMs = 1200 + Math.random() * 800 // 1200-2000ms
+      const life = Math.floor(lifeMs / 16.67) // Convert to frames (assuming 60fps)
       
       particles.push({
         x,
@@ -1510,6 +1578,7 @@ export function DevOrbsCanvas({ users, onShakeReady }: DevOrbsCanvasProps) {
       : fireworksRef.current
     
     // Update and render each particle
+    let deadParticleCount = 0
     fireworksRef.current = fireworksRef.current.filter((particle) => {
       // Update position
       particle.x += particle.vx
@@ -1522,6 +1591,7 @@ export function DevOrbsCanvas({ users, onShakeReady }: DevOrbsCanvasProps) {
       particle.life -= 1
       
       if (particle.life <= 0) {
+        deadParticleCount++
         return false // Remove dead particles
       }
       
@@ -1548,6 +1618,11 @@ export function DevOrbsCanvas({ users, onShakeReady }: DevOrbsCanvasProps) {
       
       return true // Keep alive particles
     })
+    
+    // Deallocate dead particles from budget
+    if (deadParticleCount > 0) {
+      deallocateParticles('fireworks', deadParticleCount)
+    }
     
     ctx.restore()
   }, [isFPSLevel1, isFPSLevel2])
@@ -1840,8 +1915,37 @@ export function DevOrbsCanvas({ users, onShakeReady }: DevOrbsCanvasProps) {
 
     const render = (currentTime: number) => {
       if (!engineRef.current || !ctx) return
+      
+      // Multi-tab protection: pause if we're not the owner
+      if (shouldPause) {
+        animationFrameId = requestAnimationFrame(render)
+        return
+      }
 
-      // Calculate FPS
+      // Canvas crash resilience: wrap entire render in try/catch
+      try {
+        // Reset crash state on successful render
+        if (currentTime - lastFrameTimeRef.current > 100) {
+          resetCrashState()
+        }
+
+        // Show error message if in fallback mode
+        if (isInFallback()) {
+          const colors = getThemeColors()
+          if (colors && ctx) {
+            ctx.fillStyle = colors.bg
+            ctx.fillRect(0, 0, canvas.width, canvas.height)
+            ctx.fillStyle = colors.text
+            ctx.font = '16px monospace'
+            ctx.textAlign = 'center'
+            ctx.textBaseline = 'middle'
+            ctx.fillText('Visual temporariamente indisponível, reiniciando…', canvas.width / 2, canvas.height / 2)
+          }
+          animationFrameId = requestAnimationFrame(render)
+          return
+        }
+
+        // Calculate FPS
       const deltaTime = currentTime - lastFrameTimeRef.current
       if (deltaTime > 0) {
         const fps = 1000 / deltaTime
@@ -1889,7 +1993,22 @@ export function DevOrbsCanvas({ users, onShakeReady }: DevOrbsCanvasProps) {
 
       // Update physics (only if not in lite mode and not Level 2)
       if (engineRef.current && !isFPSLevel2) {
-        updatePhysics(engineRef.current)
+        try {
+          updatePhysics(engineRef.current)
+        } catch (error) {
+          console.error('Physics update error:', error)
+          // Handle physics crash
+          if (handleCanvasCrash(error as Error, 'DevOrbsCanvas-physics')) {
+            // Retry after delay
+            setTimeout(() => {
+              animationFrameId = requestAnimationFrame(render)
+            }, getRetryDelay())
+            return
+          } else {
+            // Fallback mode - stop physics
+            return
+          }
+        }
       }
 
       // Debug: log orbs count changes (to see when/why they "disappear")
@@ -2005,7 +2124,25 @@ export function DevOrbsCanvas({ users, onShakeReady }: DevOrbsCanvasProps) {
         }
       }
 
-      animationFrameId = requestAnimationFrame(render)
+        animationFrameId = requestAnimationFrame(render)
+      } catch (error) {
+        console.error('Canvas render error:', error)
+        // Handle canvas crash
+        if (handleCanvasCrash(error as Error, 'DevOrbsCanvas-render')) {
+          // Retry after delay
+          setTimeout(() => {
+            animationFrameId = requestAnimationFrame(render)
+          }, getRetryDelay())
+        } else {
+          // Fallback mode - render static background only
+          const colors = getThemeColors()
+          if (colors && ctx) {
+            ctx.fillStyle = colors.bg
+            ctx.fillRect(0, 0, canvas.width, canvas.height)
+          }
+        }
+        return
+      }
     }
 
     animationFrameId = requestAnimationFrame(render)
@@ -2015,7 +2152,7 @@ export function DevOrbsCanvas({ users, onShakeReady }: DevOrbsCanvasProps) {
         cancelAnimationFrame(animationFrameId)
       }
     }
-  }, [canvasSize, themeId, renderOrb, isVisible, drawBackboard, drawRim, drawBackboardSideSupports, drawFloor, drawCourt, renderFireworks, createFireworks, isLiteMode, isFPSLevel1, isFPSLevel2, fpsLevel])
+  }, [canvasSize, themeId, renderOrb, isVisible, drawBackboard, drawRim, drawBackboardSideSupports, drawFloor, drawCourt, renderFireworks, createFireworks, isLiteMode, isFPSLevel1, isFPSLevel2, fpsLevel, shouldPause])
 
   // Apply theme to canvas
   useEffect(() => {

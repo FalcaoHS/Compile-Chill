@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
+import { useSession } from 'next-auth/react'
 import { MazeCanvas } from '@/components/games/debug-maze/MazeCanvas'
 import { ScoreDisplay } from '@/components/games/debug-maze/ScoreDisplay'
 import { GameOverModal } from '@/components/games/debug-maze/GameOverModal'
@@ -14,15 +15,18 @@ import {
   resetGame,
   loadMazeByLevel,
   loadDefaultMaze,
+  getScoreData,
   type Direction,
 } from '@/lib/games/debug-maze/game-logic'
 
 const UPDATE_INTERVAL = 16 // ~60 FPS
 
 export default function DebugMazePage() {
+  const { data: session } = useSession()
   const [gameState, setGameState] = useState<GameState | null>(null)
   const [showHelpPanel, setShowHelpPanel] = useState(true)
   const [showGameOverModal, setShowGameOverModal] = useState(false)
+  const [scoreSaved, setScoreSaved] = useState(false)
   const gameStateRef = useRef<GameState | null>(null)
   const lastSwipeRef = useRef<{ x: number; y: number; time: number } | null>(null)
 
@@ -186,6 +190,7 @@ export default function DebugMazePage() {
       setGameState(newState)
       gameStateRef.current = newState
       setShowGameOverModal(false)
+      setScoreSaved(false) // Reset for new game
     }
   }, [gameState])
 
@@ -201,11 +206,64 @@ export default function DebugMazePage() {
       setGameState(newState)
       gameStateRef.current = newState
       setShowGameOverModal(false)
+      setScoreSaved(false) // Reset for new level
     } else {
       // No more levels, restart current
       handlePlayAgain()
     }
   }, [gameState, handlePlayAgain])
+
+  // Save score to API when game completes
+  useEffect(() => {
+    if (gameState?.gameCompleted && !scoreSaved && session?.user && gameState) {
+      setScoreSaved(true)
+      
+      const saveScore = async () => {
+        try {
+          const scoreData = getScoreData(gameState)
+          
+          // Convert duration from milliseconds to seconds
+          const durationInSeconds = Math.floor(scoreData.duration / 1000)
+          
+          const response = await fetch('/api/scores', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            credentials: 'include',
+            body: JSON.stringify({
+              gameId: 'debug-maze',
+              score: scoreData.score,
+              duration: durationInSeconds,
+              moves: scoreData.moves,
+              level: scoreData.level,
+              metadata: {
+                level: scoreData.level,
+                moves: scoreData.moves,
+                duration: scoreData.duration,
+              },
+            }),
+          })
+          
+          if (!response.ok) {
+            if (response.status === 401) {
+              console.warn('[score-submission] User not authenticated, score not saved to server')
+            } else {
+              const error = await response.json()
+              console.error('[score-submission] Failed to save score:', error)
+            }
+          } else {
+            const result = await response.json().catch(() => ({}))
+            console.log('[score-submission] Score saved successfully!', result)
+          }
+        } catch (error) {
+          console.error('Error saving score:', error)
+        }
+      }
+      
+      saveScore()
+    }
+  }, [gameState?.gameCompleted, scoreSaved, session, gameState])
 
   // Canvas update callback
   const handleCanvasUpdate = useCallback((deltaTime: number) => {

@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef, memo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
+import { useSession } from 'next-auth/react'
 import MiningButton from '@/components/games/crypto-miner/MiningButton'
 import StatsDisplay from '@/components/games/crypto-miner/StatsDisplay'
 import UpgradesPanel from '@/components/games/crypto-miner/UpgradesPanel'
@@ -29,10 +30,13 @@ const MAX_CLICK_RATE = 20 // clicks per second
 const CLICK_WINDOW = 1000 // 1 second window
 
 export default function CryptoMinerPage() {
+  const { data: session } = useSession()
   const [gameState, setGameState] = useState<GameState | null>(null)
   const [showOfflineModal, setShowOfflineModal] = useState(false)
   const [offlineEarnings, setOfflineEarnings] = useState({ coins: 0, timeAway: 0 })
   const [showHelpPanel, setShowHelpPanel] = useState(true)
+  const lastScoreSubmissionRef = useRef<number>(0)
+  const SCORE_SUBMISSION_INTERVAL = 60000 // Submit score every 60 seconds (1 minute)
   
   // Click rate limiting
   const clickTimestamps = useRef<number[]>([])
@@ -101,6 +105,73 @@ export default function CryptoMinerPage() {
 
     return () => clearInterval(interval)
   }, [gameState])
+
+  // Submit score periodically (for idle games, submit based on milestones)
+  useEffect(() => {
+    if (!session?.user) return
+
+    const interval = setInterval(() => {
+      const now = Date.now()
+      const timeSinceLastSubmission = now - lastScoreSubmissionRef.current
+
+      // Submit score every minute if coins > 0
+      if (timeSinceLastSubmission >= SCORE_SUBMISSION_INTERVAL && gameStateRef.current && gameStateRef.current.coins > 0) {
+        lastScoreSubmissionRef.current = now
+
+        const submitScore = async () => {
+          try {
+            const currentState = gameStateRef.current
+            if (!currentState) return
+
+            // Use coins as score (idle games don't have traditional "game over")
+            const score = Math.floor(currentState.coins)
+            
+            // Calculate duration from last save time
+            const duration = Math.floor((now - currentState.lastSaveTime) / 1000) // in seconds
+
+            const response = await fetch('/api/scores', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              credentials: 'include',
+              body: JSON.stringify({
+                gameId: 'crypto-miner-game',
+                score,
+                duration,
+                moves: currentState.totalClicks,
+                metadata: {
+                  coins: currentState.coins,
+                  coinsPerSecond: calculateCoinsPerSecond(currentState),
+                  coinsPerClick: currentState.coinsPerClick,
+                  totalClicks: currentState.totalClicks,
+                  minersOwned: currentState.miners,
+                  clickUpgradeLevel: currentState.clickUpgradeLevel,
+                  multipliersOwned: currentState.multipliers.length,
+                },
+              }),
+            })
+
+            if (!response.ok) {
+              if (response.status === 401) {
+                console.warn('[score-submission] User not authenticated, score not saved')
+              } else {
+                console.error('[score-submission] Failed to save score')
+              }
+            } else {
+              console.log('[score-submission] Score saved successfully')
+            }
+          } catch (error) {
+            console.error('Error submitting score:', error)
+          }
+        }
+
+        submitScore()
+      }
+    }, SCORE_SUBMISSION_INTERVAL)
+
+    return () => clearInterval(interval)
+  }, [session])
 
   // Save on window unload
   useEffect(() => {

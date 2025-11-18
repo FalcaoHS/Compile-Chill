@@ -1,4 +1,4 @@
-import { NextRequest } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { handleApiError } from "@/lib/api-errors"
 
@@ -92,7 +92,7 @@ export async function GET(request: NextRequest) {
     // Check cache
     const now = Date.now()
     if (cache && (now - cache.timestamp) < CACHE_TTL_MS) {
-      return Response.json(
+      return NextResponse.json(
         {
           users: cache.data,
         },

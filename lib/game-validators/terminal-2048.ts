@@ -142,7 +142,7 @@ function validateFull(
   // But we validate board structure and score calculation
 
   // Validate impossible scores (complete tier only)
-  if (tier === "complete") {
+  if (tier === "complete" && calculatedScore !== undefined) {
     validateImpossibleScores(submittedScore, moveHistory.length, calculatedScore, errors)
   }
 

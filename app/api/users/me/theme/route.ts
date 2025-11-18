@@ -1,4 +1,4 @@
-import { NextRequest } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { themeUpdateSchema } from "@/lib/validations/theme"
 import { validate } from "@/lib/validations/validate"
@@ -22,7 +22,7 @@ export const GET = withAuth(async (request: NextRequest, user) => {
       select: { theme: true },
     })
 
-    return Response.json(
+    return NextResponse.json(
       { theme: dbUser?.theme || null },
       { status: 200 }
     )
@@ -51,7 +51,7 @@ export const PATCH = withAuthAndRateLimit(
         data: { theme },
       })
 
-      return Response.json(
+      return NextResponse.json(
         { theme: updatedUser.theme },
         { status: 200 }
       )

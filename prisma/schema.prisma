@@ -16,6 +16,7 @@ model User {
   name      String
   avatar    String?
   xId       String   @unique
+  xUsername String? // X/Twitter username (slug) - e.g., "shuktv"
   // Theme preference: 'cyber', 'pixel', 'neon', 'terminal', or 'blueprint'
   theme            String?
   // Privacy setting: controls whether game history is visible on public profile

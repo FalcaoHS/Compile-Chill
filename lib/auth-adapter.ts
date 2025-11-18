@@ -12,28 +12,52 @@ export const authAdapter: Adapter = {
   async createUser(user) {
     // If user has xId (from signIn callback), use it
     const xId = (user as any).xId
+    const xUsername = (user as any).xUsername
     
     if (xId) {
       // createUser should only create NEW users
       // If user exists, NextAuth will use getUserByAccount instead
       // So we just create the user with xId
-      const newUser = await prisma.user.create({
-        data: {
-          xId,
-          name: user.name || "",
-          avatar: user.image || null,
-        },
-      })
-      
-      // Return in the format NextAuth expects
-      // ⚠️ ATENÇÃO: AVATAR - Sempre retornar image no createUser
-      return {
-        id: newUser.id.toString(),
-        name: newUser.name,
-        email: null,
-        emailVerified: null,
-        image: newUser.avatar || null, // ⚠️ CRÍTICO: Não remover este campo!
-      } as any
+      try {
+        const newUser = await prisma.user.create({
+          data: {
+            xId,
+            name: user.name || "",
+            avatar: user.image || null,
+            ...(xUsername ? { xUsername } : {}), // Only include if provided and field exists
+          },
+        })
+        
+        // Return in the format NextAuth expects
+        // ⚠️ ATENÇÃO: AVATAR - Sempre retornar image no createUser
+        return {
+          id: newUser.id.toString(),
+          name: newUser.name,
+          email: null,
+          emailVerified: null,
+          image: newUser.avatar || null, // ⚠️ CRÍTICO: Não remover este campo!
+        } as any
+      } catch (error) {
+        // If error is about missing xUsername field, retry without it
+        if (error instanceof Error && error.message.includes('xUsername')) {
+          console.warn("⚠️ xUsername field not found. Creating user without it.")
+          const newUser = await prisma.user.create({
+            data: {
+              xId,
+              name: user.name || "",
+              avatar: user.image || null,
+            },
+          })
+          return {
+            id: newUser.id.toString(),
+            name: newUser.name,
+            email: null,
+            emailVerified: null,
+            image: newUser.avatar || null,
+          } as any
+        }
+        throw error // Re-throw if it's a different error
+      }
     }
     
     // Fallback to default adapter behavior if no xId

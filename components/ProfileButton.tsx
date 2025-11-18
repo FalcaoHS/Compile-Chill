@@ -95,17 +95,16 @@ export function ProfileButton({ session, className = "" }: ProfileButtonProps) {
             alt={session.user.name || "Avatar"}
             width={32}
             height={32}
-            className="w-8 h-8 rounded-full"
+            className="w-8 h-8 rounded"
             unoptimized
           />
         ) : (
-          <div className="w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center">
+          <div className="w-8 h-8 rounded bg-gray-600 flex items-center justify-center">
             <span className="text-white text-xs">
               {session.user?.name?.[0]?.toUpperCase() || "U"}
             </span>
           </div>
         )}
-        <span className="hidden sm:inline">Perfil</span>
         <svg
           className={`w-4 h-4 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
           fill="none"

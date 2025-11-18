@@ -131,7 +131,7 @@ export default function RankingPage() {
   const currentUserId = session?.user?.id ? parseInt(session.user.id) : undefined
 
   return (
-    <div className="min-h-screen bg-page">
+    <div className="min-h-screen bg-page pt-24">
       <Header />
       
       <main className="max-w-6xl mx-auto px-4 py-8">

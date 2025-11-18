@@ -58,8 +58,8 @@ export function CodeBlock({
   return (
     <motion.div
       draggable
-      onDragStart={handleDragStart}
-      onDragEnd={handleDragEnd}
+      onDragStart={handleDragStart as any}
+      onDragEnd={handleDragEnd as any}
       onClick={handleTap}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}

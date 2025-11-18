@@ -1,6 +1,7 @@
 import { ScoreSubmissionInput } from "@/lib/validations/score"
 import { GameValidator, ValidationResult, ValidationContext } from "./types"
 import { terminal2048Validator } from "./terminal-2048"
+import { devFifteenHexValidator } from "./dev-fifteen-hex"
 
 /**
  * Game validators registry
@@ -10,6 +11,7 @@ import { terminal2048Validator } from "./terminal-2048"
  */
 const validators: Record<string, GameValidator> = {
   "terminal-2048": terminal2048Validator,
+  "dev-fifteen-hex": devFifteenHexValidator,
 }
 
 /**

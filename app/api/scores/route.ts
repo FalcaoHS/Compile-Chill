@@ -68,7 +68,7 @@ export const POST = withAuthAndRateLimit(
         return newScore
       })
 
-      return Response.json(
+      return NextResponse.json(
         {
           id: result.id,
           gameId: result.gameId,

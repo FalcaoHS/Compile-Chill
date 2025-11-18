@@ -166,7 +166,7 @@ export default function ByteMatchPage() {
     : calculateScore(gameState.moves)
 
   return (
-    <div className="h-screen flex flex-col bg-page overflow-hidden">
+    <div className="h-screen flex flex-col bg-page overflow-hidden pt-16">
       {/* Header */}
       <header className="border-b border-border bg-page-secondary flex-shrink-0 p-4">
         <div className="flex items-center justify-between max-w-7xl mx-auto">

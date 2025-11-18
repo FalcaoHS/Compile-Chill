@@ -27,7 +27,7 @@ export function validate<T>(
 
   if (!result.success) {
     // Extract field-specific errors from Zod's error.issues array
-    const details = result.error.errors.map((issue) => ({
+    const details = result.error.issues.map((issue) => ({
       path: issue.path.join("."),
       message: issue.message,
       code: issue.code,
@@ -58,7 +58,7 @@ export function validateQuery<T>(
   const result = schema.safeParse(params)
 
   if (!result.success) {
-    const details = result.error.errors.map((issue) => ({
+    const details = result.error.issues.map((issue) => ({
       path: issue.path.join("."),
       message: issue.message,
       code: issue.code,

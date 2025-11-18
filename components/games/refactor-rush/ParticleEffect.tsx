@@ -15,7 +15,7 @@ export function ParticleEffect({ config, onComplete }: ParticleEffectProps) {
   const variants = getParticleVariants(config)
 
   const renderParticle = () => {
-    const { shape, color, size, type } = particleConfig
+    const { shape, color, size } = particleConfig
 
     if (shape === 'char' && config.theme === 'terminal-minimal') {
       return (

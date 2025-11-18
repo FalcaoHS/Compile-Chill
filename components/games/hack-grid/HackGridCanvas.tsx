@@ -643,7 +643,6 @@ export function HackGridCanvas({
         const draggedId = draggedNodeRef.current
         draggedNodeRef.current = null
         dragStartPosRef.current = null
-        invalidConnectionRef.current = false
         
         // Call drag end with target node ID (or empty string if no target)
         if (targetNode && targetNode.id !== draggedId) {

@@ -23,6 +23,7 @@
   },
   "devDependencies": {
     "@prisma/client": "^6.19.0",
+    "@types/matter-js": "^0.20.2",
     "@types/node": "^20.0.0",
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",

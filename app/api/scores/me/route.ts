@@ -1,4 +1,4 @@
-import { NextRequest } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { getGame } from "@/lib/games"
 import { withAuth } from "@/lib/api-auth"
@@ -52,7 +52,7 @@ export const GET = withAuth(async (request: NextRequest, user) => {
       },
     })
 
-    return Response.json(
+      return NextResponse.json(
       {
         scores: scores.map((score) => ({
           id: score.id,

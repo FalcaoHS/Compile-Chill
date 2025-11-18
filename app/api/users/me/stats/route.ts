@@ -1,4 +1,4 @@
-import { NextRequest } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { withAuth } from "@/lib/api-auth"
 import { handleApiError } from "@/lib/api-errors"
@@ -121,7 +121,7 @@ export const GET = withAuth(async (request: NextRequest, user) => {
       ? Math.max(...scores.map((s) => s.score))
       : 0
 
-    return Response.json(
+    return NextResponse.json(
       {
         stats: {
           totalGames,

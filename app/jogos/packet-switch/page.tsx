@@ -197,7 +197,7 @@ export default function PacketSwitchPage() {
   const hasNextLevel = getNextLevel(gameState.currentLevel) !== null
 
   return (
-    <div className="h-screen flex flex-col bg-page overflow-hidden">
+    <div className="h-screen flex flex-col bg-page overflow-hidden pt-16">
       {/* Header */}
       <div className="flex-shrink-0 p-2 sm:p-4 border-b border-border bg-page-secondary">
         <div className="max-w-7xl mx-auto flex items-center justify-between">

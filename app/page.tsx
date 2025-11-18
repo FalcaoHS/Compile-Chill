@@ -12,6 +12,11 @@ import { DropsCanvas } from "@/components/DropsCanvas"
 import { EmoteBubble } from "@/components/EmoteBubble"
 import { HackerPanel } from "@/components/hacker-panel/HackerPanel"
 import { getEmotesByRarity, getEmoteById } from "@/lib/canvas/emotes/emote-loader"
+import { useSafeScore } from "@/hooks/useSafeScore"
+import { startSessionMonitoring, stopSessionMonitoring } from "@/lib/performance/session-stability"
+import { CanvasRestartButton } from "@/components/CanvasRestartButton"
+import { Test99BasketsButton } from "@/components/Test99BasketsButton"
+import { DevMaster99Egg } from "@/components/DevMaster99Egg"
 
 interface UserData {
   userId: number
@@ -29,6 +34,8 @@ export default function Home() {
   const [usersLoading, setUsersLoading] = useState(true)
   const [usersError, setUsersError] = useState<string | null>(null)
   const [showHackerPanel, setShowHackerPanel] = useState(false)
+  const [show99Egg, setShow99Egg] = useState(false)
+  const { processPendingScores } = useSafeScore()
 
   // Fetch recent users
   useEffect(() => {
@@ -65,8 +72,27 @@ export default function Home() {
     return () => clearInterval(interval)
   }, [])
 
+  // Process pending scores on load (if authenticated)
+  useEffect(() => {
+    if (session?.user) {
+      processPendingScores()
+    }
+  }, [session, processPendingScores])
+
+  // Session stability monitoring
+  useEffect(() => {
+    if (session) {
+      startSessionMonitoring(session)
+    }
+    
+    return () => {
+      stopSessionMonitoring()
+    }
+  }, [session])
+
   return (
     <main className="min-h-screen bg-page">
+      <CanvasRestartButton />
       {/* Physics Area - Replaces Hero Section */}
       <div className="w-full relative" style={{ height: "calc(100vh - 96px)", minHeight: "400px" }}>
         {/* DevOrbs Canvas - Bottom layer */}
@@ -74,6 +100,30 @@ export default function Home() {
           users={users} 
           onShakeReady={(handleShake) => {
             handleShakeRef.current = handleShake
+          }}
+          onScoreChange={(score) => {
+            // Check if score reached 99
+            if (score === 99) {
+              if (typeof window !== 'undefined') {
+                const eggUnlocked = localStorage.getItem('compilechill_egg_99_v1')
+                if (!eggUnlocked) {
+                  // Save unlock
+                  localStorage.setItem('compilechill_egg_99_v1', JSON.stringify({
+                    unlockedAt: new Date().toISOString(),
+                    device: navigator.userAgent
+                  }))
+                  // Show easter egg
+                  setShow99Egg(true)
+                }
+              }
+            }
+          }}
+          onTest99Baskets={() => {
+            // Remove unlock flag for testing
+            if (typeof window !== 'undefined') {
+              localStorage.removeItem('compilechill_egg_99_v1')
+            }
+            setShow99Egg(true)
           }}
         />
         
@@ -113,6 +163,16 @@ export default function Home() {
           <span>{showHackerPanel ? 'HIDE' : 'TERMINAL'}</span>
           <span className="text-primary">]</span>
         </button>
+
+        {/* Test 99 Baskets Button - Hidden */}
+        {/* <Test99BasketsButton
+          onTrigger={() => {
+            if (typeof window !== 'undefined') {
+              localStorage.removeItem('compilechill_egg_99_v1')
+            }
+            setShow99Egg(true)
+          }}
+        /> */}
 
         {/* Hacker Panel - Overlay layer (highest z-index when visible) */}
         {showHackerPanel && (
@@ -267,6 +327,22 @@ export default function Home() {
           </div>
         </div>
       </div>
+
+      {/* 99 Baskets Easter Egg */}
+      {show99Egg && (
+        <DevMaster99Egg
+          onClose={() => {
+            setShow99Egg(false)
+            // Save unlock after closing
+            if (typeof window !== 'undefined') {
+              localStorage.setItem('compilechill_egg_99_v1', JSON.stringify({
+                unlockedAt: new Date().toISOString(),
+                device: navigator.userAgent
+              }))
+            }
+          }}
+        />
+      )}
     </main>
   );
 }

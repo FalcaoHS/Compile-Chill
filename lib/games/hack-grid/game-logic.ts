@@ -401,7 +401,7 @@ export function removeConnection(
   const updatedConnections = state.connections.filter((_, index) => index !== connectionIndex)
 
   // Update nodes state (check if they're still connected to other nodes)
-  const updatedNodes = state.nodes.map(node => {
+  const updatedNodes: Node[] = state.nodes.map(node => {
     if (node.id === fromId || node.id === toId) {
       // Check if node is still connected to any other node
       const stillConnected = updatedConnections.some(
@@ -409,7 +409,7 @@ export function removeConnection(
       )
       return {
         ...node,
-        state: stillConnected ? 'connected' : 'idle',
+        state: (stillConnected ? 'connected' : 'idle') as NodeState,
       }
     }
     return node
