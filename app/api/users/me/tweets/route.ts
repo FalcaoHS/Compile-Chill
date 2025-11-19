@@ -109,14 +109,28 @@ export const GET = withAuth(async (request: NextRequest, user) => {
       
       // Handle rate limiting
       if (response.status === 429) {
+        // Rate limit é por aplicação, não por usuário
+        // No plano Free do Twitter, o limite é bem restritivo
+        const retryAfter = response.headers.get("retry-after") || "15"
+        console.warn("⚠️ Rate limit atingido na API do Twitter:", {
+          retryAfter,
+          endpoint: twitterApiUrl,
+        })
+        
         return NextResponse.json(
           {
             error: {
               code: "rate_limit",
               message: "Limite de requisições da API do X atingido. Tente novamente mais tarde.",
+              retryAfter: parseInt(retryAfter),
             },
           },
-          { status: 429 }
+          { 
+            status: 429,
+            headers: {
+              "Retry-After": retryAfter,
+            },
+          }
         )
       }
 
@@ -182,4 +196,5 @@ export const GET = withAuth(async (request: NextRequest, user) => {
     return handleApiError(error, request)
   }
 })
+
 

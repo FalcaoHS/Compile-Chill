@@ -37,7 +37,7 @@ export const authConfig: NextAuthConfig = {
           
           // Extract X username (slug) from profile PRIMEIRO (precisa para fallback do name)
           // Twitter/X OAuth profile may have username in different fields
-          const xUsername = 
+          let xUsername = 
             profileData?.username ||
             profileData?.screen_name ||
             rawProfile?.screen_name || 
@@ -46,7 +46,7 @@ export const authConfig: NextAuthConfig = {
           
           // Extrair name de vários lugares possíveis
           // Se não vier name, usar xUsername como fallback (melhor que string vazia)
-          const name = 
+          let name = 
             profileData?.name || 
             rawProfile?.name || 
             user.name || 
@@ -54,7 +54,7 @@ export const authConfig: NextAuthConfig = {
             ""
           
           // Extrair avatar
-          const avatar = 
+          let avatar = 
             (typeof profileData?.profile_image_url_https === "string" 
               ? profileData.profile_image_url_https 
               : null) ||
@@ -63,6 +63,61 @@ export const authConfig: NextAuthConfig = {
               : null) || 
             (typeof user.image === "string" ? user.image : null) || 
             null
+
+          // Se não trouxer nome ou foto do OAuth, buscar via API do Twitter
+          // O plano Free do Twitter pode não retornar esses dados no callback
+          if ((!name || !avatar) && account.access_token && xId) {
+            try {
+              console.log("🔍 Buscando perfil completo via Twitter API...")
+              const twitterApiUrl = `https://api.twitter.com/2/users/${xId}`
+              const params = new URLSearchParams({
+                "user.fields": "name,username,profile_image_url,profile_image_url_https",
+              })
+
+              const apiResponse = await fetch(`${twitterApiUrl}?${params.toString()}`, {
+                headers: {
+                  Authorization: `Bearer ${account.access_token}`,
+                  "Content-Type": "application/json",
+                },
+              })
+
+              if (apiResponse.ok) {
+                const apiData: any = await apiResponse.json()
+                const apiUser = apiData?.data ?? apiData
+                
+                // Atualizar name se não tiver
+                if (!name && apiUser?.name) {
+                  name = apiUser.name
+                  console.log("✅ Nome obtido via API:", name)
+                }
+                
+                // Atualizar avatar se não tiver (priorizar HTTPS)
+                if (!avatar) {
+                  avatar = apiUser?.profile_image_url_https || apiUser?.profile_image_url || null
+                  if (avatar) {
+                    console.log("✅ Avatar obtido via API")
+                  }
+                }
+                
+                // Atualizar xUsername se não tiver
+                if (!xUsername && apiUser?.username) {
+                  xUsername = apiUser.username
+                  console.log("✅ Username obtido via API:", xUsername)
+                }
+              } else {
+                const errorData = await apiResponse.json().catch(() => ({}))
+                console.warn("⚠️ Erro ao buscar perfil via API:", {
+                  status: apiResponse.status,
+                  error: errorData,
+                })
+              }
+            } catch (apiError) {
+              console.warn("⚠️ Erro ao buscar perfil via API (não crítico):", {
+                message: apiError instanceof Error ? apiError.message : "Unknown error",
+              })
+              // Não bloquear login se a API falhar
+            }
+          }
 
           // Debug: Log profile structure para entender formato do X
           console.log("Profile structure:", {
