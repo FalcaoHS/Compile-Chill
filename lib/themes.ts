@@ -1,11 +1,11 @@
 /**
  * Theme configuration for Compile & Chill
  * 
- * Defines 8 unique visual themes with comprehensive design tokens.
+ * Defines 9 unique visual themes with comprehensive design tokens.
  * Each theme includes colors, typography, and effect variables.
  */
 
-export type ThemeId = 'analista-jr' | 'analista-sr' | 'cyber' | 'pixel' | 'neon' | 'terminal' | 'blueprint' | 'bruno-csharp'
+export type ThemeId = 'analista-jr' | 'analista-sr' | 'lofi-code' | 'cyber' | 'pixel' | 'neon' | 'terminal' | 'blueprint' | 'bruno-csharp'
 
 export interface Theme {
   name: string
@@ -55,6 +55,59 @@ export const THEMES: Record<ThemeId, Theme> = {
       '--particle-color-1': '#ff6b6b',
       '--particle-color-2': '#4ecdc4',
       '--particle-color-3': '#f9ca24',
+    },
+  },
+  'lofi-code': {
+    name: 'Lofi Code',
+    vars: {
+      // Colors - Tons pastel suaves estilo lofi hip hop (warm & cozy)
+      '--color-bg': '#2b3a4a', // Azul acinzentado (janela ao entardecer)
+      '--color-bg-secondary': '#34495e', // Azul ardósia
+      '--color-primary': '#f39c6b', // Laranja pastel (sol poente)
+      '--color-primary-hover': '#f5b78a',
+      '--color-accent': '#e8a87c', // Pêssego suave
+      '--color-accent-hover': '#f0b890',
+      '--color-muted': '#7f8c9f', // Cinza azulado suave
+      '--color-text': '#e8dfd4', // Bege claro (papel envelhecido)
+      '--color-text-secondary': '#b8a896',
+      '--color-glow': 'rgba(243, 156, 107, 0.25)', // Glow laranja MUITO sutil
+      '--color-border': 'rgba(200, 184, 157, 0.3)',
+      '--color-error': '#d98670', // Coral suave
+      
+      // Typography - Arredondada e confortável
+      '--font': "'DM Sans', 'Inter', 'Segoe UI', sans-serif",
+      '--font-size-base': '16px',
+      
+      // Effects - TUDO suave e slow (relaxante)
+      '--glow-sm': '0 2px 4px rgba(243, 156, 107, 0.15)',
+      '--glow-md': '0 4px 8px rgba(243, 156, 107, 0.2)',
+      '--glow-lg': '0 6px 12px rgba(243, 156, 107, 0.25)',
+      '--glow-xl': '0 10px 20px rgba(243, 156, 107, 0.3)',
+      '--glow-intensity': '0.2', // Muito baixo (relaxante)
+      '--anim-duration': '800ms', // Slow motion suave
+      '--anim-easing': 'cubic-bezier(0.4, 0, 0.2, 1)',
+      '--border-radius': '6px', // Cantos suaves
+      '--scanline-opacity': '0.015', // Quase imperceptível
+      '--noise-opacity': '0.025', // Textura de vinil sutil
+      
+      // Canvas/Game - Cores quentes e acolhedoras
+      '--orb-fill': '#f39c6b',
+      '--orb-stroke': '#e8a87c',
+      '--orb-glow': 'rgba(243, 156, 107, 0.3)',
+      '--basket-fill': '#34495e',
+      '--basket-stroke': '#f39c6b',
+      '--particle-color-1': '#f39c6b',
+      '--particle-color-2': '#e8a87c',
+      '--particle-color-3': '#c8b89d',
+      '--firework-color-1': '#f39c6b',
+      '--firework-color-2': '#e8a87c',
+      '--firework-color-3': '#f5b78a',
+      
+      // EXCLUSIVO: Efeitos lofi
+      '--lofi-warmth': '1.05', // Filtro de calor
+      '--lofi-grain': '0.03', // Grão de filme
+      '--lofi-vignette': '0.2', // Vinheta sutil
+      '--paper-lines-opacity': '0.08', // Linhas de caderno
     },
   },
   cyber: {

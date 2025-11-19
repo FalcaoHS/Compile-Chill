@@ -42,6 +42,59 @@ export function ThemeEffects() {
         </>
       )}
 
+      {/* ====== LOFI CODE: Papel pautado + Ondas sonoras suaves ====== */}
+      {theme === 'lofi-code' && (
+        <>
+          {/* Linhas horizontais (papel pautado vintage) */}
+          <div
+            className="fixed inset-0 pointer-events-none z-50"
+            style={{
+              backgroundImage: `repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 23px,
+                rgba(232, 223, 212, 0.08) 23px,
+                rgba(232, 223, 212, 0.08) 24px
+              )`,
+            }}
+            aria-hidden="true"
+          />
+          
+          {/* Círculos concêntricos desfocados (ondas sonoras lofi) */}
+          <div
+            className="fixed inset-0 pointer-events-none z-40"
+            style={{
+              backgroundImage: `
+                repeating-radial-gradient(
+                  circle at 30% 40%,
+                  transparent 0,
+                  transparent 120px,
+                  rgba(243, 156, 107, 0.02) 121px,
+                  transparent 122px
+                ),
+                repeating-radial-gradient(
+                  circle at 70% 60%,
+                  transparent 0,
+                  transparent 150px,
+                  rgba(232, 168, 124, 0.02) 151px,
+                  transparent 152px
+                )
+              `,
+            }}
+            aria-hidden="true"
+          />
+          
+          {/* Textura de vinil/papel muito sutil */}
+          <div
+            className="fixed inset-0 pointer-events-none z-41 opacity-[0.025]"
+            style={{
+              backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 300 300' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='lofiGrain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23lofiGrain)' opacity='0.5'/%3E%3C/svg%3E")`,
+            }}
+            aria-hidden="true"
+          />
+        </>
+      )}
+
       {/* ====== CYBER HACKER: Scanlines + Matrix Rain ====== */}
       {theme === 'cyber' && (
         <>

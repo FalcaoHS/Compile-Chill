@@ -517,6 +517,51 @@ body {
   }
 }
 
+/* ============================================
+   SHAKE BUTTON - Lofi Code Theme
+   ============================================ */
+.shake-button--lofi-code {
+  background: linear-gradient(135deg, #34495e 0%, #2b3a4a 100%);
+  color: #f39c6b;
+  border: 2px solid #e8a87c;
+  border-radius: 12px; /* Bem arredondado (cozy) */
+  box-shadow: 
+    0 3px 8px rgba(0, 0, 0, 0.2),
+    inset 0 1px 3px rgba(243, 156, 107, 0.1),
+    0 0 0 1px rgba(232, 168, 124, 0.2);
+  text-shadow: 0 1px 3px rgba(243, 156, 107, 0.3);
+  font-weight: 600;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); /* Slow & smooth */
+}
+
+.shake-button--lofi-code:hover {
+  background: linear-gradient(135deg, #3d5266 0%, #34495e 100%);
+  box-shadow: 
+    0 5px 12px rgba(0, 0, 0, 0.25),
+    inset 0 1px 3px rgba(243, 156, 107, 0.15),
+    0 0 0 2px rgba(232, 168, 124, 0.3);
+  transform: translateY(-2px) scale(1.03); /* Levanta suavemente */
+}
+
+.shake-button--lofi-code:active {
+  transform: translateY(0) scale(0.98);
+  box-shadow: 
+    0 2px 5px rgba(0, 0, 0, 0.2),
+    inset 0 1px 3px rgba(243, 156, 107, 0.1);
+}
+
+/* Textura de papel sutil */
+.shake-button--lofi-code::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  background-image: `url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='paperTexture'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.5' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23paperTexture)' opacity='0.05'/%3E%3C/svg%3E")`;
+  pointer-events: none;
+  z-index: -1;
+  opacity: 0.3;
+}
+
 /* Light Animations for Mobile Lite Mode */
 /* These animations use opacity/transform with will-change for optimal performance */
 
