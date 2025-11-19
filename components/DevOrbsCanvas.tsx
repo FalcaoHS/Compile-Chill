@@ -207,33 +207,33 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
     return { width, height }
   }
 
-  // Load avatar image
-  const loadAvatarImage = useCallback((avatarUrl: string | null, orbId: string): Promise<HTMLImageElement | null> => {
+  // Load avatar image via proxy to bypass Twitter CORS restrictions
+  const loadAvatarImage = useCallback((userId: number, orbId: string): Promise<HTMLImageElement | null> => {
     return new Promise((resolve) => {
-      if (!avatarUrl) {
-                resolve(null)
-        return
-      }
-
-      // Check cache
-      if (imagesRef.current.has(avatarUrl)) {
-        resolve(imagesRef.current.get(avatarUrl)!)
+      // Use proxy endpoint to avoid CORS issues with Twitter images
+      const proxyUrl = `/api/avatars/${userId}`
+      
+      // Check cache by userId
+      const cacheKey = `avatar-${userId}`
+      if (imagesRef.current.has(cacheKey)) {
+        resolve(imagesRef.current.get(cacheKey)!)
         return
       }
 
       const img = new Image()
-      img.crossOrigin = "anonymous"
+      img.crossOrigin = "anonymous" // Now safe because it's our domain
       
       img.onload = () => {
-        imagesRef.current.set(avatarUrl, img)
+        imagesRef.current.set(cacheKey, img)
         resolve(img)
       }
       
       img.onerror = (error) => {
+        console.warn(`[DevOrbs] Failed to load avatar for user ${userId}:`, error)
         resolve(null)
       }
       
-      img.src = avatarUrl
+      img.src = proxyUrl
     })
   }, [])
 
@@ -288,8 +288,8 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
     
     // Load images for static orbs (will be handled after drawStaticCanvas is defined)
     staticOrbs.forEach((orb) => {
-      if (orb.avatar) {
-        loadAvatarImage(orb.avatar, orb.id).then((img) => {
+      if (orb.userId) {
+        loadAvatarImage(orb.userId, orb.id).then((img) => {
           orb.image = img
           orb.imageLoaded = true
         })
@@ -332,9 +332,9 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
       imageLoaded: false,
     }
 
-    // Load avatar image
-    if (user.avatar) {
-      loadAvatarImage(user.avatar, orb.id).then((img) => {
+    // Load avatar image via proxy
+    if (user.userId) {
+      loadAvatarImage(user.userId, orb.id).then((img) => {
         orb.image = img
         orb.imageLoaded = true
       })

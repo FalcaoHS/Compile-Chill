@@ -49,13 +49,11 @@ NEXTAUTH_URL=https://compileandchill.dev
 **How to Generate:**
 
 **On Windows (PowerShell):**
-```powershell
-[Convert]::ToBase64String((1..32 | ForEach-Object { Get-Random -Maximum 256 }))
+```powershell [Convert]::ToBase64String((1..32 | ForEach-Object { Get-Random -Maximum 256 }))
 ```
 
 **On Linux/Mac:**
-```bash
-openssl rand -base64 32
+```bash openssl rand -base64 32
 ```
 
 **Online (if openssl not available):**

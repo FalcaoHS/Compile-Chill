@@ -81,12 +81,20 @@ export function validateAuthEnvironment(): ValidationResult {
 /**
  * Validate and log results
  * 
- * In production: throws error if validation fails (prevents server startup)
- * In development: logs warnings but allows server to start
+ * In production runtime (Vercel): throws error if validation fails
+ * In build time or development: logs warnings but allows process to continue
  */
 export function validateAndLogAuthEnvironment(): void {
   const result = validateAuthEnvironment()
   const isProduction = process.env.NODE_ENV === 'production'
+  
+  // Detect if we're in Vercel production runtime (not just build time)
+  const isVercelProduction = process.env.VERCEL === '1' && isProduction
+  
+  // During build (even with NODE_ENV=production), we allow the build to pass
+  // Only strict validation happens in actual production runtime (Vercel)
+  const isBuildTime = process.env.NEXT_PHASE === 'phase-production-build'
+  const shouldThrowOnError = isVercelProduction && !isBuildTime
 
   // Log errors
   if (result.errors.length > 0) {
@@ -94,8 +102,10 @@ export function validateAndLogAuthEnvironment(): void {
     result.errors.forEach(error => console.error(error))
     console.error('\n')
 
-    if (isProduction) {
+    if (shouldThrowOnError) {
       throw new Error('Authentication environment validation failed. Fix the errors above before deploying to production.')
+    } else if (isProduction) {
+      console.error('⚠️  Build will continue, but fix these errors before deploying to production.\n')
     } else {
       console.error('⚠️  Server will start in development mode, but authentication may not work correctly.\n')
     }
@@ -108,8 +118,8 @@ export function validateAndLogAuthEnvironment(): void {
     console.warn('\n')
   }
 
-  // Log success in production
-  if (result.valid && isProduction) {
+  // Log success in production runtime
+  if (result.valid && isVercelProduction) {
     console.log('✅ Authentication environment validation passed\n')
   }
 }
