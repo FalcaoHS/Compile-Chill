@@ -3,101 +3,140 @@ import { authAdapter } from "@/lib/auth-adapter"
 import { prisma } from "@/lib/prisma"
 import type { NextAuthConfig } from "next-auth"
 
-// Configure Twitter provider using OAuth 2.0.
-// We cast the options to `any` to allow passing the `version` field
-// and a custom `profile` mapper, which are supported at runtime even
-// though not fully covered by the TS types yet.
-const twitterProvider = Twitter({
-  clientId: process.env.X_CLIENT_ID!,
-  clientSecret: process.env.X_CLIENT_SECRET!,
-  version: "2.0",
-  async profile(profile: any) {
-    // A API Free às vezes retorna formatos diferentes, então normalizamos:
-    // - { data: { id, name, username, profile_image_url } }
-    // - ou o objeto direto com esses campos na raiz
-    const user = profile?.data ?? profile ?? {}
-
-    return {
-      id: user.id ?? crypto.randomUUID(), // obrigatório para o NextAuth
-      // Deixa o nome cru; fallbacks são aplicados depois no callback de signIn
-      name: typeof user.name === "string" ? user.name : null,
-      // Username pode vir em campos diferentes
-      username: user.username ?? user.screen_name ?? null,
-      // Deixa o avatar o mais fiel possível ao que a API retornar,
-      // sem forçar placeholder aqui (o callback de sessão faz o fallback certo).
-      image: user.profile_image_url ?? user.profile_image_url_https ?? null,
-    }
-  },
-} as any)
-
 export const authConfig: NextAuthConfig = {
-  secret: process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET,
   adapter: authAdapter,
-  providers: [twitterProvider],
+  providers: [
+    Twitter({
+      clientId: process.env.X_CLIENT_ID!,
+      clientSecret: process.env.X_CLIENT_SECRET!,
+    }),
+  ],
   callbacks: {
     async signIn({ user, account, profile }) {
       if (account?.provider === "twitter" && account.providerAccountId) {
         try {
-          // Provider-specific id do X (Twitter)
+          // Extract X account data
           const xId = account.providerAccountId
-
-          // Extrair dados básicos do perfil com fallbacks seguros
-          const rawProfile: any = profile ?? {}
-          // Username pode vir em campos diferentes
-          const xUsername =
-            rawProfile.username ||
-            rawProfile.screen_name ||
-            (rawProfile.data && rawProfile.data.username) ||
+          const name = profile?.name || user.name || ""
+          const avatar = 
+            (typeof profile?.profile_image_url_https === "string" 
+              ? profile.profile_image_url_https 
+              : null) || 
+            (typeof user.image === "string" ? user.image : null) || 
+            null
+          
+          // Extract X username (slug) from profile
+          // Twitter/X OAuth profile may have username in different fields
+          const xUsername = 
+            (profile as any)?.screen_name || 
+            (profile as any)?.username || 
+            (profile as any)?.data?.username ||
             null
 
-          const name =
-            rawProfile.name ||
-            user.name ||
-            null
-
-          // Se não veio nome nenhum do X, não criamos usuário "anônimo":
-          // preferimos barrar o login para evitar cadastro lixo.
-          if (!name) {
-            console.error("⚠️ signIn: X profile sem name. Bloqueando criação de usuário.", {
-              xId,
-              rawProfileHasName: !!rawProfile.name,
-              userHasName: !!user.name,
-              xUsername,
+          // Debug: Log account token info (without exposing full token)
+          if (account.access_token) {
+            console.log("Account token received:", {
+              hasAccessToken: !!account.access_token,
+              tokenLength: account.access_token.length,
+              tokenType: account.token_type,
+              hasRefreshToken: !!account.refresh_token,
+              expiresAt: account.expires_at,
+              scope: account.scope,
             })
-            return false
+          } else {
+            console.warn("⚠️ No access_token in account object during signIn")
           }
 
-          // ⚠️ Avatar: voltar ao comportamento original que funcionava bem
-          // Preferimos sempre o profile_image_url_https da API do X.
-          const avatar =
-            (typeof rawProfile.profile_image_url_https === "string"
-              ? rawProfile.profile_image_url_https
-              : null) ||
-            (typeof user.image === "string" ? user.image : null) ||
-            null
-
-          // Log básico (sem tokens)
-          console.log("Account token received:", {
-            hasAccessToken: !!account.access_token,
-            tokenLength: account.access_token?.length ?? 0,
-            tokenType: account.token_type,
-            hasRefreshToken: !!account.refresh_token,
-            expiresAt: account.expires_at,
-            scope: account.scope,
-          })
-
-          // Anexar xId/xUsername para o adapter usar em createUser / linkAccount
-          ;(user as any).xId = xId
-          if (xUsername) {
-            ;(user as any).xUsername = xUsername
+          // Add xId and xUsername to user object so adapter can use it
+          // This ensures the adapter creates the user with xId and xUsername
+          if (!user.id) {
+            (user as any).xId = xId
+            if (xUsername) {
+              (user as any).xUsername = xUsername
+            }
           }
-
-          // Garantir name/image consistentes para o adapter (sem fallback de "Anonymous Dev")
+          
+          // Update user object with correct name and image for adapter
           user.name = name
           user.image = avatar || undefined
+          
+          // If user already exists (has id), update their data
+          if (user.id) {
+            const userId = parseInt(user.id)
+            // Try to update with xUsername, but don't fail if field doesn't exist yet
+            try {
+              await prisma.user.update({
+                where: { id: userId },
+                data: {
+                  name,
+                  avatar,
+                  ...(xUsername ? { xUsername } : {}), // Only include if provided
+                  updatedAt: new Date(),
+                },
+              })
+            } catch (updateError) {
+              // If xUsername field doesn't exist, update without it
+              if (updateError instanceof Error && updateError.message.includes('xUsername')) {
+                console.warn("⚠️ xUsername field not found. Updating user without it.")
+                await prisma.user.update({
+                  where: { id: userId },
+                  data: {
+                    name,
+                    avatar,
+                    updatedAt: new Date(),
+                  },
+                })
+              } else {
+                throw updateError // Re-throw if it's a different error
+              }
+            }
 
-          // Deixar criação/atualização no banco a cargo do adapter (authAdapter)
-          return true
+            // Ensure account is linked (create or update)
+            // This is necessary because NextAuth may not call linkAccount if user already exists
+            const existingAccount = await prisma.account.findUnique({
+              where: {
+                provider_providerAccountId: {
+                  provider: "twitter",
+                  providerAccountId: xId,
+                },
+              },
+            })
+
+            if (existingAccount) {
+              // Update existing account with new tokens
+              console.log("📝 Updating account in signIn callback")
+              await prisma.account.update({
+                where: { id: existingAccount.id },
+                data: {
+                  refresh_token: account.refresh_token,
+                  access_token: account.access_token,
+                  expires_at: account.expires_at,
+                  token_type: account.token_type,
+                  scope: account.scope,
+                  id_token: typeof account.id_token === "string" ? account.id_token : null,
+                  session_state: typeof account.session_state === "string" ? account.session_state : null,
+                },
+              })
+            } else {
+              // Create new account link
+              console.log("✨ Creating account in signIn callback")
+              await prisma.account.create({
+                data: {
+                  userId,
+                  type: account.type || "oauth",
+                  provider: "twitter",
+                  providerAccountId: xId,
+                  refresh_token: account.refresh_token,
+                  access_token: account.access_token,
+                  expires_at: account.expires_at,
+                  token_type: account.token_type,
+                  scope: account.scope,
+                  id_token: typeof account.id_token === "string" ? account.id_token : null,
+                  session_state: typeof account.session_state === "string" ? account.session_state : null,
+                },
+              })
+            }
+          }
         } catch (error) {
           console.error("Error in signIn callback:", {
             message: error instanceof Error ? error.message : "Unknown error",
