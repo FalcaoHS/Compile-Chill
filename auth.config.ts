@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma"
 import type { NextAuthConfig } from "next-auth"
 
 export const authConfig: NextAuthConfig = {
+  secret: process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET,
   adapter: authAdapter,
   providers: [
     Twitter({
@@ -232,6 +233,8 @@ export const authConfig: NextAuthConfig = {
         url,
         baseUrl,
         envNextAuthUrl: process.env.NEXTAUTH_URL,
+        hasSecret: !!process.env.NEXTAUTH_SECRET,
+        secretLength: process.env.NEXTAUTH_SECRET?.length || 0,
       })
       
       // Redirect to home page after successful authentication
