@@ -57,7 +57,8 @@ interface DevOrbsCanvasProps {
   onTest99Baskets?: () => void
 }
 
-const MAX_ORBS = 10
+const MAX_ORBS_DESKTOP = 10
+const MAX_ORBS_MOBILE = 3 // Reduced for better mobile performance
 const ORB_RADIUS_DESKTOP = 32 // 64px diameter (reduced from 96px)
 const ORB_RADIUS_MOBILE = 24 // 48px diameter (reduced from 64px)
 const SPAWN_INTERVAL_MS = 1000 // 1 second
@@ -303,14 +304,16 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
 
   // Spawn a single orb
   const spawnOrb = useCallback((user: UserData, index: number) => {
-    if (!engineRef.current || !worldRef.current || orbsRef.current.length >= MAX_ORBS) {
+    const isMobile = isMobileDevice()
+    const maxOrbs = isMobile ? MAX_ORBS_MOBILE : MAX_ORBS_DESKTOP
+    
+    if (!engineRef.current || !worldRef.current || orbsRef.current.length >= maxOrbs) {
       return
     }
 
     const size = calculateCanvasSize()
     if (size.width === 0 || size.height === 0) return
 
-    const isMobile = isMobileDevice()
     const radius = isMobile ? ORB_RADIUS_MOBILE : ORB_RADIUS_DESKTOP
     const config = getPhysicsConfig()
 
@@ -362,8 +365,11 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
           }
 
     const spawnNext = () => {
+      const isMobile = isMobileDevice()
+      const maxOrbs = isMobile ? MAX_ORBS_MOBILE : MAX_ORBS_DESKTOP
+      
       // Stop if we've spawned all users or reached max orbs
-      if (spawnIndexRef.current >= users.length || orbsRef.current.length >= MAX_ORBS) {
+      if (spawnIndexRef.current >= users.length || orbsRef.current.length >= maxOrbs) {
         if (spawnTimerRef.current) {
           clearInterval(spawnTimerRef.current)
           spawnTimerRef.current = null
@@ -377,7 +383,9 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
     }
 
     // Spawn first orb immediately (if we haven't spawned all yet)
-    if (spawnIndexRef.current < users.length && orbsRef.current.length < MAX_ORBS) {
+    const isMobile = isMobileDevice()
+    const maxOrbs = isMobile ? MAX_ORBS_MOBILE : MAX_ORBS_DESKTOP
+    if (spawnIndexRef.current < users.length && orbsRef.current.length < maxOrbs) {
       spawnNext()
     }
 
