@@ -12,17 +12,18 @@ const twitterProvider = Twitter({
   clientSecret: process.env.X_CLIENT_SECRET!,
   version: "2.0",
   async profile(profile: any) {
-    // A API Free às vezes retorna:
-    // { data: null }
-    // { data: { id: "...", name: null, ... } }
-    // ou até falha em retornar "data"
-    const user = profile?.data ?? {}
+    // A API Free às vezes retorna formatos diferentes, então normalizamos:
+    // - { data: { id, name, username, profile_image_url } }
+    // - ou o objeto direto com esses campos na raiz
+    const user = profile?.data ?? profile ?? {}
 
     return {
-      id: user.id ?? crypto.randomUUID(),                             // obrigatório ✔
-      name: user.name || "Anonymous Dev",                             // fallback ✔
-      username: user.username || "unknown",                           // fallback ✔
-      image: user.profile_image_url || "/default-avatar.png",         // fallback ✔
+      id: user.id ?? crypto.randomUUID(), // obrigatório para o NextAuth
+      name: user.name ?? "Anonymous Dev",
+      username: user.username ?? user.screen_name ?? "unknown",
+      // Deixa o avatar o mais fiel possível ao que a API retornar,
+      // sem forçar placeholder aqui (o callback de sessão faz o fallback certo).
+      image: user.profile_image_url ?? user.profile_image_url_https ?? null,
     }
   },
 } as any)
@@ -46,12 +47,14 @@ export const authConfig: NextAuthConfig = {
             user.name ||
             "Anonymous Dev"
 
+          // ⚠️ Avatar: voltar ao comportamento original que funcionava bem
+          // Preferimos sempre o profile_image_url_https da API do X.
           const avatar =
-            rawProfile.profile_image_url ||
-            rawProfile.profile_image_url_https ||
-            (rawProfile.data && rawProfile.data.profile_image_url) ||
+            (typeof rawProfile.profile_image_url_https === "string"
+              ? rawProfile.profile_image_url_https
+              : null) ||
             (typeof user.image === "string" ? user.image : null) ||
-            "/default-avatar.png"
+            null
 
           // Username pode vir em campos diferentes
           const xUsername =
