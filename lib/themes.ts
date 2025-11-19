@@ -146,52 +146,82 @@ export const THEMES: Record<ThemeId, Theme> = {
   'bruno-csharp': {
     name: 'Bruno C# de Burro',
     vars: {
-      // Colors - Paleta melancólica metálica inspirada em robô paranóide
-      '--color-bg': '#1A1E24',
-      '--color-bg-secondary': '#2C3440',
-      '--color-primary': '#C8D5E0',
-      '--color-primary-hover': '#D8E5F0',
-      '--color-accent': '#00FF88',
-      '--color-accent-hover': '#00DD77',
-      '--color-secondary': '#4A5A6A',
-      '--color-highlight': '#88FFB8',
-      '--color-muted': '#6A7A8A',
-      '--color-text': '#C8D5E0',
-      '--color-text-secondary': '#9AA5B0',
-      '--color-glow': 'rgba(0, 255, 170, 0.4)',
-      '--color-border': 'rgba(0, 255, 136, 0.2)',
-      '--color-error': '#FF6B6B',
+      // Colors - Paleta ÚNICA: Cinza hospital + Verde cirúrgico depressivo
+      '--color-bg': '#252a31', // Cinza aço escuro (TOTALMENTE diferente dos outros)
+      '--color-bg-secondary': '#2f3640', // Cinza concreto
+      '--color-primary': '#b4bcc8', // Prata fosco envelhecido
+      '--color-primary-hover': '#cbd3dd',
+      '--color-accent': '#5cdb95', // Verde água hospitalar (único!)
+      '--color-accent-hover': '#6ff3a8',
+      '--color-secondary': '#3d4653', // Cinza ardósia azulado
+      '--color-highlight': '#8feba5', // Verde menta pálido
+      '--color-muted': '#6c7a89', // Cinza azulado neutro
+      '--color-text': '#dfe4ea', // Texto prata claro
+      '--color-text-secondary': '#a4b0be', // Texto névoa
+      '--color-glow': 'rgba(92, 219, 149, 0.35)', // Glow verde água suave
+      '--color-border': 'rgba(92, 219, 149, 0.18)',
+      '--color-error': '#ee5a6f', // Rosa salmão (diferente!)
       
-      // Typography - Monoespaçada para estética retrofuturista
-      '--font': "'Space Mono', 'Courier New', monospace",
-      '--font-size-base': '16px',
+      // Typography - Condensada e pesada, como código antigo
+      '--font': "'IBM Plex Mono', 'Consolas', monospace",
+      '--font-size-base': '15px',
+      '--font-weight-normal': '500', // Mais pesado que o normal
+      '--line-height': '1.8', // Espaçamento cansado
       
-      // Effects - Glow verde néon suave e animações lentas
-      '--glow-sm': '0 0 4px rgba(0, 255, 170, 0.4)',
-      '--glow-md': '0 0 8px rgba(0, 255, 170, 0.4)',
-      '--glow-lg': '0 0 16px rgba(0, 255, 170, 0.6)',
-      '--glow-xl': '0 0 24px rgba(0, 255, 170, 0.8)',
-      '--glow-intensity': '0.6',
-      '--anim-duration': '1200ms',
-      '--anim-easing': 'cubic-bezier(0.4, 0, 0.2, 1)',
-      '--border-radius': '4px',
-      '--pulse-speed': '3000ms',
-      '--drift-speed': '5000ms',
-      '--scanline-opacity': '0.02',
-      '--noise-opacity': '0.01',
+      // Effects ÚNICOS - Movimentos pesados e relutantes
+      '--glow-sm': '0 0 4px rgba(92, 219, 149, 0.2)', // Verde água fosco
+      '--glow-md': '0 0 8px rgba(92, 219, 149, 0.3)',
+      '--glow-lg': '0 0 15px rgba(92, 219, 149, 0.4)',
+      '--glow-xl': '0 0 25px rgba(92, 219, 149, 0.5)',
+      '--glow-intensity': '0.3', // Muito baixo (vs. 1.5 do neon, 1 do cyber)
+      '--anim-duration': '1800ms', // MUITO mais lento que todos
+      '--anim-easing': 'cubic-bezier(0.7, 0, 0.3, 1)', // Ease pesado
+      '--border-radius': '2px', // Quase reto (robótico)
+      '--pulse-speed': '4500ms', // Pulsação quase imperceptível
+      '--drift-speed': '8000ms', // Drift preguiçoso
+      '--scanline-opacity': '0.04', // Scanlines mais visíveis que cyber
+      '--noise-opacity': '0.03', // Igual ao cyber mas com blur
+      '--blur-intensity': '0.5px', // EXCLUSIVO: Leve desfoque nostálgico
+      '--cursor-blink': 'slow-blink', // Cursor pisca devagar (vs. 'blink' normal)
+      '--minimal-opacity': '0.6', // Mais transparente que terminal (0.8)
       
-      // Canvas/Game specific
-      '--orb-fill': '#C8D5E0',
-      '--orb-stroke': '#00FF88',
-      '--orb-glow': 'rgba(0, 255, 170, 0.4)',
-      '--basket-fill': '#4A5A6A',
-      '--basket-stroke': '#00FF88',
-      '--particle-color-1': '#00FFAA',
-      '--particle-color-2': '#C8D5E0',
-      '--particle-color-3': '#88FFB8',
-      '--firework-color-1': '#00FF88',
-      '--firework-color-2': '#C8D5E0',
-      '--firework-color-3': '#88FFB8',
+      // EXCLUSIVO: Efeitos de "cansaço" visual
+      '--fatigue-overlay': 'rgba(13, 17, 23, 0.15)', // Overlay de cansaço
+      '--glitch-chance': '0.02', // 2% chance de glitch aleatório
+      '--flicker-interval': '7000ms', // Tela pisca a cada 7s
+      '--sigh-particle-speed': '0.3', // Partículas caem devagar
+      '--existential-pause': '2s', // Pausa antes de animações
+      
+      // Canvas/Game specific - Movimentos PESADOS
+      '--orb-fill': '#7f8fa6', // Cinza prata azulado (único!)
+      '--orb-stroke': '#5cdb95', // Verde água hospitalar
+      '--orb-glow': 'rgba(92, 219, 149, 0.25)', // Glow verde água suave
+      '--orb-trail-opacity': '0.18', // Rastro bem sutil
+      '--orb-gravity': '1.4', // Cai MUITO pesado (exageradamente lento)
+      '--basket-fill': '#353b48', // Cinza grafite azulado escuro
+      '--basket-stroke': '#5cdb95',
+      '--basket-stroke-width': '4px', // Linha MUITO grossa (robusta)
+      '--particle-color-1': '#5cdb95', // Verde água
+      '--particle-color-2': '#b4bcc8', // Prata
+      '--particle-color-3': '#8feba5', // Verde menta
+      '--particle-lifetime': '4200ms', // Partículas duram AINDA MAIS
+      '--particle-fade-delay': '1500ms', // Demora muito pra sumir
+      '--firework-color-1': '#5cdb95', // Verde água
+      '--firework-color-2': '#b4bcc8', // Prata
+      '--firework-color-3': '#8feba5', // Verde menta
+      '--firework-speed': '0.5', // Explosões MUITO lentas
+      '--firework-gravity': '0.9', // Partículas caem bem pesadas
+      
+      // EXCLUSIVO: Efeitos de "suspiro robótico"
+      '--sigh-frequency': '15s', // A cada 15s solta um "suspiro"
+      '--sigh-particle-count': '3', // Poucas partículas (minimalista)
+      '--sigh-color': 'rgba(139, 148, 158, 0.3)', // Cinza transparente
+      '--depression-filter': 'saturate(0.7) brightness(0.85)', // Dessaturado
+      
+      // EXCLUSIVO: Textos especiais
+      '--idle-message': '"Life. Don\'t talk to me about life..."', // Frase idle
+      '--idle-message-opacity': '0.3',
+      '--idle-message-delay': '30s', // Aparece após 30s idle
     },
   },
 }
