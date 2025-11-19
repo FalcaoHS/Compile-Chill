@@ -35,6 +35,15 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "/",
   },
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/logo.png", type: "image/png", sizes: "512x512" },
+    ],
+    apple: [
+      { url: "/logo.png", sizes: "180x180", type: "image/png" },
+    ],
+  },
   openGraph: {
     type: "website",
     locale: "pt_BR",
@@ -44,7 +53,7 @@ export const metadata: Metadata = {
     description: "Jogos leves com estética hacker/cyber, temas personalizáveis, ranking competitivo e integração social no X.",
     images: [
       {
-        url: "/og-image.png",
+        url: "/og.png",
         width: 1200,
         height: 630,
         alt: "Compile & Chill - Portal de Descompressão para Desenvolvedores",
@@ -55,7 +64,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Compile & Chill - Portal de Descompressão para Desenvolvedores",
     description: "Jogos leves com estética hacker/cyber, temas personalizáveis, ranking competitivo e integração social no X.",
-    images: ["/og-image.png"],
+    images: ["/og.png"],
     creator: "@compileandchill",
   },
   robots: {
