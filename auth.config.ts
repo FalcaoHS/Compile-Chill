@@ -35,11 +35,22 @@ export const authConfig: NextAuthConfig = {
           const rawProfile: any = profile ?? {}
           const profileData = rawProfile.data ?? rawProfile
           
+          // Extract X username (slug) from profile PRIMEIRO (precisa para fallback do name)
+          // Twitter/X OAuth profile may have username in different fields
+          const xUsername = 
+            profileData?.username ||
+            profileData?.screen_name ||
+            rawProfile?.screen_name || 
+            rawProfile?.username || 
+            null
+          
           // Extrair name de vários lugares possíveis
+          // Se não vier name, usar xUsername como fallback (melhor que string vazia)
           const name = 
             profileData?.name || 
             rawProfile?.name || 
             user.name || 
+            xUsername || // Fallback: usar @username se não tiver name
             ""
           
           // Extrair avatar
@@ -52,15 +63,6 @@ export const authConfig: NextAuthConfig = {
               : null) || 
             (typeof user.image === "string" ? user.image : null) || 
             null
-          
-          // Extract X username (slug) from profile
-          // Twitter/X OAuth profile may have username in different fields
-          const xUsername = 
-            profileData?.username ||
-            profileData?.screen_name ||
-            rawProfile?.screen_name || 
-            rawProfile?.username || 
-            null
 
           // Debug: Log profile structure para entender formato do X
           console.log("Profile structure:", {
@@ -68,8 +70,10 @@ export const authConfig: NextAuthConfig = {
             profileKeys: profile ? Object.keys(profile) : [],
             hasData: !!(profile as any)?.data,
             dataKeys: (profile as any)?.data ? Object.keys((profile as any).data) : [],
-            name: profileData?.name || rawProfile?.name || user.name || "NONE",
-            username: xUsername || "NONE",
+            finalName: name,
+            finalUsername: xUsername || "NONE",
+            finalAvatar: avatar ? "HAS_AVATAR" : "NO_AVATAR",
+            userImage: user.image || "NO_USER_IMAGE",
           })
 
           // Debug: Log account token info (without exposing full token)
