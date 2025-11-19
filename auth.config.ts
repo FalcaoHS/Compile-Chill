@@ -73,8 +73,23 @@ export const authConfig: NextAuthConfig = {
           user.image = avatar || undefined
           
           // If user already exists (has id), update their data
+          // ⚠️ IMPORTANTE: user.id pode ser UUID (string) no primeiro login, não número
+          // Só tentar update se for um ID numérico válido (usuário já existe no banco)
           if (user.id) {
             const userId = parseInt(user.id)
+            // Se não for número válido, é primeiro login - deixa o adapter criar
+            if (isNaN(userId)) {
+              console.log("⚠️ user.id não é numérico (primeiro login), deixando adapter criar usuário")
+              // Apenas anexar xId/xUsername e deixar o adapter criar
+              if (!user.id || typeof user.id === 'string') {
+                (user as any).xId = xId
+                if (xUsername) {
+                  (user as any).xUsername = xUsername
+                }
+              }
+              return true
+            }
+            
             // Try to update with xUsername, but don't fail if field doesn't exist yet
             try {
               await prisma.user.update({
