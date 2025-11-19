@@ -4,12 +4,23 @@ import { prisma } from "@/lib/prisma"
 import type { NextAuthConfig } from "next-auth"
 
 // Configure Twitter provider using OAuth 2.0.
-// We cast the options to `any` to allow passing the `version` field,
-// which is supported at runtime even though it's not in the TS type yet.
+// We cast the options to `any` to allow passing the `version` field
+// and a custom `profile` mapper, which are supported at runtime even
+// though not fully covered by the TS types yet.
 const twitterProvider = Twitter({
   clientId: process.env.X_CLIENT_ID!,
   clientSecret: process.env.X_CLIENT_SECRET!,
   version: "2.0",
+  profile(profile: any) {
+    const user = (profile as any)?.data ?? {}
+
+    return {
+      id: user.id ?? crypto.randomUUID(),
+      name: user.name ?? "Anonymous Dev",
+      username: user.username ?? "unknown",
+      image: user.profile_image_url ?? "/default-avatar.png",
+    }
+  },
 } as any)
 
 export const authConfig: NextAuthConfig = {
