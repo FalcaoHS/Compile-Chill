@@ -550,11 +550,12 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
           // Find the orb
           const orb = orbsRef.current.find((o) => o.body === orbBody)
           if (orb && !scoredOrbsRef.current.has(orb.id)) {
-            // CRITICAL: Only score if orb is moving downward (velocity.y > 0)
-            // This prevents scoring when orb bounces UP through the sensor
+            // CRITICAL: Only score if orb is moving downward with sufficient velocity
+            // This prevents scoring when orb bounces UP through the sensor or is barely moving
             const velocity = orbBody.velocity
-            if (velocity.y <= 0) {
-              // Orb is moving upward or stationary, don't score
+            const MIN_DOWNWARD_VELOCITY = 2 // Minimum downward velocity to register as "falling into basket"
+            if (velocity.y < MIN_DOWNWARD_VELOCITY) {
+              // Orb is moving upward, stationary, or falling too slowly - don't score
               return
             }
             
@@ -998,9 +999,19 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
       const pos = getPointerPos(e)
       if (!pos) return
 
+      // Clamp position within canvas bounds to prevent dragging outside
+      const isMobile = isMobileDevice()
+      const radius = isMobile ? ORB_RADIUS_MOBILE : ORB_RADIUS_DESKTOP
+      const margin = radius + 10 // Extra margin to keep orb fully visible
+      
+      const clampedPos = {
+        x: Math.max(margin, Math.min(canvasSize.width - margin, pos.x)),
+        y: Math.max(margin, Math.min(canvasSize.height - margin, pos.y)),
+      }
+
       // Update the body position directly for immediate response
       // Keep body static during drag to prevent physics interference
-      Body.setPosition(draggedOrbRef.current.body, pos)
+      Body.setPosition(draggedOrbRef.current.body, clampedPos)
       
       e.preventDefault()
       e.stopPropagation()
@@ -1027,10 +1038,31 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
       if (pos && dragStartRef.current) {
         const force = calculateThrowForce(dragStartRef.current, pos)
         
+        // Cap maximum throw velocity to prevent orbs from flying off screen
+        const MAX_VELOCITY = 25 // Maximum velocity in any direction
+        const magnitude = Math.sqrt(force.x * force.x + force.y * force.y)
+        
+        let finalForce = force
+        if (magnitude > MAX_VELOCITY) {
+          // Scale down to max velocity while preserving direction
+          const scale = MAX_VELOCITY / magnitude
+          finalForce = {
+            x: force.x * scale,
+            y: force.y * scale,
+          }
+        }
+        
         // Apply throw force
         Body.setVelocity(orb.body, {
-          x: force.x,
-          y: force.y,
+          x: finalForce.x,
+          y: finalForce.y,
+        })
+      } else {
+        // If no drag movement detected, apply gentle downward velocity
+        // This prevents orbs from being "stuck" when released without movement
+        Body.setVelocity(orb.body, {
+          x: 0,
+          y: 2, // Gentle downward push
         })
       }
 
