@@ -1,11 +1,11 @@
 /**
  * Theme configuration for Compile & Chill
  * 
- * Defines 5 unique visual themes with comprehensive design tokens.
+ * Defines 6 unique visual themes with comprehensive design tokens.
  * Each theme includes colors, typography, and effect variables.
  */
 
-export type ThemeId = 'cyber' | 'pixel' | 'neon' | 'terminal' | 'blueprint'
+export type ThemeId = 'cyber' | 'pixel' | 'neon' | 'terminal' | 'blueprint' | 'bruno-csharp'
 
 export interface Theme {
   name: string
@@ -141,6 +141,57 @@ export const THEMES: Record<ThemeId, Theme> = {
       '--grid-opacity': '0.1',
       '--line-opacity': '0.3',
       '--glow-intensity': '0.9',
+    },
+  },
+  'bruno-csharp': {
+    name: 'Bruno C# de Burro',
+    vars: {
+      // Colors - Paleta melancólica metálica inspirada em robô paranóide
+      '--color-bg': '#1A1E24',
+      '--color-bg-secondary': '#2C3440',
+      '--color-primary': '#C8D5E0',
+      '--color-primary-hover': '#D8E5F0',
+      '--color-accent': '#00FF88',
+      '--color-accent-hover': '#00DD77',
+      '--color-secondary': '#4A5A6A',
+      '--color-highlight': '#88FFB8',
+      '--color-muted': '#6A7A8A',
+      '--color-text': '#C8D5E0',
+      '--color-text-secondary': '#9AA5B0',
+      '--color-glow': 'rgba(0, 255, 170, 0.4)',
+      '--color-border': 'rgba(0, 255, 136, 0.2)',
+      '--color-error': '#FF6B6B',
+      
+      // Typography - Monoespaçada para estética retrofuturista
+      '--font': "'Space Mono', 'Courier New', monospace",
+      '--font-size-base': '16px',
+      
+      // Effects - Glow verde néon suave e animações lentas
+      '--glow-sm': '0 0 4px rgba(0, 255, 170, 0.4)',
+      '--glow-md': '0 0 8px rgba(0, 255, 170, 0.4)',
+      '--glow-lg': '0 0 16px rgba(0, 255, 170, 0.6)',
+      '--glow-xl': '0 0 24px rgba(0, 255, 170, 0.8)',
+      '--glow-intensity': '0.6',
+      '--anim-duration': '1200ms',
+      '--anim-easing': 'cubic-bezier(0.4, 0, 0.2, 1)',
+      '--border-radius': '4px',
+      '--pulse-speed': '3000ms',
+      '--drift-speed': '5000ms',
+      '--scanline-opacity': '0.02',
+      '--noise-opacity': '0.01',
+      
+      // Canvas/Game specific
+      '--orb-fill': '#C8D5E0',
+      '--orb-stroke': '#00FF88',
+      '--orb-glow': 'rgba(0, 255, 170, 0.4)',
+      '--basket-fill': '#4A5A6A',
+      '--basket-stroke': '#00FF88',
+      '--particle-color-1': '#00FFAA',
+      '--particle-color-2': '#C8D5E0',
+      '--particle-color-3': '#88FFB8',
+      '--firework-color-1': '#00FF88',
+      '--firework-color-2': '#C8D5E0',
+      '--firework-color-3': '#88FFB8',
     },
   },
 }
