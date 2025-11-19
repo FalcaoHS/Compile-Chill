@@ -16,8 +16,14 @@ export const GET = withAuth(async (request: NextRequest, user) => {
     const userId = parseInt(user.id)
 
     // Get all user scores in a single query to prevent N+1
+    // Exclude crypto-miner-game (idle game that pollutes statistics)
     const scores = await prisma.score.findMany({
-      where: { userId },
+      where: { 
+        userId,
+        NOT: {
+          gameId: 'crypto-miner-game'
+        }
+      },
       select: {
         gameId: true,
         score: true,

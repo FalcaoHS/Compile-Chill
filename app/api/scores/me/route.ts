@@ -25,8 +25,12 @@ export const GET = withAuth(async (request: NextRequest, user) => {
     }
 
     // Build where clause
+    // Exclude crypto-miner-game (idle game that pollutes history)
     const where: any = {
       userId,
+      NOT: {
+        gameId: 'crypto-miner-game'
+      }
     }
     if (gameId) {
       where.gameId = gameId
