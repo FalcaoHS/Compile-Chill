@@ -9,7 +9,19 @@ export const authConfig: NextAuthConfig = {
     Twitter({
       clientId: process.env.X_CLIENT_ID!,
       clientSecret: process.env.X_CLIENT_SECRET!,
-    }),
+      // Profile mapper para lidar com formato do plano Free do X
+      profile(profile: any) {
+        // O plano Free pode retornar { data: { ... } } ou o objeto direto
+        const user = profile?.data ?? profile ?? {}
+        
+        return {
+          id: user.id ?? crypto.randomUUID(),
+          name: user.name ?? null,
+          username: user.username ?? user.screen_name ?? null,
+          image: user.profile_image_url ?? user.profile_image_url_https ?? null,
+        }
+      },
+    } as any),
   ],
   callbacks: {
     async signIn({ user, account, profile }) {
