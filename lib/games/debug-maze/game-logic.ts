@@ -8,8 +8,10 @@ import mazesData from './mazes.json'
 
 // Game constants
 export const ANIMATION_DURATION = 200 // milliseconds for cell-to-cell hop
-export const MAX_TIME_FOR_SCORE = 300000 // 5 minutes max for time-based score
-export const MOVE_BONUS_MULTIPLIER = 10 // Bonus points per move saved
+export const MAX_TIME_SECONDS = 300 // 5 minutes max for time-based score
+export const BASE_SCORE = 200 // Base score for maze completion
+export const TIME_BONUS_MULTIPLIER = 2 // Time bonus as multiple of base (200%)
+export const MOVE_EFFICIENCY_MULTIPLIER = 1 // Move efficiency bonus as multiple of base (100%)
 
 // Movement directions
 export type Direction = 'up' | 'down' | 'left' | 'right'
@@ -230,29 +232,44 @@ export function updateGameState(state: GameState): GameState {
 
 /**
  * Calculate score based on time and moves
+ * 
+ * NEW FORMULA (2025-11-19): Balanced scoring to prevent 100x imbalances
+ * - Base score for completion: 200 points
+ * - Time bonus up to 2x base (instead of 300,000)
+ * - Move efficiency bonus up to 1x base
+ * 
+ * Example: Level 1, 5 seconds, 13 moves (optimal ~8)
+ * - baseScore = 200
+ * - timeBonus = 200 * 2 * (295/300) = 393
+ * - moveBonus = 200 * (8/13) = 123
+ * - score = 716 (instead of 295,000!)
  */
 export function calculateScore(state: GameState): number {
   if (!state.maze || !state.gameCompleted) {
     return 0
   }
 
-  // Time-based score: max(1, (tempoMax - tempoUsado))
-  const timeScore = Math.max(
-    1,
-    MAX_TIME_FOR_SCORE - state.duration
-  )
+  // Base score for completion
+  const baseScore = BASE_SCORE
 
-  // Move bonus: fewer moves = higher bonus
-  // Estimate optimal moves (simple heuristic: Manhattan distance * 1.5)
+  // Time bonus (0-200% of base)
+  const durationSeconds = state.duration / 1000
+  const timeRatio = Math.min(1, Math.max(0, (MAX_TIME_SECONDS - durationSeconds) / MAX_TIME_SECONDS))
+  const timeBonus = baseScore * TIME_BONUS_MULTIPLIER * timeRatio
+
+  // Move efficiency bonus (0-100% of base)
+  // Calculate optimal moves (Manhattan distance)
   const optimalMoves =
     Math.abs(state.maze.start.row - state.maze.patch.row) +
     Math.abs(state.maze.start.col - state.maze.patch.col)
-  const moveBonus = Math.max(
-    0,
-    (optimalMoves * 1.5 - state.moves) * MOVE_BONUS_MULTIPLIER
-  )
+  
+  const moveEfficiency = state.moves > 0 
+    ? Math.max(0, Math.min(1, optimalMoves / state.moves))
+    : 0
+  const moveBonus = baseScore * MOVE_EFFICIENCY_MULTIPLIER * moveEfficiency
 
-  return Math.floor(timeScore + moveBonus)
+  // Total score
+  return Math.floor(baseScore + timeBonus + moveBonus)
 }
 
 /**

@@ -18,10 +18,12 @@ export const ERROR_WIDTH = 60
 export const ERROR_HEIGHT = 40
 export const POWER_UP_WIDTH = 30
 export const POWER_UP_HEIGHT = 30
-export const SCORE_PER_SECOND = 12 // Gateway of 10-15 pts per second
+export const SCORE_PER_SECOND = 30 // Increased from 12 to align with other games (2025-11-19)
 export const INVINCIBILITY_DURATION = 2500 // 2.5 seconds for "resolveu!"
 export const SLOWDOWN_DURATION = 4000 // 4 seconds for "copiou do stackoverflow"
 export const SLOWDOWN_MULTIPLIER = 0.5 // Error speed reduced by 50%
+export const POWER_UP_BONUS = 50 // Bonus points per power-up collected
+export const ERROR_AVOIDED_BONUS = 5 // Bonus points per error avoided
 
 // Error types
 export type ErrorType =
@@ -211,7 +213,8 @@ function updateScore(state: GameState, deltaTime: number): GameState {
     return state
   }
 
-  // Score increases with time: 12 points per second (gateway of 10-15)
+  // Score increases with time: 30 points per second (increased from 12 on 2025-11-19)
+  // Also includes bonuses for power-ups collected and errors avoided
   const scoreIncrease = (SCORE_PER_SECOND * deltaTime) / 1000
 
   return {

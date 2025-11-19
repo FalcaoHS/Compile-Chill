@@ -1,0 +1,687 @@
+{
+  "exportDate": "2025-11-19T14:58:01.652Z",
+  "totalScores": 23,
+  "games": [
+    "hack-grid",
+    "debug-maze",
+    "bit-runner",
+    "terminal-2048",
+    "crypto-miner-game",
+    "refactor-rush",
+    "stack-overflow-dodge",
+    "packet-switch"
+  ],
+  "rawScores": [
+    {
+      "id": 76,
+      "userId": 18,
+      "userName": "Dark 🏴‍☠️",
+      "gameId": "hack-grid",
+      "score": 299448,
+      "duration": 0,
+      "moves": 2,
+      "level": 1,
+      "metadata": {
+        "segments": 6
+      },
+      "createdAt": "2025-11-19T14:47:02.180Z"
+    },
+    {
+      "id": 66,
+      "userId": 18,
+      "userName": "Dark 🏴‍☠️",
+      "gameId": "debug-maze",
+      "score": 296284,
+      "duration": 3,
+      "moves": 13,
+      "level": 1,
+      "metadata": {
+        "level": 1,
+        "moves": 13,
+        "duration": 3781
+      },
+      "createdAt": "2025-11-19T14:42:17.025Z"
+    },
+    {
+      "id": 60,
+      "userId": 17,
+      "userName": "Osti",
+      "gameId": "debug-maze",
+      "score": 292588,
+      "duration": 7,
+      "moves": 13,
+      "level": 1,
+      "metadata": {
+        "level": 1,
+        "moves": 13,
+        "duration": 7477
+      },
+      "createdAt": "2025-11-19T14:41:09.787Z"
+    },
+    {
+      "id": 68,
+      "userId": 17,
+      "userName": "Osti",
+      "gameId": "hack-grid",
+      "score": 288820,
+      "duration": 11,
+      "moves": 3,
+      "level": 1,
+      "metadata": {
+        "segments": 12
+      },
+      "createdAt": "2025-11-19T14:42:49.693Z"
+    },
+    {
+      "id": 52,
+      "userId": 14,
+      "userName": "Shuk ➔ banheirourgente.app 🚽💩🧻",
+      "gameId": "bit-runner",
+      "score": 158894,
+      "duration": 227,
+      "moves": 0,
+      "level": null,
+      "metadata": {
+        "gameSpeed": 12,
+        "finalDistance": 158894,
+        "spawnPatterns": [
+          "high-low",
+          "double-compiler",
+          "single-brackets"
+        ],
+        "obstaclesAvoided": 3
+      },
+      "createdAt": "2025-11-19T14:37:27.975Z"
+    },
+    {
+      "id": 51,
+      "userId": 18,
+      "userName": "Dark 🏴‍☠️",
+      "gameId": "bit-runner",
+      "score": 21598,
+      "duration": 72,
+      "moves": 0,
+      "level": null,
+      "metadata": {
+        "gameSpeed": 9.000429999682325,
+        "finalDistance": 21598,
+        "spawnPatterns": [
+          "low-high",
+          "double-compiler",
+          "single-brackets",
+          "stackoverflow-flame",
+          "single-brackets",
+          "high-low",
+          "single-brackets",
+          "single-brackets",
+          "error-warning",
+          "low-high",
+          "double-compiler"
+        ],
+        "obstaclesAvoided": 3
+      },
+      "createdAt": "2025-11-19T14:37:16.484Z"
+    },
+    {
+      "id": 69,
+      "userId": 17,
+      "userName": "Osti",
+      "gameId": "bit-runner",
+      "score": 4450,
+      "duration": 21,
+      "moves": 0,
+      "level": null,
+      "metadata": {
+        "gameSpeed": 4.881976603056287,
+        "finalDistance": 4450,
+        "spawnPatterns": [
+          "double-compiler",
+          "low-high",
+          "high-low",
+          "mixed-combo"
+        ],
+        "obstaclesAvoided": 4
+      },
+      "createdAt": "2025-11-19T14:43:20.189Z"
+    },
+    {
+      "id": 83,
+      "userId": 17,
+      "userName": "Osti",
+      "gameId": "terminal-2048",
+      "score": 2836,
+      "duration": 334,
+      "moves": 231,
+      "level": null,
+      "metadata": {
+        "bestTile": 256,
+        "moveHistory": [
+          "up",
+          "left",
+          "up",
+          "left",
+          "up",
+          "right",
+          "left",
+          "left",
+          "right",
+          "right"
+        ]
+      },
+      "createdAt": "2025-11-19T14:49:09.386Z"
+    },
+    {
+      "id": 36,
+      "userId": 14,
+      "userName": "Shuk ➔ banheirourgente.app 🚽💩🧻",
+      "gameId": "terminal-2048",
+      "score": 2728,
+      "duration": 219,
+      "moves": 213,
+      "level": null,
+      "metadata": {
+        "bestTile": 256,
+        "moveHistory": [
+          "down",
+          "up",
+          "left",
+          "right",
+          "down",
+          "left",
+          "down",
+          "left",
+          "down",
+          "left"
+        ]
+      },
+      "createdAt": "2025-11-19T14:18:45.484Z"
+    },
+    {
+      "id": 48,
+      "userId": 18,
+      "userName": "Dark 🏴‍☠️",
+      "gameId": "terminal-2048",
+      "score": 2728,
+      "duration": 23,
+      "moves": 221,
+      "level": null,
+      "metadata": {
+        "bestTile": 256,
+        "moveHistory": [
+          "left",
+          "down",
+          "right",
+          "up",
+          "left",
+          "down",
+          "right",
+          "up",
+          "left",
+          "down"
+        ]
+      },
+      "createdAt": "2025-11-19T14:33:39.026Z"
+    },
+    {
+      "id": 33,
+      "userId": 15,
+      "userName": "Wesley",
+      "gameId": "terminal-2048",
+      "score": 2420,
+      "duration": 37,
+      "moves": 206,
+      "level": null,
+      "metadata": {
+        "bestTile": 256,
+        "moveHistory": [
+          "left",
+          "right",
+          "up",
+          "left",
+          "up",
+          "left",
+          "right",
+          "left",
+          "right",
+          "left"
+        ]
+      },
+      "createdAt": "2025-11-19T12:53:55.478Z"
+    },
+    {
+      "id": 24,
+      "userId": 13,
+      "userName": "bruno C# de burro",
+      "gameId": "terminal-2048",
+      "score": 2400,
+      "duration": 38,
+      "moves": 202,
+      "level": null,
+      "metadata": {
+        "bestTile": 256,
+        "moveHistory": [
+          "left",
+          "left",
+          "right",
+          "left",
+          "up",
+          "up",
+          "down",
+          "right",
+          "right",
+          "left"
+        ]
+      },
+      "createdAt": "2025-11-19T11:10:48.655Z"
+    },
+    {
+      "id": 20,
+      "userId": 11,
+      "userName": "wendeus",
+      "gameId": "bit-runner",
+      "score": 2028,
+      "duration": 13,
+      "moves": 0,
+      "level": null,
+      "metadata": {
+        "gameSpeed": 3.970160000001264,
+        "finalDistance": 2028,
+        "spawnPatterns": [
+          "single-compiler",
+          "single-brackets",
+          "double-compiler"
+        ],
+        "obstaclesAvoided": 3
+      },
+      "createdAt": "2025-11-19T08:42:30.766Z"
+    },
+    {
+      "id": 84,
+      "userId": 19,
+      "userName": "O Fantasma Da Concha",
+      "gameId": "terminal-2048",
+      "score": 1656,
+      "duration": 239,
+      "moves": 167,
+      "level": null,
+      "metadata": {
+        "bestTile": 128,
+        "moveHistory": [
+          "down",
+          "right",
+          "left",
+          "up",
+          "left",
+          "right",
+          "right",
+          "right",
+          "right",
+          "right"
+        ]
+      },
+      "createdAt": "2025-11-19T14:57:55.313Z"
+    },
+    {
+      "id": 6,
+      "userId": 10,
+      "userName": "sayden ᶜʳᶠ",
+      "gameId": "terminal-2048",
+      "score": 1456,
+      "duration": 185,
+      "moves": 153,
+      "level": null,
+      "metadata": {
+        "bestTile": 128,
+        "moveHistory": [
+          "up",
+          "up",
+          "right",
+          "right",
+          "up",
+          "right",
+          "down",
+          "right",
+          "up",
+          "left"
+        ]
+      },
+      "createdAt": "2025-11-19T05:03:24.994Z"
+    },
+    {
+      "id": 4,
+      "userId": 8,
+      "userName": "Hudson Falcão",
+      "gameId": "terminal-2048",
+      "score": 1328,
+      "duration": 21,
+      "moves": 137,
+      "level": null,
+      "metadata": {
+        "bestTile": 128,
+        "moveHistory": [
+          "down",
+          "left",
+          "up",
+          "right",
+          "right",
+          "down",
+          "left",
+          "up",
+          "down",
+          "up"
+        ]
+      },
+      "createdAt": "2025-11-19T04:04:47.090Z"
+    },
+    {
+      "id": 31,
+      "userId": 14,
+      "userName": "Shuk ➔ banheirourgente.app 🚽💩🧻",
+      "gameId": "crypto-miner-game",
+      "score": 1010,
+      "duration": 478,
+      "moves": 125,
+      "level": null,
+      "metadata": {
+        "coins": 1010.285,
+        "minersOwned": {
+          "raspberry-pi": 12
+        },
+        "totalClicks": 125,
+        "coinsPerClick": 1,
+        "coinsPerSecond": 12,
+        "multipliersOwned": 0,
+        "clickUpgradeLevel": 0
+      },
+      "createdAt": "2025-11-19T12:07:20.384Z"
+    },
+    {
+      "id": 5,
+      "userId": 9,
+      "userName": "Reesha",
+      "gameId": "terminal-2048",
+      "score": 768,
+      "duration": 170,
+      "moves": 94,
+      "level": null,
+      "metadata": {
+        "bestTile": 64,
+        "moveHistory": [
+          "right",
+          "left",
+          "right",
+          "right",
+          "left",
+          "down",
+          "right",
+          "down",
+          "left",
+          "down"
+        ]
+      },
+      "createdAt": "2025-11-19T04:22:09.696Z"
+    },
+    {
+      "id": 57,
+      "userId": 18,
+      "userName": "Dark 🏴‍☠️",
+      "gameId": "refactor-rush",
+      "score": 490,
+      "duration": null,
+      "moves": null,
+      "level": null,
+      "metadata": {
+        "moves": 2,
+        "levelId": 2,
+        "duration": 1776,
+        "gridSize": 3,
+        "correctPlacements": 3
+      },
+      "createdAt": "2025-11-19T14:40:49.554Z"
+    },
+    {
+      "id": 39,
+      "userId": 14,
+      "userName": "Shuk ➔ banheirourgente.app 🚽💩🧻",
+      "gameId": "refactor-rush",
+      "score": 480,
+      "duration": null,
+      "moves": null,
+      "level": null,
+      "metadata": {
+        "moves": 2,
+        "levelId": 2,
+        "duration": 6257,
+        "gridSize": 3,
+        "correctPlacements": 3
+      },
+      "createdAt": "2025-11-19T14:20:44.771Z"
+    },
+    {
+      "id": 44,
+      "userId": 14,
+      "userName": "Shuk ➔ banheirourgente.app 🚽💩🧻",
+      "gameId": "stack-overflow-dodge",
+      "score": 121,
+      "duration": 8,
+      "moves": 0,
+      "level": null,
+      "metadata": {
+        "duration": 8.5,
+        "finalScore": 121,
+        "errorsAvoided": 7,
+        "powerUpsCollected": 1
+      },
+      "createdAt": "2025-11-19T14:31:02.918Z"
+    },
+    {
+      "id": 70,
+      "userId": 18,
+      "userName": "Dark 🏴‍☠️",
+      "gameId": "packet-switch",
+      "score": 0,
+      "duration": 3,
+      "moves": 2,
+      "level": 1,
+      "metadata": {
+        "levelId": 1,
+        "averageHops": 2,
+        "packetsDelivered": 1
+      },
+      "createdAt": "2025-11-19T14:43:48.302Z"
+    },
+    {
+      "id": 25,
+      "userId": 13,
+      "userName": "bruno C# de burro",
+      "gameId": "packet-switch",
+      "score": 0,
+      "duration": 9,
+      "moves": 2,
+      "level": 1,
+      "metadata": {
+        "levelId": 1,
+        "averageHops": 2,
+        "packetsDelivered": 1
+      },
+      "createdAt": "2025-11-19T11:11:37.293Z"
+    }
+  ],
+  "analysis": {
+    "hack-grid": {
+      "gameId": "hack-grid",
+      "scores": [
+        288820,
+        299448
+      ],
+      "count": 2,
+      "min": 288820,
+      "max": 299448,
+      "mean": 294134,
+      "median": 288820,
+      "stdDev": 5314,
+      "percentiles": {
+        "p25": 288820,
+        "p50": 288820,
+        "p75": 299448,
+        "p90": 299448,
+        "p95": 299448,
+        "p99": 299448
+      }
+    },
+    "debug-maze": {
+      "gameId": "debug-maze",
+      "scores": [
+        292588,
+        296284
+      ],
+      "count": 2,
+      "min": 292588,
+      "max": 296284,
+      "mean": 294436,
+      "median": 292588,
+      "stdDev": 1848,
+      "percentiles": {
+        "p25": 292588,
+        "p50": 292588,
+        "p75": 296284,
+        "p90": 296284,
+        "p95": 296284,
+        "p99": 296284
+      }
+    },
+    "bit-runner": {
+      "gameId": "bit-runner",
+      "scores": [
+        2028,
+        4450,
+        21598,
+        158894
+      ],
+      "count": 4,
+      "min": 2028,
+      "max": 158894,
+      "mean": 46742.5,
+      "median": 4450,
+      "stdDev": 65188.66254763937,
+      "percentiles": {
+        "p25": 2028,
+        "p50": 4450,
+        "p75": 21598,
+        "p90": 158894,
+        "p95": 158894,
+        "p99": 158894
+      }
+    },
+    "terminal-2048": {
+      "gameId": "terminal-2048",
+      "scores": [
+        768,
+        1328,
+        1456,
+        1656,
+        2400,
+        2420,
+        2728,
+        2728,
+        2836
+      ],
+      "count": 9,
+      "min": 768,
+      "max": 2836,
+      "mean": 2035.5555555555557,
+      "median": 2400,
+      "stdDev": 704.553934708749,
+      "percentiles": {
+        "p25": 1456,
+        "p50": 2400,
+        "p75": 2728,
+        "p90": 2836,
+        "p95": 2836,
+        "p99": 2836
+      }
+    },
+    "crypto-miner-game": {
+      "gameId": "crypto-miner-game",
+      "scores": [
+        1010
+      ],
+      "count": 1,
+      "min": 1010,
+      "max": 1010,
+      "mean": 1010,
+      "median": 1010,
+      "stdDev": 0,
+      "percentiles": {
+        "p25": 1010,
+        "p50": 1010,
+        "p75": 1010,
+        "p90": 1010,
+        "p95": 1010,
+        "p99": 1010
+      }
+    },
+    "refactor-rush": {
+      "gameId": "refactor-rush",
+      "scores": [
+        480,
+        490
+      ],
+      "count": 2,
+      "min": 480,
+      "max": 490,
+      "mean": 485,
+      "median": 480,
+      "stdDev": 5,
+      "percentiles": {
+        "p25": 480,
+        "p50": 480,
+        "p75": 490,
+        "p90": 490,
+        "p95": 490,
+        "p99": 490
+      }
+    },
+    "stack-overflow-dodge": {
+      "gameId": "stack-overflow-dodge",
+      "scores": [
+        121
+      ],
+      "count": 1,
+      "min": 121,
+      "max": 121,
+      "mean": 121,
+      "median": 121,
+      "stdDev": 0,
+      "percentiles": {
+        "p25": 121,
+        "p50": 121,
+        "p75": 121,
+        "p90": 121,
+        "p95": 121,
+        "p99": 121
+      }
+    },
+    "packet-switch": {
+      "gameId": "packet-switch",
+      "scores": [
+        0,
+        0
+      ],
+      "count": 2,
+      "min": 0,
+      "max": 0,
+      "mean": 0,
+      "median": 0,
+      "stdDev": 0,
+      "percentiles": {
+        "p25": 0,
+        "p50": 0,
+        "p75": 0,
+        "p90": 0,
+        "p95": 0,
+        "p99": 0
+      }
+    }
+  }
+}

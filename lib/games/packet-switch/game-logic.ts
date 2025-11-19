@@ -8,7 +8,9 @@ import levelsData from './levels.json'
 
 // Game constants
 export const PACKET_SPEED = 0.02 // Progress increment per frame (0-1)
-export const DURATION_PENALTY_DIVISOR = 1000 // Divide duration by this for penalty
+export const BASE_SCORE_PER_PACKET = 50 // Base score per packet delivered
+export const MAX_TIME_SECONDS = 120 // 2 minutes max for time bonus
+export const TIME_BONUS_POINTS = 100 // Maximum time bonus points
 
 // Node types
 export type NodeType = 'source' | 'destination' | 'router'
@@ -311,6 +313,17 @@ export function checkCompletion(gameState: GameState): GameState {
 
 /**
  * Calculate score
+ * 
+ * NEW FORMULA (2025-11-19): Fixed broken scoring (was returning 0)
+ * - Base score per packet: 50 points
+ * - Efficiency bonus for fewer hops
+ * - Time bonus (minor component)
+ * 
+ * Example: 1 packet, difficulty=1, 2 hops, 5 seconds
+ * - baseScorePerPacket = 50
+ * - hopEfficiency = 1 / 2 = 0.5
+ * - timeBonus = 100 * (115/120) = 96
+ * - score = 50 * 1 * 1 * 0.5 + 96 = 121 (fixed from 0!)
  */
 export function calculateScore(gameState: GameState): number {
   if (!gameState.level || gameState.completedPackets === 0) {
@@ -320,10 +333,25 @@ export function calculateScore(gameState: GameState): number {
   const packetsDelivered = gameState.completedPackets
   const difficulty = gameState.level.difficulty
   const averageHops = gameState.averageHops || 1 // Avoid division by zero
-  const durationPenalty = gameState.duration / DURATION_PENALTY_DIVISOR
 
-  // Score formula: packetsDelivered * difficulty / averageHops – durationPenalty
-  const score = (packetsDelivered * difficulty) / averageHops - durationPenalty
+  // Base score per packet delivered
+  const baseScorePerPacket = BASE_SCORE_PER_PACKET
+
+  // Difficulty multiplier
+  const difficultyMultiplier = difficulty
+
+  // Efficiency bonus (fewer hops = better)
+  // Theoretical minimum is 1 hop, use 0.5 as floor to avoid zero scores
+  const minPossibleHops = 1
+  const hopEfficiency = Math.max(0.5, minPossibleHops / averageHops)
+
+  // Time bonus (faster is better, but minor component)
+  const durationSeconds = gameState.duration / 1000
+  const timeRatio = Math.max(0, Math.min(1, (MAX_TIME_SECONDS - durationSeconds) / MAX_TIME_SECONDS))
+  const timeBonus = TIME_BONUS_POINTS * timeRatio
+
+  // Total score
+  const score = (baseScorePerPacket * packetsDelivered * difficultyMultiplier * hopEfficiency) + timeBonus
 
   return Math.max(0, Math.floor(score)) // Ensure non-negative integer
 }

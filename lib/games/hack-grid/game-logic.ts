@@ -8,9 +8,10 @@ import levelsData from './levels.json'
 
 // Game constants
 export const GRID_SIZE = 6 // 6×6 grid
-export const MAX_TIME_FOR_SCORE = 300000 // 5 minutes max for time-based score
-export const EFFICIENCY_BONUS_MULTIPLIER = 50 // Bonus multiplier for efficiency
-export const DIFFICULTY_BASE_MULTIPLIER = 100 // Base multiplier for difficulty
+export const MAX_TIME_SECONDS = 300 // 5 minutes max for time-based score
+export const EFFICIENCY_BONUS_MULTIPLIER = 0.5 // Efficiency bonus as percentage of base (50%)
+export const TIME_BONUS_MULTIPLIER = 2 // Time bonus as percentage of base (200%)
+export const BASE_SCORE_PER_DIFFICULTY = 100 // Base score per difficulty point
 
 // Node states
 export type NodeState = 'idle' | 'active' | 'connected' | 'completed'
@@ -557,6 +558,17 @@ export function updateGameState(state: GameState): GameState {
 
 /**
  * Calculate score based on time, efficiency, and difficulty
+ * 
+ * NEW FORMULA (2025-11-19): Balanced scoring to prevent 100x imbalances
+ * - Base score scales with difficulty
+ * - Time bonus capped at 2x base (instead of 300,000)
+ * - Efficiency bonus up to 50% of base
+ * 
+ * Example: Level 1, 10 seconds, perfect efficiency
+ * - baseScore = 100
+ * - timeBonus = 100 * 2 * (290/300) = 193
+ * - efficiencyBonus = 100 * 0.5 * 1.0 = 50
+ * - score = 343 (instead of 299,890!)
  */
 export function calculateScore(state: GameState): {
   score: number
@@ -568,8 +580,13 @@ export function calculateScore(state: GameState): {
     return { score: 0, timeBonus: 0, efficiencyBonus: 0, difficultyMultiplier: 0 }
   }
 
-  // Time bonus: max(1, (maxTime - duration))
-  const timeBonus = Math.max(1, MAX_TIME_FOR_SCORE - state.duration)
+  // Base score scales with level difficulty
+  const baseScore = BASE_SCORE_PER_DIFFICULTY * state.level.difficulty
+
+  // Time bonus (0-200% of base, capped)
+  const durationSeconds = state.duration / 1000
+  const timeRatio = Math.min(1, Math.max(0, (MAX_TIME_SECONDS - durationSeconds) / MAX_TIME_SECONDS))
+  const timeBonus = baseScore * TIME_BONUS_MULTIPLIER * timeRatio
 
   // Calculate required segments (minimum segments needed for all required connections)
   const requiredSegments = state.level.requiredConnections.reduce((total, reqConn) => {
@@ -581,18 +598,17 @@ export function calculateScore(state: GameState): {
     return total
   }, 0)
 
-  // Efficiency bonus: (requiredSegments / actualSegments) * multiplier
-  // Higher efficiency = fewer wasted segments
+  // Efficiency bonus (0-50% of base)
   const efficiencyRatio = requiredSegments > 0 && state.segments > 0
-    ? requiredSegments / state.segments
+    ? Math.min(1, requiredSegments / state.segments)
     : 0
-  const efficiencyBonus = efficiencyRatio * EFFICIENCY_BONUS_MULTIPLIER
+  const efficiencyBonus = baseScore * EFFICIENCY_BONUS_MULTIPLIER * efficiencyRatio
 
-  // Difficulty multiplier: level * baseMultiplier
-  const difficultyMultiplier = state.level.difficulty * DIFFICULTY_BASE_MULTIPLIER
+  // Difficulty multiplier (for backward compatibility in return value)
+  const difficultyMultiplier = state.level.difficulty * BASE_SCORE_PER_DIFFICULTY
 
   // Total score
-  const score = Math.floor(timeBonus + efficiencyBonus + difficultyMultiplier)
+  const score = Math.floor(baseScore + timeBonus + efficiencyBonus)
 
   return {
     score,

@@ -32,10 +32,16 @@ export async function GET(request: NextRequest) {
     const skip = (page - 1) * limit
 
     // Get top scores across all games (only best scores)
+    // Exclude infinite runners from global leaderboard (bit-runner, stack-overflow-dodge)
+    const excludedGames = ['bit-runner', 'stack-overflow-dodge']
+    
     const [scores, total] = await Promise.all([
       prisma.score.findMany({
         where: {
           isBestScore: true,
+          gameId: {
+            notIn: excludedGames,
+          },
         },
         include: {
           user: {
@@ -55,6 +61,9 @@ export async function GET(request: NextRequest) {
       prisma.score.count({
         where: {
           isBestScore: true,
+          gameId: {
+            notIn: excludedGames,
+          },
         },
       }),
     ])
