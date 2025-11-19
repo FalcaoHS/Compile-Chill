@@ -3,21 +3,19 @@ import { authAdapter } from "@/lib/auth-adapter"
 import { prisma } from "@/lib/prisma"
 import type { NextAuthConfig } from "next-auth"
 
+// Configure Twitter provider using OAuth 2.0.
+// We cast the options to `any` to allow passing the `version` field,
+// which is supported at runtime even though it's not in the TS type yet.
+const twitterProvider = Twitter({
+  clientId: process.env.X_CLIENT_ID!,
+  clientSecret: process.env.X_CLIENT_SECRET!,
+  version: "2.0",
+} as any)
+
 export const authConfig: NextAuthConfig = {
   secret: process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET,
   adapter: authAdapter,
-  providers: [
-    Twitter({
-      clientId: process.env.X_CLIENT_ID!,
-      clientSecret: process.env.X_CLIENT_SECRET!,
-      authorization: {
-        url: "https://twitter.com/i/oauth2/authorize",
-        params: {
-          scope: "users.read offline.access",
-        },
-      },
-    }),
-  ],
+  providers: [twitterProvider],
   callbacks: {
     async signIn({ user, account, profile }) {
       if (account?.provider === "twitter" && account.providerAccountId) {
