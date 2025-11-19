@@ -1,13 +1,53 @@
 import Twitter from "next-auth/providers/twitter"
-import { authAdapter } from "@/lib/auth-adapter"
+import { authAdapter, updateUserFromOAuth } from "@/lib/auth-adapter"
 import { prisma } from "@/lib/prisma"
 import type { NextAuthConfig } from "next-auth"
+import { validateAndLogAuthEnvironment } from "@/lib/auth-env-validation"
+import { logSessionUserMismatch } from "@/lib/session-monitor"
+
+// 🔐 SECURITY: Validate authentication environment variables on server startup
+// This prevents runtime errors and security misconfigurations
+validateAndLogAuthEnvironment()
+
+// 🍪 Extract cookie domain from NEXTAUTH_URL for proper cookie scoping
+function getCookieDomain(): string | undefined {
+  const nextauthUrl = process.env.NEXTAUTH_URL
+  if (!nextauthUrl) return undefined
+  
+  try {
+    const url = new URL(nextauthUrl)
+    // Don't set domain for localhost (allows it to work in development)
+    if (url.hostname === 'localhost') return undefined
+    // Set domain with leading dot for subdomain support (e.g., .compileandchill.dev)
+    return `.${url.hostname}`
+  } catch {
+    return undefined
+  }
+}
 
 export const authConfig: NextAuthConfig = {
   // 🔐 CRÍTICO: Secret para criptografia de sessões
   // Sem isso, sessões podem vazar entre usuários!
   secret: process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET,
   adapter: authAdapter,
+  
+  // 🍪 SECURITY: Explicit cookie configuration to prevent session leakage
+  // Without this, NextAuth uses defaults that may be incorrect for custom domains
+  cookies: {
+    sessionToken: {
+      name: process.env.NODE_ENV === 'production' 
+        ? `__Secure-next-auth.session-token` 
+        : `next-auth.session-token`,
+      options: {
+        httpOnly: true, // Prevent client-side JavaScript access
+        sameSite: 'lax', // CSRF protection while allowing normal navigation
+        path: '/', // Cookie available across entire site
+        secure: process.env.NODE_ENV === 'production', // HTTPS only in production
+        domain: getCookieDomain(), // Extracted from NEXTAUTH_URL
+      },
+    },
+  },
+  
   providers: [
     Twitter({
       clientId: process.env.X_CLIENT_ID!,
@@ -154,37 +194,8 @@ export const authConfig: NextAuthConfig = {
               return true
             }
             
-            // Try to update with xUsername, but don't fail if field doesn't exist yet
-            try {
-              
-              
-              await prisma.user.update({
-                where: { id: userId },
-                data: {
-                  name,
-                  avatar,
-                  ...(xUsername ? { xUsername } : {}), // Only include if provided
-                  updatedAt: new Date(),
-                },
-              })
-              
-              
-            } catch (updateError) {
-              // If xUsername field doesn't exist, update without it
-              if (updateError instanceof Error && updateError.message.includes('xUsername')) {
-                
-                await prisma.user.update({
-                  where: { id: userId },
-                  data: {
-                    name,
-                    avatar,
-                    updatedAt: new Date(),
-                  },
-                })
-              } else {
-                throw updateError // Re-throw if it's a different error
-              }
-            }
+            // Update user with fresh OAuth data using extracted utility function
+            await updateUserFromOAuth(userId, name, avatar, xUsername)
 
             // Ensure account is linked (create or update)
             // This is necessary because NextAuth may not call linkAccount if user already exists
@@ -258,29 +269,64 @@ export const authConfig: NextAuthConfig = {
         // This ensures avatar is always up-to-date
         if (user.id) {
           const userId = parseInt(user.id)
-          const dbUser = await prisma.user.findUnique({
-            where: { id: userId },
-            select: { 
-              id: true,
-              avatar: true, 
-              name: true,
-              xId: true,
-              xUsername: true,
-            },
-          })
           
-          if (dbUser) {
-            // ⚠️ CRÍTICO: Sempre definir image, mesmo que null
-            session.user.image = dbUser.avatar || null
-            session.user.name = dbUser.name || null
+          try {
+            const dbUser = await prisma.user.findUnique({
+              where: { id: userId },
+              select: { 
+                id: true,
+                avatar: true, 
+                name: true,
+                xId: true,
+                xUsername: true,
+              },
+            })
             
-            // Debug: Log avatar status e dados do usuário
+            if (dbUser) {
+              // 🔐 SECURITY: Validate user ID match to prevent session leakage
+              if (dbUser.id !== userId) {
+                // 🚨 CRITICAL: User ID mismatch detected!
+                console.error('🚨 [SESSION-CALLBACK] CRITICAL: User ID mismatch detected!', {
+                  sessionUserId: userId,
+                  dbUserId: dbUser.id,
+                  sessionUserName: session.user.name,
+                  dbUserName: dbUser.name,
+                })
+                
+                logSessionUserMismatch(
+                  session.user.id || 'unknown',
+                  userId,
+                  dbUser.id
+                )
+                
+                // Return existing session data as fallback (safer than returning wrong user)
+                return session
+              }
+              
+              // ⚠️ CRÍTICO: Sempre definir image, mesmo que null
+              session.user.image = dbUser.avatar || null
+              session.user.name = dbUser.name || null
+              
+              console.log('✅ [SESSION-CALLBACK] Session refreshed:', {
+                userId: dbUser.id,
+                name: dbUser.name,
+                hasAvatar: !!dbUser.avatar,
+              })
+            } else {
+              // User not found in database
+              console.warn('⚠️  [SESSION-CALLBACK] User not found in database:', userId)
+              
+              // Fallback to user object from adapter
+              session.user.image = user.image || null
+              session.user.name = user.name || null
+            }
+          } catch (error) {
+            // Database query failed
+            console.error('❌ [SESSION-CALLBACK] Error fetching user:', error)
             
-          } else {
-            // Fallback to user object from adapter
+            // Fallback to user object from adapter (safer than failing)
             session.user.image = user.image || null
             session.user.name = user.name || null
-            
           }
         } else {
           // Fallback to user object from adapter

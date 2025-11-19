@@ -12,6 +12,10 @@ export type LogEventType =
   | 'multi_tab_warning'
   | 'session_renewal'
   | 'session_renewal_failure'
+  | 'session_created'
+  | 'session_duplicate_detected'
+  | 'session_user_mismatch'
+  | 'session_destroyed'
 
 export interface LogEvent {
   type: LogEventType
@@ -127,5 +131,40 @@ export function logMultiTabWarning(): void {
  */
 export function logSessionRenewal(success: boolean): void {
   logEvent(success ? 'session_renewal' : 'session_renewal_failure')
+}
+
+/**
+ * Session Event Metadata
+ * 
+ * Metadata captured for session-related events
+ */
+export interface SessionEventMetadata {
+  userId?: number | string
+  sessionToken?: string // First 8 chars only for security
+  ip?: string
+  userAgent?: string
+  [key: string]: any
+}
+
+/**
+ * Log session event
+ * 
+ * Generic function for logging session-related events with metadata.
+ * Session tokens are truncated to first 8 characters for security.
+ * 
+ * @param type - Session event type
+ * @param metadata - Event metadata (userId, sessionToken, IP, user agent, etc.)
+ */
+export function logSessionEvent(
+  type: Extract<LogEventType, 'session_created' | 'session_duplicate_detected' | 'session_user_mismatch' | 'session_destroyed'>,
+  metadata: SessionEventMetadata
+): void {
+  // Truncate session token to first 8 chars for security
+  const safeMetadata = { ...metadata }
+  if (safeMetadata.sessionToken) {
+    safeMetadata.sessionToken = safeMetadata.sessionToken.substring(0, 8) + '...'
+  }
+  
+  logEvent(type, safeMetadata)
 }
 

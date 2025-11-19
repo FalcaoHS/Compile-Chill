@@ -42,7 +42,7 @@ export function getCORSHeaders(origin: string | null): Record<string, string> | 
 /**
  * Security headers to apply to responses
  * 
- * TODO: Expand in security hardening phase (roadmap item 25)
+ * Implements essential security headers for session isolation and general security.
  * 
  * @returns Object with security headers
  */
@@ -55,12 +55,27 @@ export function getSecurityHeaders(): Record<string, string> {
     headers["Content-Security-Policy"] = csp
   }
 
-  // Additional security headers can be added here
-  // - X-Frame-Options
-  // - X-Content-Type-Options
-  // - Referrer-Policy
-  // - Permissions-Policy
-  // - HSTS (Strict-Transport-Security)
+  // 🔐 X-Frame-Options: Prevent clickjacking attacks
+  // SAMEORIGIN allows framing from same origin (safe for OAuth callbacks)
+  headers["X-Frame-Options"] = "SAMEORIGIN"
+
+  // 🔐 X-Content-Type-Options: Prevent MIME type sniffing
+  // Forces browser to respect declared content type
+  headers["X-Content-Type-Options"] = "nosniff"
+
+  // 🔐 Referrer-Policy: Control referrer information
+  // strict-origin-when-cross-origin provides good balance:
+  // - Sends full URL for same-origin requests
+  // - Sends only origin for cross-origin HTTPS requests
+  // - Sends nothing for HTTPS to HTTP downgrades
+  headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+
+  // 🔐 X-XSS-Protection: Enable browser XSS filtering (legacy browsers)
+  // Modern browsers rely on CSP, but this helps older browsers
+  headers["X-XSS-Protection"] = "1; mode=block"
+
+  // Note: HSTS and Permissions-Policy can be added in future hardening phase
+  // These headers do NOT conflict with NextAuth cookie functionality
 
   return headers
 }
