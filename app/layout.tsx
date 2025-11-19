@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Providers } from "./providers";
 import { Header } from "@/components/Header";
-import { Footer } from "@/components/Footer";
+import { ConditionalFooter } from "@/components/ConditionalFooter";
 import { ThemeEffects } from "@/components/ThemeEffects";
 
 export const metadata: Metadata = {
@@ -90,7 +90,7 @@ export default function RootLayout({
             <main className="flex-1 pt-16">
               {children}
             </main>
-            <Footer />
+            <ConditionalFooter />
           </div>
         </Providers>
       </body>
