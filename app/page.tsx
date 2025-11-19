@@ -37,7 +37,7 @@ export default function Home() {
   const [show99Egg, setShow99Egg] = useState(false)
   const { processPendingScores } = useSafeScore()
 
-  // Fetch recent users
+  // Fetch recent users ONCE on page load
   useEffect(() => {
     const fetchUsers = async () => {
       try {
@@ -45,31 +45,23 @@ export default function Home() {
         const response = await fetch("/api/users/recent")
         
         if (!response.ok) {
-          const errorText = await response.text()
-          
           throw new Error(`Failed to fetch users: ${response.status}`)
         }
 
         const data = await response.json()
-        
         setUsers(data.users || [])
         setUsersError(null)
       } catch (error) {
-        
+        console.error('[Home] Failed to load users:', error)
         setUsersError("Failed to load users")
-        // Fallback to empty array - fake profiles will be used
-        setUsers([])
+        setUsers([]) // Fallback to empty - fake profiles will be used
       } finally {
         setUsersLoading(false)
       }
     }
 
     fetchUsers()
-
-    // Refresh users every 3 seconds for dynamic orb updates
-    const interval = setInterval(fetchUsers, 3000)
-
-    return () => clearInterval(interval)
+    // No interval - fetch only once on mount
   }, [])
 
   // Process pending scores on load (if authenticated)

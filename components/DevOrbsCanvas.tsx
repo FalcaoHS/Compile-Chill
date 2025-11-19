@@ -637,49 +637,31 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
     }
   }, [isMounted])
 
-  // Generate a key from user IDs to detect actual user changes (not just length)
-  const usersKey = users.map(u => u.userId).join(',')
+  // Start spawn when users are available (only once on first load)
+  const hasSpawnedRef = useRef(false)
   
-  // Start spawn when users are available and dynamically update when users change
   useEffect(() => {
     // Skip spawn in mobile lite mode
     if (isLiteMode) {
       return
     }
     
-    // Clear existing orbs when users change (not just on length change)
-    // This ensures new users replace old ones dynamically
-    if (users.length > 0 && engineRef.current && worldRef.current) {
-      // Remove old orbs from physics world
-      orbsRef.current.forEach(orb => {
-        Matter.Composite.remove(worldRef.current!, orb.body)
-      })
-      
-      // Clear orbs array
-      orbsRef.current = []
-      
-      // Reset spawn index
-      spawnIndexRef.current = 0
-      
-      // Clear existing spawn timer
-      if (spawnTimerRef.current) {
-        clearInterval(spawnTimerRef.current)
-        spawnTimerRef.current = null
-      }
-      
-      // Start fresh spawn sequence with new users
+    // Only spawn ONCE when component mounts with users
+    // Never re-spawn, even if users array changes
+    if (users.length > 0 && engineRef.current && !hasSpawnedRef.current) {
+      hasSpawnedRef.current = true
       startSpawnSequence()
     }
 
     return () => {
-      // Cleanup on unmount
+      // Cleanup on unmount only
       if (spawnTimerRef.current) {
         clearInterval(spawnTimerRef.current)
         spawnTimerRef.current = null
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [usersKey, startSpawnSequence, isLiteMode]) // Depend on usersKey to detect actual user changes
+  }, []) // Empty dependency - only run once on mount
 
   // Handle shake function - throws all orbs upward with strong force
   const handleShake = useCallback(() => {
