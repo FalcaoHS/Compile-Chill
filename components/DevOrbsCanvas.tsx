@@ -213,25 +213,31 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
   const loadAvatarImage = useCallback((avatarUrl: string | null, orbId: string): Promise<HTMLImageElement | null> => {
     return new Promise((resolve) => {
       if (!avatarUrl) {
+        console.log("⚠️ DevOrbsCanvas: Tentando carregar avatar sem URL para orb:", orbId)
         resolve(null)
         return
       }
 
       // Check cache
       if (imagesRef.current.has(avatarUrl)) {
+        console.log("✅ DevOrbsCanvas: Avatar já carregado (cache):", avatarUrl.substring(0, 50) + "...")
         resolve(imagesRef.current.get(avatarUrl)!)
         return
       }
+      
+      console.log("🔄 DevOrbsCanvas: Carregando novo avatar:", avatarUrl.substring(0, 50) + "...")
 
       const img = new Image()
       img.crossOrigin = "anonymous"
       
       img.onload = () => {
+        console.log("✅ DevOrbsCanvas: Avatar carregado com sucesso:", avatarUrl.substring(0, 50) + "...")
         imagesRef.current.set(avatarUrl, img)
         resolve(img)
       }
       
-      img.onerror = () => {
+      img.onerror = (error) => {
+        console.warn(`❌ DevOrbsCanvas: Falha ao carregar avatar para orb ${orbId}:`, avatarUrl.substring(0, 50) + "...", error)
         resolve(null)
       }
       

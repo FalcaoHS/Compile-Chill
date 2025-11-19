@@ -193,6 +193,15 @@ export const authConfig: NextAuthConfig = {
             
             // Try to update with xUsername, but don't fail if field doesn't exist yet
             try {
+              console.log("📝 Atualizando usuário existente:", {
+                userId,
+                hasName: !!name,
+                hasAvatar: !!avatar,
+                hasUsername: !!xUsername,
+                nameValue: name || "VAZIO",
+                avatarValue: avatar ? "TEM_AVATAR" : "SEM_AVATAR",
+              })
+              
               await prisma.user.update({
                 where: { id: userId },
                 data: {
@@ -202,6 +211,8 @@ export const authConfig: NextAuthConfig = {
                   updatedAt: new Date(),
                 },
               })
+              
+              console.log("✅ Usuário atualizado com sucesso")
             } catch (updateError) {
               // If xUsername field doesn't exist, update without it
               if (updateError instanceof Error && updateError.message.includes('xUsername')) {
@@ -301,10 +312,19 @@ export const authConfig: NextAuthConfig = {
             // ⚠️ CRÍTICO: Sempre definir image, mesmo que null
             session.user.image = dbUser.avatar || null
             session.user.name = dbUser.name || null
+            
+            // Debug: Log avatar status
+            console.log("🔍 Session callback - Avatar do banco:", {
+              userId,
+              hasAvatar: !!dbUser.avatar,
+              avatarValue: dbUser.avatar ? "TEM_AVATAR" : "SEM_AVATAR",
+              name: dbUser.name || "SEM_NOME",
+            })
           } else {
             // Fallback to user object from adapter
             session.user.image = user.image || null
             session.user.name = user.name || null
+            console.warn("⚠️ Usuário não encontrado no banco no session callback")
           }
         } else {
           // Fallback to user object from adapter

@@ -21,7 +21,7 @@ interface UserData {
  * In-memory cache with TTL
  */
 let cache: CacheEntry | null = null
-const CACHE_TTL_MS = 7 * 1000 // 7 seconds (between 5-10 as specified)
+const CACHE_TTL_MS = 3 * 1000 // 3 seconds (reduced to update avatars faster)
 
 /**
  * Fake user profiles for fallback
@@ -92,6 +92,13 @@ export async function GET(request: NextRequest) {
     // Check cache
     const now = Date.now()
     if (cache && (now - cache.timestamp) < CACHE_TTL_MS) {
+      // Debug: Log cached data
+      console.log("📦 Retornando dados do cache:", {
+        usersCount: cache.data.length,
+        usersWithAvatar: cache.data.filter(u => u.avatar).length,
+        cacheAge: now - cache.timestamp,
+      })
+      
       return NextResponse.json(
         {
           users: cache.data,
@@ -99,6 +106,9 @@ export async function GET(request: NextRequest) {
         { status: 200 }
       )
     }
+    
+    // Cache expired or doesn't exist - fetch fresh data
+    console.log("🔄 Cache expirado ou não existe, buscando dados frescos...")
 
     // Calculate time threshold (5 minutes ago)
     const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000)
@@ -138,12 +148,22 @@ export async function GET(request: NextRequest) {
 
       for (const session of recentSessions) {
         if (!uniqueUsers.has(session.userId)) {
-          uniqueUsers.set(session.userId, {
+          const userData: UserData = {
             userId: session.user.id,
             avatar: session.user.avatar,
-            username: session.user.xId || session.user.name,
+            username: session.user.xId || session.user.name || "Unknown",
             lastLogin: session.user.updatedAt.toISOString(), // Use user's updatedAt as proxy for last activity
+          }
+          
+          // Debug: Log avatar status
+          console.log("📋 User data from session:", {
+            userId: userData.userId,
+            hasAvatar: !!userData.avatar,
+            avatarValue: userData.avatar ? "TEM_AVATAR" : "SEM_AVATAR",
+            username: userData.username,
           })
+          
+          uniqueUsers.set(session.userId, userData)
         }
       }
 
@@ -169,12 +189,24 @@ export async function GET(request: NextRequest) {
         take: 10,
       })
 
-      users = recentUsers.map((user) => ({
-        userId: user.id,
-        avatar: user.avatar,
-        username: user.xId || user.name,
-        lastLogin: user.updatedAt.toISOString(),
-      }))
+      users = recentUsers.map((user) => {
+        const userData: UserData = {
+          userId: user.id,
+          avatar: user.avatar,
+          username: user.xId || user.name || "Unknown",
+          lastLogin: user.updatedAt.toISOString(),
+        }
+        
+        // Debug: Log avatar status
+        console.log("📋 User data from recent users:", {
+          userId: userData.userId,
+          hasAvatar: !!userData.avatar,
+          avatarValue: userData.avatar ? "TEM_AVATAR" : "SEM_AVATAR",
+          username: userData.username,
+        })
+        
+        return userData
+      })
     }
 
     // If no users found, use fake profiles
