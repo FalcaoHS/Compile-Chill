@@ -24,7 +24,8 @@ export const POST = withAuthAndRateLimit(
       const body = await request.json()
       
       // Log suspicious score attempts before validation
-      if (body.score > 1_000_000) {
+      // Note: Idle games like crypto-miner can legitimately reach billions
+      if (body.score > 100_000_000_000) {
         console.warn('🚨 [ANTI-CHEAT] Score manipulation attempt detected:', {
           userId: user.id,
           userName: user.name,

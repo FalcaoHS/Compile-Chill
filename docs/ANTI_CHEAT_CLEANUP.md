@@ -21,14 +21,16 @@ A user exploited a vulnerability in score validation to submit impossibly high s
 **File:** `lib/validations/score.ts`
 
 ```typescript
-const MAX_SCORE = 1_000_000 // 1 million points max
+const MAX_SCORE = 100_000_000_000 // 100 billion points max (for idle games)
 
 score: z
   .number()
   .int("Score must be an integer")
   .min(0, "Score cannot be negative")
-  .max(MAX_SCORE, "Score cannot exceed 1,000,000 (possible cheating detected)")
+  .max(MAX_SCORE, "Score cannot exceed 100,000,000,000 (possible cheating detected)")
 ```
+
+**Note:** The high limit (100 billion) accommodates idle games like Crypto Miner which legitimately reach billions of coins through long-term gameplay and upgrades.
 
 ### 2. Added Anti-Cheat Logging
 
@@ -48,7 +50,7 @@ Logs all attempts to submit scores > 1 million with:
 ### Query 1: Find All Suspicious Scores
 
 ```sql
--- Find scores above reasonable maximum (1 million)
+-- Find scores above reasonable maximum (100 billion)
 SELECT 
   s.id,
   s."userId",
@@ -60,7 +62,7 @@ SELECT
   s."createdAt"
 FROM scores s
 JOIN users u ON s."userId" = u.id
-WHERE s.score > 1000000
+WHERE s.score > 100000000000
 ORDER BY s.score DESC;
 ```
 

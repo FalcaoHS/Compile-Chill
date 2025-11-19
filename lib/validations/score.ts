@@ -5,9 +5,13 @@ import { getGameStateSchema } from "@/lib/validations/game-state"
 /**
  * Maximum reasonable score per game to prevent cheating
  * This is a generous limit that should accommodate legitimate high scores
- * while blocking obvious manipulation (e.g., 900 million points)
+ * including idle games like crypto-miner which can reach billions
+ * 
+ * Note: Crypto Miner has costs up to 10 billion, so we allow up to 100 billion
+ * to give players room for progression while still blocking obvious cheating
+ * (e.g., 900 billion+ points submitted instantly)
  */
-const MAX_SCORE = 1_000_000 // 1 million points max
+const MAX_SCORE = 100_000_000_000 // 100 billion points max (for idle games)
 
 /**
  * Zod schema for score submission validation
