@@ -11,14 +11,18 @@ const twitterProvider = Twitter({
   clientId: process.env.X_CLIENT_ID!,
   clientSecret: process.env.X_CLIENT_SECRET!,
   version: "2.0",
-  profile(profile: any) {
-    const user = (profile as any)?.data ?? {}
+  async profile(profile: any) {
+    // A API Free às vezes retorna:
+    // { data: null }
+    // { data: { id: "...", name: null, ... } }
+    // ou até falha em retornar "data"
+    const user = profile?.data ?? {}
 
     return {
-      id: user.id ?? crypto.randomUUID(),
-      name: user.name ?? "Anonymous Dev",
-      username: user.username ?? "unknown",
-      image: user.profile_image_url ?? "/default-avatar.png",
+      id: user.id ?? crypto.randomUUID(),                             // obrigatório ✔
+      name: user.name || "Anonymous Dev",                             // fallback ✔
+      username: user.username || "unknown",                           // fallback ✔
+      image: user.profile_image_url || "/default-avatar.png",         // fallback ✔
     }
   },
 } as any)
