@@ -9,7 +9,6 @@ export const authConfig: NextAuthConfig = {
     Twitter({
       clientId: process.env.X_CLIENT_ID!,
       clientSecret: process.env.X_CLIENT_SECRET!,
-      version: "2.0",
       authorization: {
         url: "https://twitter.com/i/oauth2/authorize",
         params: {
