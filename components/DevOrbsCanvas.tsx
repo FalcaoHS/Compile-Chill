@@ -1773,8 +1773,8 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
       gradientCenterX, gradientCenterY, Math.max(canvas.width, canvas.height)
     )
     
-    gradient.addColorStop(0, '#0d1b2a')
-    gradient.addColorStop(1, '#000814')
+    gradient.addColorStop(0, colors.bg)
+    gradient.addColorStop(1, colors.bgSecondary)
     
     ctx.fillStyle = gradient
     ctx.fillRect(0, 0, canvas.width, canvas.height)
@@ -1968,8 +1968,8 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
             gradientCenterX, gradientCenterY, Math.max(canvas.width, canvas.height)
           )
           
-          gradient.addColorStop(0, '#0d1b2a')
-          gradient.addColorStop(1, '#000814')
+          gradient.addColorStop(0, colors.bg)
+          gradient.addColorStop(1, colors.bgSecondary)
           
           ctx.fillStyle = gradient
           ctx.fillRect(0, 0, canvas.width, canvas.height)
@@ -2020,9 +2020,9 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
           gradientCenterX, gradientCenterY, Math.max(canvas.width, canvas.height) // Outer radius
         )
         
-        // Gradient from darker center to darkest edges
-        gradient.addColorStop(0, '#0d1b2a') // Darker center
-        gradient.addColorStop(1, '#000814') // Darkest edges
+        // Gradient from theme background color (center) to darker edges
+        gradient.addColorStop(0, colors.bg) // Theme background at center
+        gradient.addColorStop(1, colors.bgSecondary) // Darker theme bg at edges
         
         ctx.fillStyle = gradient
         ctx.fillRect(0, 0, canvas.width, canvas.height)
