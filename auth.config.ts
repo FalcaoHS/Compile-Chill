@@ -32,8 +32,21 @@ export const authConfig: NextAuthConfig = {
           
           // Profile pode vir em formatos diferentes (plano Free do X)
           // Pode ser: { data: { name, ... } } ou objeto direto
+          // Também pode vir como erro: { title, detail, type, status }
           const rawProfile: any = profile ?? {}
-          const profileData = rawProfile.data ?? rawProfile
+          
+          // Verificar se profile é um erro (tem title/detail/type)
+          const isErrorProfile = rawProfile.title || rawProfile.detail || rawProfile.type
+          if (isErrorProfile) {
+            console.warn("⚠️ Profile veio como erro do Twitter:", {
+              title: rawProfile.title,
+              detail: rawProfile.detail,
+              type: rawProfile.type,
+            })
+          }
+          
+          // Se for erro, usar objeto vazio (vai buscar via API)
+          const profileData = isErrorProfile ? {} : (rawProfile.data ?? rawProfile)
           
           // Extract X username (slug) from profile PRIMEIRO (precisa para fallback do name)
           // Twitter/X OAuth profile may have username in different fields
@@ -66,10 +79,12 @@ export const authConfig: NextAuthConfig = {
 
           // Se não trouxer nome ou foto do OAuth, buscar via API do Twitter
           // O plano Free do Twitter pode não retornar esses dados no callback
-          if ((!name || !avatar) && account.access_token && xId) {
+          // Usar /2/users/me que retorna o usuário autenticado sem precisar do ID
+          if ((!name || !avatar) && account.access_token) {
             try {
               console.log("🔍 Buscando perfil completo via Twitter API...")
-              const twitterApiUrl = `https://api.twitter.com/2/users/${xId}`
+              // Usar /2/users/me que não precisa do ID do usuário
+              const twitterApiUrl = `https://api.twitter.com/2/users/me`
               const params = new URLSearchParams({
                 "user.fields": "name,username,profile_image_url,profile_image_url_https",
               })
