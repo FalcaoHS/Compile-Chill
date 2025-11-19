@@ -1,11 +1,11 @@
 /**
  * Theme configuration for Compile & Chill
  * 
- * Defines 6 unique visual themes with comprehensive design tokens.
+ * Defines 7 unique visual themes with comprehensive design tokens.
  * Each theme includes colors, typography, and effect variables.
  */
 
-export type ThemeId = 'cyber' | 'pixel' | 'neon' | 'terminal' | 'blueprint' | 'bruno-csharp'
+export type ThemeId = 'cyber' | 'pixel' | 'neon' | 'terminal' | 'blueprint' | 'bruno-csharp' | 'analista-sr'
 
 export interface Theme {
   name: string
@@ -16,18 +16,18 @@ export const THEMES: Record<ThemeId, Theme> = {
   cyber: {
     name: 'Cyber Hacker',
     vars: {
-      // Colors
-      '--color-bg': '#070912',
-      '--color-bg-secondary': '#0a0f1a',
-      '--color-primary': '#7ef9ff',
-      '--color-primary-hover': '#5dd5e0',
-      '--color-accent': '#7dd3fc',
-      '--color-accent-hover': '#60b8d4',
-      '--color-muted': '#94a3b8',
-      '--color-text': '#e2e8f0',
-      '--color-text-secondary': '#cbd5e1',
-      '--color-glow': 'rgba(126, 249, 255, 0.45)',
-      '--color-border': 'rgba(126, 249, 255, 0.2)',
+      // Colors - Ciano néon vibrante (hacker clássico)
+      '--color-bg': '#050a0f', // Preto azulado profundo
+      '--color-bg-secondary': '#0a1520', // Azul marinho escuro
+      '--color-primary': '#00ffff', // Ciano elétrico puro
+      '--color-primary-hover': '#33ffff',
+      '--color-accent': '#00d4ff', // Azul ciano brilhante
+      '--color-accent-hover': '#00e5ff',
+      '--color-muted': '#5a8a9f',
+      '--color-text': '#e0f7ff', // Texto ciano claro
+      '--color-text-secondary': '#a0d5e8',
+      '--color-glow': 'rgba(0, 255, 255, 0.5)', // Glow ciano forte
+      '--color-border': 'rgba(0, 255, 255, 0.25)',
       
       // Typography
       '--font': "'Roboto Mono', 'Courier New', monospace",
@@ -69,18 +69,18 @@ export const THEMES: Record<ThemeId, Theme> = {
   neon: {
     name: 'Neon Future',
     vars: {
-      // Colors
-      '--color-bg': '#0a0e27',
-      '--color-bg-secondary': '#0f1629',
-      '--color-primary': '#00f5ff',
-      '--color-primary-hover': '#00d4e0',
-      '--color-accent': '#ff00ff',
-      '--color-accent-hover': '#e000e0',
-      '--color-muted': '#6b7aa0',
+      // Colors - Rosa/Roxo néon futurista (totalmente diferente!)
+      '--color-bg': '#0d0221', // Roxo quase preto
+      '--color-bg-secondary': '#190339', // Roxo escuro profundo
+      '--color-primary': '#ff006e', // Rosa néon choque
+      '--color-primary-hover': '#ff1a7f',
+      '--color-accent': '#fb5607', // Laranja néon vibrante  
+      '--color-accent-hover': '#ff6b1a',
+      '--color-muted': '#8338ec', // Roxo médio
       '--color-text': '#ffffff',
-      '--color-text-secondary': '#e0e0e0',
-      '--color-glow': 'rgba(0, 245, 255, 0.6)',
-      '--color-border': 'rgba(0, 245, 255, 0.4)',
+      '--color-text-secondary': '#e0b3ff',
+      '--color-glow': 'rgba(255, 0, 110, 0.6)', // Glow rosa forte
+      '--color-border': 'rgba(255, 0, 110, 0.3)',
       
       // Typography
       '--font': "'Orbitron', 'Arial', sans-serif",
@@ -95,18 +95,18 @@ export const THEMES: Record<ThemeId, Theme> = {
   terminal: {
     name: 'Terminal Minimal',
     vars: {
-      // Colors
-      '--color-bg': '#1e1e1e',
-      '--color-bg-secondary': '#252525',
-      '--color-primary': '#4ec9b0',
-      '--color-primary-hover': '#3ab89f',
-      '--color-accent': '#569cd6',
-      '--color-accent-hover': '#4a8bc0',
-      '--color-muted': '#858585',
-      '--color-text': '#d4d4d4',
-      '--color-text-secondary': '#b4b4b4',
-      '--color-glow': 'rgba(78, 201, 176, 0.3)',
-      '--color-border': 'rgba(78, 201, 176, 0.2)',
+      // Colors - Verde Matrix / Terminal clássico
+      '--color-bg': '#0c0c0c', // Preto terminal
+      '--color-bg-secondary': '#1a1a1a', // Cinza terminal
+      '--color-primary': '#00ff00', // Verde Matrix puro
+      '--color-primary-hover': '#33ff33',
+      '--color-accent': '#00cc00', // Verde terminal escuro
+      '--color-accent-hover': '#00dd00',
+      '--color-muted': '#505050',
+      '--color-text': '#ccffcc', // Texto verde claro
+      '--color-text-secondary': '#88cc88',
+      '--color-glow': 'rgba(0, 255, 0, 0.3)', // Glow verde
+      '--color-border': 'rgba(0, 255, 0, 0.2)',
       
       // Typography
       '--font': "'Fira Code', 'Consolas', monospace",
@@ -222,6 +222,80 @@ export const THEMES: Record<ThemeId, Theme> = {
       '--idle-message': '"Life. Don\'t talk to me about life..."', // Frase idle
       '--idle-message-opacity': '0.3',
       '--idle-message-delay': '30s', // Aparece após 30s idle
+    },
+  },
+  'analista-sr': {
+    name: 'Analista Sr.',
+    vars: {
+      // Colors - Paleta corporativa profissional (sem néon, muito sóbrio)
+      '--color-bg': '#f5f7fa', // Cinza claro corporativo (LIGHT MODE!)
+      '--color-bg-secondary': '#e8ecf1', // Cinza gelo
+      '--color-primary': '#2c3e50', // Azul petróleo escuro (sério)
+      '--color-primary-hover': '#34495e',
+      '--color-accent': '#3498db', // Azul corporate limpo
+      '--color-accent-hover': '#2980b9',
+      '--color-secondary': '#7f8c8d', // Cinza neutro
+      '--color-highlight': '#16a085', // Verde corporativo discreto
+      '--color-muted': '#95a5a6', // Cinza médio
+      '--color-text': '#2c3e50', // Texto escuro (inversão!)
+      '--color-text-secondary': '#7f8c8d', // Texto cinza
+      '--color-glow': 'rgba(52, 152, 219, 0.15)', // Glow MUITO sutil
+      '--color-border': 'rgba(127, 140, 141, 0.3)',
+      '--color-error': '#e74c3c', // Vermelho corporativo
+      
+      // Typography - Sans-serif profissional
+      '--font': "'Inter', 'Segoe UI', 'Helvetica Neue', sans-serif",
+      '--font-size-base': '16px',
+      '--font-weight-normal': '400',
+      '--line-height': '1.6',
+      
+      // Effects - MINIMALISTAS (sem exageros)
+      '--glow-sm': '0 1px 3px rgba(0, 0, 0, 0.08)', // Sombra sutil
+      '--glow-md': '0 2px 6px rgba(0, 0, 0, 0.1)',
+      '--glow-lg': '0 4px 12px rgba(0, 0, 0, 0.12)',
+      '--glow-xl': '0 8px 24px rgba(0, 0, 0, 0.15)',
+      '--glow-intensity': '0.1', // Quase imperceptível
+      '--anim-duration': '200ms', // Rápido e eficiente
+      '--anim-easing': 'cubic-bezier(0.4, 0, 0.2, 1)',
+      '--border-radius': '8px', // Bordas arredondadas profissionais
+      '--pulse-speed': '0ms', // SEM pulse (muito profissional)
+      '--drift-speed': '0ms', // SEM drift
+      '--scanline-opacity': '0', // SEM scanlines
+      '--noise-opacity': '0', // SEM noise
+      '--blur-intensity': '0px', // SEM blur
+      '--cursor-blink': 'none', // SEM blink
+      '--minimal-opacity': '1', // Totalmente opaco
+      
+      // Efeitos corporativos
+      '--paper-texture': '0.02', // Leve textura de papel
+      '--card-elevation': '0 2px 8px rgba(0, 0, 0, 0.08)', // Elevação tipo Material
+      '--divider-opacity': '0.12', // Divisores sutis
+      '--table-stripe': 'rgba(127, 140, 141, 0.04)', // Linhas de tabela
+      
+      // Canvas/Game specific - Cores corporativas
+      '--orb-fill': '#3498db', // Azul corporativo
+      '--orb-stroke': '#2c3e50', // Azul petróleo
+      '--orb-glow': 'rgba(52, 152, 219, 0.2)',
+      '--orb-trail-opacity': '0.1',
+      '--orb-gravity': '1.0', // Normal
+      '--basket-fill': '#ecf0f1', // Cinza claro
+      '--basket-stroke': '#2c3e50',
+      '--basket-stroke-width': '2px',
+      '--particle-color-1': '#3498db',
+      '--particle-color-2': '#2c3e50',
+      '--particle-color-3': '#16a085',
+      '--particle-lifetime': '1200ms', // Rápido
+      '--particle-fade-delay': '200ms',
+      '--firework-color-1': '#3498db',
+      '--firework-color-2': '#2c3e50',
+      '--firework-color-3': '#16a085',
+      '--firework-speed': '1.2', // Rápido
+      '--firework-gravity': '1.0',
+      
+      // EXCLUSIVO: Tema profissional
+      '--professional-mode': 'true', // Flag para componentes
+      '--serif-accent': "'Merriweather', 'Georgia', serif", // Para títulos
+      '--system-font': 'system-ui', // Fallback system
     },
   },
 }
