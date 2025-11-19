@@ -29,10 +29,26 @@ export const authConfig: NextAuthConfig = {
         try {
           // Extract X account data
           const xId = account.providerAccountId
-          const name = profile?.name || user.name || ""
+          
+          // Profile pode vir em formatos diferentes (plano Free do X)
+          // Pode ser: { data: { name, ... } } ou objeto direto
+          const rawProfile: any = profile ?? {}
+          const profileData = rawProfile.data ?? rawProfile
+          
+          // Extrair name de vários lugares possíveis
+          const name = 
+            profileData?.name || 
+            rawProfile?.name || 
+            user.name || 
+            ""
+          
+          // Extrair avatar
           const avatar = 
-            (typeof profile?.profile_image_url_https === "string" 
-              ? profile.profile_image_url_https 
+            (typeof profileData?.profile_image_url_https === "string" 
+              ? profileData.profile_image_url_https 
+              : null) ||
+            (typeof rawProfile?.profile_image_url_https === "string" 
+              ? rawProfile.profile_image_url_https 
               : null) || 
             (typeof user.image === "string" ? user.image : null) || 
             null
@@ -40,10 +56,21 @@ export const authConfig: NextAuthConfig = {
           // Extract X username (slug) from profile
           // Twitter/X OAuth profile may have username in different fields
           const xUsername = 
-            (profile as any)?.screen_name || 
-            (profile as any)?.username || 
-            (profile as any)?.data?.username ||
+            profileData?.username ||
+            profileData?.screen_name ||
+            rawProfile?.screen_name || 
+            rawProfile?.username || 
             null
+
+          // Debug: Log profile structure para entender formato do X
+          console.log("Profile structure:", {
+            hasProfile: !!profile,
+            profileKeys: profile ? Object.keys(profile) : [],
+            hasData: !!(profile as any)?.data,
+            dataKeys: (profile as any)?.data ? Object.keys((profile as any).data) : [],
+            name: profileData?.name || rawProfile?.name || user.name || "NONE",
+            username: xUsername || "NONE",
+          })
 
           // Debug: Log account token info (without exposing full token)
           if (account.access_token) {
