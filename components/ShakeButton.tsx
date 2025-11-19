@@ -14,12 +14,14 @@ export function ShakeButton({ onShake }: ShakeButtonProps) {
   // Map theme IDs to CSS class names
   const getThemeClass = (themeId: string) => {
     const themeMap: Record<string, string> = {
+      'analista-jr': "shake-button--analista-jr",
+      'analista-sr': "shake-button--analista-sr",
       cyber: "shake-button--cyber",
       neon: "shake-button--neon",
       pixel: "shake-button--pixel",
       terminal: "shake-button--terminal",
       blueprint: "shake-button--blueprint",
-      vaporwave: "shake-button--vaporwave",
+      'bruno-csharp': "shake-button--bruno-csharp",
     }
     return themeMap[themeId] || "shake-button--cyber"
   }

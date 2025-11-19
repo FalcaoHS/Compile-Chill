@@ -429,6 +429,94 @@ body {
   opacity: 0.5;
 }
 
+/* ============================================
+   SHAKE BUTTON - Analista Jr. Theme
+   ============================================ */
+.shake-button--analista-jr {
+  background: linear-gradient(135deg, #2d2d2d 0%, #1a1a1a 100%);
+  color: #4ecdc4;
+  border: 2px solid #ff6b6b;
+  box-shadow: 
+    0 0 15px rgba(78, 205, 196, 0.5),
+    0 0 10px rgba(255, 107, 107, 0.3),
+    inset 0 0 20px rgba(78, 205, 196, 0.1),
+    0 2px 8px rgba(0, 0, 0, 0.5);
+  text-shadow: 
+    0 0 8px rgba(78, 205, 196, 0.8),
+    0 0 4px rgba(255, 107, 107, 0.5);
+}
+
+.shake-button--analista-jr:hover {
+  box-shadow: 
+    0 0 25px rgba(78, 205, 196, 0.7),
+    0 0 15px rgba(255, 107, 107, 0.5),
+    inset 0 0 30px rgba(78, 205, 196, 0.15),
+    0 4px 12px rgba(0, 0, 0, 0.6);
+}
+
+/* ============================================
+   SHAKE BUTTON - Analista Sr. Theme
+   ============================================ */
+.shake-button--analista-sr {
+  background: linear-gradient(135deg, #ecf0f1 0%, #e8ecf1 100%);
+  color: #2c3e50;
+  border: 2px solid #3498db;
+  border-radius: 8px; /* Mais arredondado (corporativo) */
+  box-shadow: 
+    0 2px 8px rgba(0, 0, 0, 0.1),
+    inset 0 1px 2px rgba(255, 255, 255, 0.8),
+    0 0 0 1px rgba(52, 152, 219, 0.1);
+  text-shadow: none;
+  font-weight: 600;
+}
+
+.shake-button--analista-sr:hover {
+  background: linear-gradient(135deg, #ffffff 0%, #f5f7fa 100%);
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.15),
+    inset 0 1px 2px rgba(255, 255, 255, 1),
+    0 0 0 2px rgba(52, 152, 219, 0.2);
+}
+
+/* ============================================
+   SHAKE BUTTON - Bruno C# de Burro Theme
+   ============================================ */
+.shake-button--bruno-csharp {
+  background: linear-gradient(135deg, #353b48 0%, #252a31 100%);
+  color: #5cdb95;
+  border: 2px solid #5cdb95;
+  box-shadow: 
+    0 0 10px rgba(92, 219, 149, 0.3),
+    inset 0 0 20px rgba(92, 219, 149, 0.08),
+    0 2px 6px rgba(0, 0, 0, 0.5);
+  text-shadow: 0 0 6px rgba(92, 219, 149, 0.5);
+  animation: melancholic-pulse 4s ease-in-out infinite; /* Pulse lento */
+}
+
+.shake-button--bruno-csharp:hover {
+  box-shadow: 
+    0 0 18px rgba(92, 219, 149, 0.5),
+    inset 0 0 30px rgba(92, 219, 149, 0.12),
+    0 4px 10px rgba(0, 0, 0, 0.6);
+  animation: none; /* Para o pulse no hover */
+}
+
+/* Animação de pulse melancólico */
+@keyframes melancholic-pulse {
+  0%, 100% {
+    box-shadow: 
+      0 0 10px rgba(92, 219, 149, 0.3),
+      inset 0 0 20px rgba(92, 219, 149, 0.08),
+      0 2px 6px rgba(0, 0, 0, 0.5);
+  }
+  50% {
+    box-shadow: 
+      0 0 15px rgba(92, 219, 149, 0.4),
+      inset 0 0 25px rgba(92, 219, 149, 0.1),
+      0 2px 6px rgba(0, 0, 0, 0.5);
+  }
+}
+
 /* Light Animations for Mobile Lite Mode */
 /* These animations use opacity/transform with will-change for optimal performance */
 

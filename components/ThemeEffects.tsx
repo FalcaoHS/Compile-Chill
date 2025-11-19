@@ -14,6 +14,34 @@ export function ThemeEffects() {
 
   return (
     <>
+      {/* ====== ANALISTA JR: Cores aleatórias tentando ser legal ====== */}
+      {theme === 'analista-jr' && (
+        <>
+          {/* Grid colorido meio torto */}
+          <div
+            className="fixed inset-0 pointer-events-none z-50"
+            style={{
+              backgroundImage: `
+                linear-gradient(rgba(78, 205, 196, 0.15) 1.5px, transparent 1.5px),
+                linear-gradient(90deg, rgba(255, 107, 107, 0.15) 1.5px, transparent 1.5px)
+              `,
+              backgroundSize: '35px 35px',
+            }}
+            aria-hidden="true"
+          />
+          {/* Dots aleatórios */}
+          <div
+            className="fixed inset-0 pointer-events-none z-50"
+            style={{
+              backgroundImage: `radial-gradient(circle, rgba(78, 205, 196, 0.25) 2px, transparent 2px)`,
+              backgroundSize: '45px 45px',
+              backgroundPosition: '10px 10px',
+            }}
+            aria-hidden="true"
+          />
+        </>
+      )}
+
       {/* ====== CYBER HACKER: Scanlines + Matrix Rain ====== */}
       {theme === 'cyber' && (
         <>

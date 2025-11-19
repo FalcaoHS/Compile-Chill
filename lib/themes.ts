@@ -1,11 +1,11 @@
 /**
  * Theme configuration for Compile & Chill
  * 
- * Defines 7 unique visual themes with comprehensive design tokens.
+ * Defines 8 unique visual themes with comprehensive design tokens.
  * Each theme includes colors, typography, and effect variables.
  */
 
-export type ThemeId = 'cyber' | 'pixel' | 'neon' | 'terminal' | 'blueprint' | 'bruno-csharp' | 'analista-sr'
+export type ThemeId = 'analista-jr' | 'analista-sr' | 'cyber' | 'pixel' | 'neon' | 'terminal' | 'blueprint' | 'bruno-csharp'
 
 export interface Theme {
   name: string
@@ -13,6 +13,50 @@ export interface Theme {
 }
 
 export const THEMES: Record<ThemeId, Theme> = {
+  'analista-jr': {
+    name: 'Analista Jr.',
+    vars: {
+      // Colors - Tentando ser profissional mas não consegue
+      '--color-bg': '#1a1a1a', // Preto "programador raiz"
+      '--color-bg-secondary': '#2d2d2d',
+      '--color-primary': '#ff6b6b', // Vermelho urgente (tudo é urgente)
+      '--color-primary-hover': '#ff5252',
+      '--color-accent': '#4ecdc4', // Verde água do tutorial
+      '--color-accent-hover': '#45b7aa',
+      '--color-muted': '#95a5a6',
+      '--color-text': '#ffffff', // Branco puro (sem contrast ratio)
+      '--color-text-secondary': '#ecf0f1',
+      '--color-glow': 'rgba(78, 205, 196, 0.7)', // Glow excessivo
+      '--color-border': 'rgba(255, 107, 107, 0.4)',
+      '--color-error': '#ff0000', // RGB puro
+      
+      // Typography - Pegou do primeiro tutorial
+      '--font': "'Roboto', 'Arial', sans-serif",
+      '--font-size-base': '17px', // Meio estranho mas "ficou legal"
+      
+      // Effects - Tudo meio exagerado
+      '--glow-sm': '0 0 12px rgba(78, 205, 196, 0.6)',
+      '--glow-md': '0 0 20px rgba(78, 205, 196, 0.7)',
+      '--glow-lg': '0 0 30px rgba(255, 107, 107, 0.8)',
+      '--glow-xl': '0 0 45px rgba(78, 205, 196, 0.9)',
+      '--glow-intensity': '1.8', // Muito glow
+      '--anim-duration': '150ms', // Rápido demais
+      '--anim-easing': 'ease-in-out',
+      '--border-radius': '12px', // Tudo bem arredondado
+      '--scanline-opacity': '0.08',
+      '--noise-opacity': '0.05',
+      
+      // Canvas/Game
+      '--orb-fill': '#ff6b6b',
+      '--orb-stroke': '#4ecdc4',
+      '--orb-glow': 'rgba(78, 205, 196, 0.6)',
+      '--basket-fill': '#2d2d2d',
+      '--basket-stroke': '#4ecdc4',
+      '--particle-color-1': '#ff6b6b',
+      '--particle-color-2': '#4ecdc4',
+      '--particle-color-3': '#f9ca24',
+    },
+  },
   cyber: {
     name: 'Cyber Hacker',
     vars: {
