@@ -5,6 +5,7 @@ import { Header } from "@/components/Header";
 import { ConditionalFooter } from "@/components/ConditionalFooter";
 import { ThemeEffects } from "@/components/ThemeEffects";
 import { StructuredData } from "@/components/StructuredData";
+import { GoogleAnalytics } from "@/components/GoogleAnalytics";
 
 export const metadata: Metadata = {
   title: {
@@ -96,6 +97,7 @@ export default function RootLayout({
         <StructuredData />
       </head>
       <body>
+        <GoogleAnalytics />
         <Providers>
           <ThemeEffects />
           <Header />
