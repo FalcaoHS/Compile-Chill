@@ -92,7 +92,7 @@ export const GET = withAuth(async (request: NextRequest, user) => {
     const twitterApiUrl = `https://api.twitter.com/2/users/${account.providerAccountId}/tweets`
     
     const params = new URLSearchParams({
-      max_results: "10", // Last 10 tweets
+      max_results: "1", // Last tweet only
       "tweet.fields": "created_at,public_metrics",
       exclude: "retweets,replies", // Only original tweets
     })
