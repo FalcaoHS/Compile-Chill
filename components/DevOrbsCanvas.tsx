@@ -542,6 +542,14 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
           // Find the orb
           const orb = orbsRef.current.find((o) => o.body === orbBody)
           if (orb && !scoredOrbsRef.current.has(orb.id)) {
+            // CRITICAL: Only score if orb is moving downward (velocity.y > 0)
+            // This prevents scoring when orb bounces UP through the sensor
+            const velocity = orbBody.velocity
+            if (velocity.y <= 0) {
+              // Orb is moving upward or stationary, don't score
+              return
+            }
+            
             // Mark as scored to prevent double scoring
             scoredOrbsRef.current.add(orb.id)
             
