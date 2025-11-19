@@ -108,28 +108,40 @@ export async function GET(request: NextRequest) {
     // Find users with active sessions (not expired)
     // Note: Session model doesn't have createdAt, so we use expires to filter recent sessions
     // Sessions that expire in the future and were likely created recently
-    const recentSessions = await prisma.session.findMany({
-      where: {
-        expires: {
-          gt: new Date(), // Session not expired (active sessions)
-        },
-      },
-      include: {
-        user: {
-          select: {
-            id: true,
-            name: true,
-            avatar: true,
-            xId: true,
-            updatedAt: true,
+    // Add timeout protection - if query takes too long, use fake profiles
+    let recentSessions: any[] = []
+    try {
+      recentSessions = await Promise.race([
+        prisma.session.findMany({
+          where: {
+            expires: {
+              gt: new Date(), // Session not expired (active sessions)
+            },
           },
-        },
-      },
-      orderBy: {
-        expires: "desc", // Order by expiration (newer sessions expire later)
-      },
-      take: 10,
-    })
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                avatar: true,
+                xId: true,
+                updatedAt: true,
+              },
+            },
+          },
+          orderBy: {
+            expires: "desc", // Order by expiration (newer sessions expire later)
+          },
+          take: 10,
+        }),
+        // Timeout after 2 seconds
+        new Promise<any[]>((_, reject) => 
+          setTimeout(() => reject(new Error('Query timeout')), 2000)
+        ),
+      ])
+    } catch (queryError) {
+      recentSessions = [] // Will trigger fallback to fake profiles
+    }
 
     // Also check users with recent profile updates (fallback if no recent sessions)
     let users: UserData[] = []
@@ -157,24 +169,35 @@ export async function GET(request: NextRequest) {
       users = Array.from(uniqueUsers.values()).slice(0, 10)
     } else {
       // Fallback: check users with recent profile updates
-      const recentUsers = await prisma.user.findMany({
-        where: {
-          updatedAt: {
-            gte: fiveMinutesAgo,
-          },
-        },
-        select: {
-          id: true,
-          name: true,
-          avatar: true,
-          xId: true,
-          updatedAt: true,
-        },
-        orderBy: {
-          updatedAt: "desc",
-        },
-        take: 10,
-      })
+      let recentUsers: any[] = []
+      try {
+        recentUsers = await Promise.race([
+          prisma.user.findMany({
+            where: {
+              updatedAt: {
+                gte: fiveMinutesAgo,
+              },
+            },
+            select: {
+              id: true,
+              name: true,
+              avatar: true,
+              xId: true,
+              updatedAt: true,
+            },
+            orderBy: {
+              updatedAt: "desc",
+            },
+            take: 10,
+          }),
+          // Timeout after 2 seconds
+          new Promise<any[]>((_, reject) => 
+            setTimeout(() => reject(new Error('Query timeout')), 2000)
+          ),
+        ])
+      } catch (queryError) {
+        recentUsers = [] // Will trigger fallback to fake profiles
+      }
 
       users = recentUsers.map((user) => {
         const userData: UserData = {

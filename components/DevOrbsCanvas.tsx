@@ -359,10 +359,8 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
 
     // Only reset spawn index if we're starting fresh (no orbs exist)
     if (orbsRef.current.length === 0) {
-            spawnIndexRef.current = 0
-    } else {
-      // Continue from where we left off - don't clear existing orbs!
-          }
+      spawnIndexRef.current = 0
+    }
 
     const spawnNext = () => {
       const isMobile = isMobileDevice()
@@ -374,7 +372,7 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
           clearInterval(spawnTimerRef.current)
           spawnTimerRef.current = null
         }
-                return
+        return
       }
 
       const user = users[spawnIndexRef.current]
@@ -671,13 +669,22 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
     }
 
     return () => {
-      // Cleanup on unmount only
+      // Cleanup on unmount only - don't clear interval if we're just re-rendering
+      // Only clear if component is actually unmounting
+      // We'll handle interval cleanup separately to avoid clearing it on re-renders
+    }
+  }, [users.length, engineRef.current, isLiteMode]) // React when users are loaded (removed startSpawnSequence to avoid re-creating on every render)
+  
+  // Separate cleanup effect that only runs on unmount
+  useEffect(() => {
+    return () => {
+      // This cleanup only runs on unmount
       if (spawnTimerRef.current) {
         clearInterval(spawnTimerRef.current)
         spawnTimerRef.current = null
       }
     }
-  }, [users.length, engineRef.current, isLiteMode, startSpawnSequence]) // React when users are loaded
+  }, []) // Empty deps = only cleanup on unmount
 
   // Handle shake function - throws all orbs upward with strong force
   const handleShake = useCallback(() => {
@@ -992,17 +999,70 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
       }
     }
 
+    // Helper function to release orb when dragged outside canvas
+    const releaseOrbOutsideCanvas = (e: MouseEvent | TouchEvent) => {
+      if (!draggedOrbRef.current) return
+      
+      const orb = draggedOrbRef.current
+      
+      // Restore body to dynamic
+      Body.setStatic(orb.body, false)
+      if (orb.body.collisionFilter) {
+        orb.body.collisionFilter.category = 0x0001
+        orb.body.collisionFilter.mask = 0xFFFFFFFF
+      }
+      
+      // Apply gentle velocity to bring orb back into view
+      const currentPos = getBodyPosition(orb.body)
+      const centerX = canvasSize.width / 2
+      const centerY = canvasSize.height / 2
+      const dx = centerX - currentPos.x
+      const dy = centerY - currentPos.y
+      const distance = Math.sqrt(dx * dx + dy * dy)
+      
+      if (distance > 0) {
+        // Normalize and apply gentle pull back
+        const pullStrength = 0.5
+        Body.setVelocity(orb.body, {
+          x: (dx / distance) * pullStrength,
+          y: (dy / distance) * pullStrength,
+        })
+      }
+      
+      // Reset drag state
+      isDraggingRef.current = false
+      draggedOrbRef.current = null
+      dragStartRef.current = null
+      
+      e.preventDefault()
+      e.stopPropagation()
+    }
+
     // Handle pointer move (update drag)
     const onPointerMove = (e: MouseEvent | TouchEvent) => {
       if (!isDraggingRef.current || !draggedOrbRef.current) return
 
       const pos = getPointerPos(e)
-      if (!pos) return
+      
+      // If pointer is outside canvas or position is invalid, release the orb
+      if (!pos) {
+        releaseOrbOutsideCanvas(e)
+        return
+      }
 
       // Clamp position within canvas bounds to prevent dragging outside
       const isMobile = isMobileDevice()
       const radius = isMobile ? ORB_RADIUS_MOBILE : ORB_RADIUS_DESKTOP
       const margin = radius + 10 // Extra margin to keep orb fully visible
+      
+      // Check if position is outside canvas bounds
+      const isOutsideCanvas = pos.x < 0 || pos.x > canvasSize.width || 
+                              pos.y < 0 || pos.y > canvasSize.height
+      
+      if (isOutsideCanvas) {
+        releaseOrbOutsideCanvas(e)
+        return
+      }
       
       const clampedPos = {
         x: Math.max(margin, Math.min(canvasSize.width - margin, pos.x)),
@@ -1034,36 +1094,75 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
         orb.body.collisionFilter.mask = 0xFFFFFFFF // Restore collision mask
       }
       
-      // Calculate throw force based on drag distance
-      if (pos && dragStartRef.current) {
-        const force = calculateThrowForce(dragStartRef.current, pos)
+      // Check if orb is outside canvas bounds
+      const currentPos = getBodyPosition(orb.body)
+      const isMobile = isMobileDevice()
+      const radius = isMobile ? ORB_RADIUS_MOBILE : ORB_RADIUS_DESKTOP
+      const margin = radius + 5
+      
+      const isOutsideCanvas = currentPos.x < -margin || currentPos.x > canvasSize.width + margin || 
+                              currentPos.y < -margin || currentPos.y > canvasSize.height + margin
+      
+      // If orb is outside canvas or position is invalid, bring it back
+      if (isOutsideCanvas || !pos) {
+        // First, clamp position to canvas bounds to ensure orb is visible
+        const clampedX = Math.max(margin, Math.min(canvasSize.width - margin, currentPos.x))
+        const clampedY = Math.max(margin, Math.min(canvasSize.height - margin, currentPos.y))
+        Body.setPosition(orb.body, { x: clampedX, y: clampedY })
         
-        // Cap maximum throw velocity to prevent orbs from flying off screen
-        const MAX_VELOCITY = 25 // Maximum velocity in any direction
-        const magnitude = Math.sqrt(force.x * force.x + force.y * force.y)
+        // Apply gentle velocity to bring orb back into center view
+        const centerX = canvasSize.width / 2
+        const centerY = canvasSize.height / 2
+        const dx = centerX - clampedX
+        const dy = centerY - clampedY
+        const distance = Math.sqrt(dx * dx + dy * dy)
         
-        let finalForce = force
-        if (magnitude > MAX_VELOCITY) {
-          // Scale down to max velocity while preserving direction
-          const scale = MAX_VELOCITY / magnitude
-          finalForce = {
-            x: force.x * scale,
-            y: force.y * scale,
-          }
+        if (distance > 0) {
+          // Normalize and apply gentle pull back
+          const pullStrength = 1.0 // Slightly stronger when released outside
+          Body.setVelocity(orb.body, {
+            x: (dx / distance) * pullStrength,
+            y: (dy / distance) * pullStrength,
+          })
+        } else {
+          // Fallback: gentle downward velocity
+          Body.setVelocity(orb.body, {
+            x: 0,
+            y: 2,
+          })
         }
-        
-        // Apply throw force
-        Body.setVelocity(orb.body, {
-          x: finalForce.x,
-          y: finalForce.y,
-        })
       } else {
-        // If no drag movement detected, apply gentle downward velocity
-        // This prevents orbs from being "stuck" when released without movement
-        Body.setVelocity(orb.body, {
-          x: 0,
-          y: 2, // Gentle downward push
-        })
+        // Normal throw calculation when inside canvas
+        if (dragStartRef.current) {
+          const force = calculateThrowForce(dragStartRef.current, pos)
+          
+          // Cap maximum throw velocity to prevent orbs from flying off screen
+          const MAX_VELOCITY = 25 // Maximum velocity in any direction
+          const magnitude = Math.sqrt(force.x * force.x + force.y * force.y)
+          
+          let finalForce = force
+          if (magnitude > MAX_VELOCITY) {
+            // Scale down to max velocity while preserving direction
+            const scale = MAX_VELOCITY / magnitude
+            finalForce = {
+              x: force.x * scale,
+              y: force.y * scale,
+            }
+          }
+          
+          // Apply throw force
+          Body.setVelocity(orb.body, {
+            x: finalForce.x,
+            y: finalForce.y,
+          })
+        } else {
+          // If no drag movement detected, apply gentle downward velocity
+          // This prevents orbs from being "stuck" when released without movement
+          Body.setVelocity(orb.body, {
+            x: 0,
+            y: 2, // Gentle downward push
+          })
+        }
       }
 
       // Reset drag state

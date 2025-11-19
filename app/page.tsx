@@ -39,22 +39,47 @@ export default function Home() {
 
   // Fetch recent users ONCE on page load
   useEffect(() => {
-    const fetchUsers = async () => {
+    const fetchUsers = async (retryCount = 0) => {
       try {
         setUsersLoading(true)
-        const response = await fetch("/api/users/recent")
+        
+        // Create AbortController for timeout
+        const controller = new AbortController()
+        const timeoutId = setTimeout(() => controller.abort(), 5000) // 5 second timeout
+        
+        const response = await fetch("/api/users/recent", {
+          signal: controller.signal,
+        })
+        
+        clearTimeout(timeoutId)
         
         if (!response.ok) {
           throw new Error(`Failed to fetch users: ${response.status}`)
         }
 
         const data = await response.json()
-        setUsers(data.users || [])
-        setUsersError(null)
+        
+        if (data.users && data.users.length > 0) {
+          setUsers(data.users)
+          setUsersError(null)
+        } else {
+          // API should return fake profiles, but if it doesn't, we'll handle it
+          setUsers([])
+          setUsersError(null) // Don't show error, fake profiles should be used
+        }
       } catch (error) {
-        console.error('[Home] Failed to load users:', error)
+        const isTimeout = error instanceof Error && error.name === 'AbortError'
+        const isNetworkError = error instanceof TypeError
+        
+        // Retry once if it's a timeout or network error
+        if (retryCount < 1 && (isTimeout || isNetworkError)) {
+          setTimeout(() => fetchUsers(retryCount + 1), 1000)
+          return
+        }
+        
+        // After retry or if it's not a network error, show error but don't block
         setUsersError("Failed to load users")
-        setUsers([]) // Fallback to empty - fake profiles will be used
+        setUsers([]) // Fallback to empty - API should return fake profiles
       } finally {
         setUsersLoading(false)
       }

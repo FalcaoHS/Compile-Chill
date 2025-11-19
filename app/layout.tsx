@@ -4,6 +4,7 @@ import { Providers } from "./providers";
 import { Header } from "@/components/Header";
 import { ConditionalFooter } from "@/components/ConditionalFooter";
 import { ThemeEffects } from "@/components/ThemeEffects";
+import { StructuredData } from "@/components/StructuredData";
 
 export const metadata: Metadata = {
   title: {
@@ -91,6 +92,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR">
+      <head>
+        <StructuredData />
+      </head>
       <body>
         <Providers>
           <ThemeEffects />
