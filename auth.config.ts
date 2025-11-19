@@ -1,9 +1,14 @@
 import Twitter from "next-auth/providers/twitter"
+import Google from "next-auth/providers/google"
+import Credentials from "next-auth/providers/credentials"
 import { authAdapter, updateUserFromOAuth } from "@/lib/auth-adapter"
 import { prisma } from "@/lib/prisma"
 import type { NextAuthConfig } from "next-auth"
 import { validateAndLogAuthEnvironment } from "@/lib/auth-env-validation"
 import { logSessionUserMismatch } from "@/lib/session-monitor"
+import { comparePassword } from "@/lib/password"
+import { encrypt } from "@/lib/encryption"
+import { convertImageUrlToBase64 } from "@/lib/avatar"
 
 // 🔐 SECURITY: Validate authentication environment variables on server startup
 // This prevents runtime errors and security misconfigurations
@@ -65,9 +70,137 @@ export const authConfig: NextAuthConfig = {
         }
       },
     } as any),
+    Google({
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+    }),
+    Credentials({
+      name: "Email",
+      credentials: {
+        email: {
+          label: "Email",
+          type: "email",
+          placeholder: "seu@email.com",
+        },
+        password: {
+          label: "Senha",
+          type: "password",
+        },
+        rememberMe: {
+          label: "Permanecer logado",
+          type: "checkbox",
+        },
+      },
+      async authorize(credentials) {
+        if (!credentials?.email || !credentials?.password) {
+          return null
+        }
+
+        try {
+          // Find user by email
+          const user = await prisma.user.findUnique({
+            where: { email: credentials.email as string },
+            select: {
+              id: true,
+              email: true,
+              passwordHash: true,
+              nameEncrypted: true,
+              avatar: true,
+            },
+          })
+
+          if (!user || !user.passwordHash) {
+            return null
+          }
+
+          // Compare password
+          const passwordMatch = await comparePassword(
+            credentials.password as string,
+            user.passwordHash
+          )
+
+          if (!passwordMatch) {
+            return null
+          }
+
+          // Decrypt name if encrypted
+          let name = ""
+          if (user.nameEncrypted) {
+            try {
+              const { decrypt } = await import("@/lib/encryption")
+              name = decrypt(user.nameEncrypted)
+            } catch (error) {
+              console.error("❌ [AUTH] Failed to decrypt name:", error)
+              name = "Usuário"
+            }
+          }
+
+          // Return user object for NextAuth
+          return {
+            id: user.id.toString(),
+            email: user.email,
+            name: name || "Usuário",
+            image: user.avatar || null,
+            // Store rememberMe preference for session callback
+            rememberMe: credentials.rememberMe === true || credentials.rememberMe === "true",
+          }
+        } catch (error) {
+          console.error("❌ [AUTH] Credentials authorization error:", error)
+          return null
+        }
+      },
+    }),
   ],
   callbacks: {
     async signIn({ user, account, profile }) {
+      // Handle Google OAuth
+      if (account?.provider === "google" && account.providerAccountId) {
+        try {
+          const googleId = account.providerAccountId
+          const googleEmail = user.email || (profile as any)?.email
+          const googleName = user.name || (profile as any)?.name || ""
+          const googleImage = user.image || (profile as any)?.picture
+
+          // Check if user already exists (by email or by Google account)
+          const existingAccount = await prisma.account.findUnique({
+            where: {
+              provider_providerAccountId: {
+                provider: "google",
+                providerAccountId: googleId,
+              },
+            },
+            include: { user: true },
+          })
+
+          // If user exists and has completed setup, allow sign in
+          if (existingAccount?.user) {
+            // User already configured, update tokens and continue
+            await prisma.account.update({
+              where: { id: existingAccount.id },
+              data: {
+                refresh_token: account.refresh_token,
+                access_token: account.access_token,
+                expires_at: account.expires_at,
+                token_type: account.token_type,
+                scope: account.scope,
+                id_token: typeof account.id_token === "string" ? account.id_token : null,
+                session_state: typeof account.session_state === "string" ? account.session_state : null,
+              },
+            })
+            return true
+          }
+
+          // First-time Google user - will redirect to /setup-profile
+          // Store Google account data temporarily for setup page
+          // The adapter will create the Account record, but User will be created on /setup-profile
+          return true
+        } catch (error) {
+          console.error("❌ [AUTH] Google OAuth signIn error:", error)
+          return false
+        }
+      }
+
+      // Handle Twitter/X OAuth (existing logic)
       if (account?.provider === "twitter" && account.providerAccountId) {
         try {
           // Extract X account data
@@ -337,8 +470,20 @@ export const authConfig: NextAuthConfig = {
       return session
     },
     async redirect({ url, baseUrl }) {
-      // Debug: Log redirect info
+      // For popup authentication, always redirect to callback page
+      // The callback page will check sessionStorage to determine if it's a popup
+      const urlObj = new URL(url, baseUrl)
+      const callbackUrl = urlObj.searchParams.get("callbackUrl")
       
+      // If callbackUrl contains our callback endpoint, it's a popup flow
+      if (callbackUrl && callbackUrl.includes("/api/auth/callback")) {
+        return callbackUrl
+      }
+
+      // For Google OAuth, check if user needs to complete profile setup
+      // This will be handled by the /setup-profile page checking if User exists
+      // For now, redirect all Google callbacks to check setup status
+      // The /setup-profile page will redirect to home if already configured
       
       // Redirect to home page after successful authentication
       if (url === baseUrl || url.startsWith(baseUrl + "/")) {
@@ -349,7 +494,7 @@ export const authConfig: NextAuthConfig = {
   },
   session: {
     strategy: "database",
-    maxAge: 30 * 24 * 60 * 60, // 30 days
+    maxAge: 30 * 24 * 60 * 60, // 30 days (default, can be overridden by Remember Me)
     updateAge: 24 * 60 * 60, // 24 hours
   },
   pages: {

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { handleApiError, ApiErrors } from "@/lib/api-errors"
+import { decrypt } from "@/lib/encryption"
 
 /**
  * GET /api/users/[id]
@@ -27,8 +28,11 @@ export async function GET(
       select: {
         id: true,
         name: true,
+        nameEncrypted: true,
         avatar: true,
         xId: true,
+        xUsername: true,
+        email: true,
         showPublicHistory: true,
         createdAt: true,
       },
@@ -38,15 +42,30 @@ export async function GET(
       throw ApiErrors.notFound("Usuário não encontrado")
     }
 
+    // Decrypt name if encrypted
+    let displayName = dbUser.name
+    if (dbUser.nameEncrypted) {
+      try {
+        displayName = decrypt(dbUser.nameEncrypted)
+      } catch (error) {
+        console.error("❌ [API] Failed to decrypt name for user:", userId, error)
+        // Fallback to plain name or default
+        displayName = dbUser.name || "Usuário"
+      }
+    }
+
+    // Determine handle (identifier) - prefer xUsername, then xId, then email, then name
+    const handle = dbUser.xUsername || dbUser.xId || dbUser.email || displayName
+
     // If privacy is disabled, return minimal data
     if (!dbUser.showPublicHistory) {
       return NextResponse.json(
         {
           user: {
             id: dbUser.id,
-            name: dbUser.name,
+            name: displayName,
             avatar: dbUser.avatar,
-            handle: dbUser.xId,
+            handle,
             isPrivate: true,
             message: "Este usuário mantém o histórico privado",
           },
@@ -105,9 +124,9 @@ export async function GET(
       {
         user: {
           id: dbUser.id,
-          name: dbUser.name,
+          name: displayName,
           avatar: dbUser.avatar,
-          handle: dbUser.xId,
+          handle,
           joinDate: dbUser.createdAt,
           isPrivate: false,
           stats: {

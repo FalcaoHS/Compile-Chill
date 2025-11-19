@@ -10,8 +10,10 @@
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.1",
+    "@types/bcrypt": "^6.0.0",
     "@upstash/ratelimit": "^2.0.7",
     "@upstash/redis": "^1.35.6",
+    "bcrypt": "^6.0.0",
     "framer-motion": "^12.23.24",
     "matter-js": "^0.20.0",
     "next": "14.2.0",

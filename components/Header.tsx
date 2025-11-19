@@ -1,14 +1,16 @@
 "use client"
 
 import { useSession } from "next-auth/react"
+import { useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { LoginButton } from "./LoginButton"
+import { LoginModal } from "./auth/LoginModal"
 import { ProfileButton } from "./ProfileButton"
 import { ThemeSwitcher } from "./ThemeSwitcher"
 
 export function Header() {
   const { data: session, status } = useSession()
+  const [showLoginModal, setShowLoginModal] = useState(false)
 
   return (
     <header
@@ -88,9 +90,30 @@ export function Header() {
             ) : session ? (
               <ProfileButton session={session} />
             ) : (
-              <LoginButton />
+              <button
+                onClick={() => setShowLoginModal(true)}
+                className="
+                  inline-flex items-center justify-center gap-2
+                  px-4 py-2 rounded-lg
+                  font-medium text-sm
+                  transition-all duration-200
+                  focus:outline-none focus:ring-2 focus:ring-offset-2
+                  bg-primary text-page
+                  hover:bg-primary-hover
+                  focus:ring-primary
+                  active:scale-95
+                  shadow-glow-sm
+                "
+                aria-label="Entrar"
+              >
+                Entrar
+              </button>
             )}
           </div>
+          <LoginModal
+            isOpen={showLoginModal}
+            onClose={() => setShowLoginModal(false)}
+          />
         </div>
       </div>
     </header>

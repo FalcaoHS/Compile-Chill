@@ -84,14 +84,17 @@ export const authAdapter: Adapter = {
   ...defaultAdapter,
   
   async createUser(user) {
-    // If user has xId (from signIn callback), use it
+    // If user has xId (from Twitter/X OAuth), use it
     const xId = (user as any).xId
     const xUsername = (user as any).xUsername
     
+    // If user has email and passwordHash (from Credentials provider), use them
+    const email = (user as any).email
+    const passwordHash = (user as any).passwordHash
+    const nameEncrypted = (user as any).nameEncrypted
+    
     if (xId) {
-      // createUser should only create NEW users
-      // If user exists, NextAuth will use getUserByAccount instead
-      // So we just create the user with xId
+      // Twitter/X OAuth user - create with xId
       try {
         const newUser = await prisma.user.create({
           data: {
@@ -102,62 +105,81 @@ export const authAdapter: Adapter = {
           },
         })
         
-        console.log('✅ [AUTH-ADAPTER] User created:', {
+        console.log('✅ [AUTH-ADAPTER] User created (X OAuth):', {
           userId: newUser.id,
           xId: newUser.xId,
           name: newUser.name,
-          xUsername: newUser.xUsername,
         })
         
-        // Return in the format NextAuth expects
-        // ⚠️ ATENÇÃO: AVATAR - Sempre retornar image no createUser
         return {
           id: newUser.id.toString(),
           name: newUser.name,
           email: null,
           emailVerified: null,
-          image: newUser.avatar || null, // ⚠️ CRÍTICO: Não remover este campo!
+          image: newUser.avatar || null,
         } as any
       } catch (error) {
-        // If error is about missing xUsername field, retry without it
-        if (error instanceof Error && error.message.includes('xUsername')) {
-          console.warn('⚠️  [AUTH-ADAPTER] Retrying user creation without xUsername')
-          const newUser = await prisma.user.create({
-            data: {
-              xId,
-              name: user.name || "",
-              avatar: user.image || null,
-            },
-          })
-          console.log('✅ [AUTH-ADAPTER] User created (without xUsername):', {
-            userId: newUser.id,
-            xId: newUser.xId,
-            name: newUser.name,
-          })
-          return {
-            id: newUser.id.toString(),
-            name: newUser.name,
-            email: null,
-            emailVerified: null,
-            image: newUser.avatar || null,
-          } as any
-        }
-        // Log error for debugging
-        console.error('❌ [AUTH-ADAPTER] Error creating user:', error)
-        throw error // Re-throw if it's a different error
+        console.error('❌ [AUTH-ADAPTER] Error creating X OAuth user:', error)
+        throw error
       }
-    }
-    
-    // Fallback to default adapter behavior if no xId
-    try {
-      const createdUser = await defaultAdapter.createUser!(user)
-      console.log('✅ [AUTH-ADAPTER] User created (default adapter):', {
-        userId: createdUser.id,
-      })
-      return createdUser
-    } catch (error) {
-      console.error('❌ [AUTH-ADAPTER] Error creating user (default adapter):', error)
-      throw error
+    } else if (email && passwordHash) {
+      // Email/Password user - create with email and passwordHash
+      try {
+        const newUser = await prisma.user.create({
+          data: {
+            email,
+            passwordHash,
+            nameEncrypted: nameEncrypted || null,
+            name: user.name || "", // Fallback name (will be decrypted from nameEncrypted when needed)
+            avatar: user.image || null,
+          },
+        })
+        
+        console.log('✅ [AUTH-ADAPTER] User created (Email/Password):', {
+          userId: newUser.id,
+          email: newUser.email,
+        })
+        
+        return {
+          id: newUser.id.toString(),
+          name: user.name || "Usuário",
+          email: newUser.email,
+          emailVerified: null,
+          image: newUser.avatar || null,
+        } as any
+      } catch (error) {
+        console.error('❌ [AUTH-ADAPTER] Error creating Email/Password user:', error)
+        throw error
+      }
+    } else {
+      // Google OAuth or other providers - create without xId
+      // Note: Google users will complete setup on /setup-profile page
+      try {
+        const newUser = await prisma.user.create({
+          data: {
+            email: user.email || null,
+            name: user.name || "",
+            avatar: user.image || null,
+            // Google users will have nameEncrypted set on /setup-profile
+          },
+        })
+        
+        console.log('✅ [AUTH-ADAPTER] User created (Google/Other):', {
+          userId: newUser.id,
+          email: newUser.email,
+        })
+        
+        return {
+          id: newUser.id.toString(),
+          name: newUser.name,
+          email: newUser.email,
+          emailVerified: null,
+          image: newUser.avatar || null,
+        } as any
+      } catch (error) {
+        console.error('❌ [AUTH-ADAPTER] Error creating user (Google/Other):', error)
+        throw error
+      }
     }
   },
   
@@ -205,8 +227,6 @@ export const authAdapter: Adapter = {
   async getUserByAccount({ providerAccountId, provider }) {
     // Override to find user by xId for Twitter provider
     if (provider === "twitter") {
-      
-      
       const user = await prisma.user.findUnique({
         where: { xId: providerAccountId },
         include: {
@@ -216,18 +236,23 @@ export const authAdapter: Adapter = {
       })
       
       if (user) {
-        // ⚠️ ATENÇÃO: AVATAR - Sempre retornar image (mesmo que null)
         return {
           id: user.id.toString(),
           name: user.name,
           email: null,
           emailVerified: null,
-          image: user.avatar || null, // ⚠️ CRÍTICO: Não remover este campo!
+          image: user.avatar || null,
         } as any
       }
     }
     
-    // Fallback to default adapter behavior
+    // For Google and other providers, use default adapter (searches by Account table)
+    // This works because Account table has unique constraint on [provider, providerAccountId]
+    if (provider === "google" || provider === "credentials") {
+      return defaultAdapter.getUserByAccount!({ providerAccountId, provider })
+    }
+    
+    // Fallback to default adapter behavior for any other provider
     return defaultAdapter.getUserByAccount!({ providerAccountId, provider })
   },
   

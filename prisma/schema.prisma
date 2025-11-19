@@ -10,19 +10,23 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// User model for storing user data from X OAuth
+// User model for storing user data from X OAuth, Google OAuth, and Email/Password
 model User {
-  id        Int      @id @default(autoincrement())
-  name      String
-  avatar    String?
-  xId       String   @unique
-  xUsername String? // X/Twitter username (slug) - e.g., "shuktv"
+  id                Int      @id @default(autoincrement())
+  name              String
+  avatar            String?  @db.Text // Base64-encoded avatar image
+  xId               String?  @unique // Optional: for X OAuth users
+  xUsername         String? // X/Twitter username (slug) - e.g., "shuktv"
+  // Email/Password authentication fields
+  email             String?  @unique // Optional: for email/password users
+  passwordHash      String? // Optional: bcrypt hash for email/password users
+  nameEncrypted     String? // Optional: AES-256 encrypted name for privacy
   // Theme preference: 'cyber', 'pixel', 'neon', 'terminal', or 'blueprint'
-  theme            String?
+  theme             String?
   // Privacy setting: controls whether game history is visible on public profile
-  showPublicHistory Boolean @default(true)
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  showPublicHistory Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
   // NextAuth relationships
   accounts Account[]
@@ -35,6 +39,7 @@ model User {
   scoreValidationFails ScoreValidationFail[]
 
   @@index([xId])
+  @@index([email])
   @@index([id])
   @@map("users")
 }
