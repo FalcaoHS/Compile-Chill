@@ -61,7 +61,7 @@ async function attemptProactiveRenewal(): Promise<void> {
       logSessionRenewal(false)
     }
   } catch (error) {
-    console.error('Session renewal error:', error)
+    
     logSessionRenewal(false)
   }
 }

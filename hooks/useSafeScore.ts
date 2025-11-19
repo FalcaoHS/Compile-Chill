@@ -86,7 +86,7 @@ export function useSafeScore(): UseSafeScoreReturn {
           }
         } catch (error) {
           // Network error - score is already in localStorage, will retry later
-          console.error('Error submitting score:', error)
+          
           logScoreSaveFailure(data.gameId, 1)
           showToast('Sua pontuação será enviada quando você entrar novamente.', 'warning')
           return false

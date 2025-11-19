@@ -82,12 +82,7 @@ export default function HackGridPage() {
       const saveScore = async () => {
         try {
           // Debug: Log authentication status
-          console.log('[score-submission] Attempting to save score', {
-            hasSession: !!session,
-            hasUser: !!session?.user,
-            userId: session?.user?.id,
-            gameId: 'hack-grid',
-          })
+          
           
           const scoreData = getScoreData(gameState)
           
@@ -122,24 +117,17 @@ export default function HackGridPage() {
           if (!response.ok) {
             if (response.status === 401) {
               const errorData = await response.json().catch(() => ({}))
-              console.warn('[score-submission] User not authenticated, score not saved to server', {
-                error: errorData,
-                sessionStatus: {
-                  hasSession: !!session,
-                  hasUser: !!session?.user,
-                  userId: session?.user?.id,
-                },
-              })
+              
             } else {
               const error = await response.json()
-              console.error('[score-submission] Failed to save score:', error)
+              
             }
           } else {
             const result = await response.json().catch(() => ({}))
-            console.log('[score-submission] Score saved successfully!', result)
+            
           }
         } catch (error) {
-          console.error('Error saving score:', error)
+          
         }
       }
       
@@ -177,9 +165,9 @@ export default function HackGridPage() {
         const newState = addConnection(prevState, draggedNodeId, targetNodeId)
         // Debug: log connection attempt
         if (newState.connections.length === prevState.connections.length) {
-          console.log('Connection failed validation:', draggedNodeId, '->', targetNodeId)
+          
         } else {
-          console.log('Connection added:', draggedNodeId, '->', targetNodeId, 'Total:', newState.connections.length)
+          
         }
         return newState
       })

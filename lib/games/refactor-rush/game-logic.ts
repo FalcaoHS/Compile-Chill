@@ -340,7 +340,7 @@ export function loadLevelByNumber(levelNumber: number): Level | null {
 
   // Validate level structure
   if (!validateLevel(level)) {
-    console.error(`Invalid level structure for level ${levelNumber}`)
+    
     return null
   }
 

@@ -89,7 +89,7 @@ export class DropManager {
     // Get theme colors
     const themeColors = this.getThemeColors()
     if (!themeColors) {
-      console.warn('DropManager: Theme colors not available, skipping spawn')
+      
       return
     }
 

@@ -247,17 +247,17 @@ export default function DebugMazePage() {
           
           if (!response.ok) {
             if (response.status === 401) {
-              console.warn('[score-submission] User not authenticated, score not saved to server')
+              
             } else {
               const error = await response.json()
-              console.error('[score-submission] Failed to save score:', error)
+              
             }
           } else {
             const result = await response.json().catch(() => ({}))
-            console.log('[score-submission] Score saved successfully!', result)
+            
           }
         } catch (error) {
-          console.error('Error saving score:', error)
+          
         }
       }
       

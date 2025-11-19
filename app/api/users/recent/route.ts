@@ -92,13 +92,6 @@ export async function GET(request: NextRequest) {
     // Check cache
     const now = Date.now()
     if (cache && (now - cache.timestamp) < CACHE_TTL_MS) {
-      // Debug: Log cached data
-      console.log("📦 Retornando dados do cache:", {
-        usersCount: cache.data.length,
-        usersWithAvatar: cache.data.filter(u => u.avatar).length,
-        cacheAge: now - cache.timestamp,
-      })
-      
       return NextResponse.json(
         {
           users: cache.data,
@@ -106,9 +99,8 @@ export async function GET(request: NextRequest) {
         { status: 200 }
       )
     }
+
     
-    // Cache expired or doesn't exist - fetch fresh data
-    console.log("🔄 Cache expirado ou não existe, buscando dados frescos...")
 
     // Calculate time threshold (5 minutes ago)
     const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000)
@@ -156,12 +148,7 @@ export async function GET(request: NextRequest) {
           }
           
           // Debug: Log avatar status
-          console.log("📋 User data from session:", {
-            userId: userData.userId,
-            hasAvatar: !!userData.avatar,
-            avatarValue: userData.avatar ? "TEM_AVATAR" : "SEM_AVATAR",
-            username: userData.username,
-          })
+          
           
           uniqueUsers.set(session.userId, userData)
         }
@@ -198,12 +185,7 @@ export async function GET(request: NextRequest) {
         }
         
         // Debug: Log avatar status
-        console.log("📋 User data from recent users:", {
-          userId: userData.userId,
-          hasAvatar: !!userData.avatar,
-          avatarValue: userData.avatar ? "TEM_AVATAR" : "SEM_AVATAR",
-          username: userData.username,
-        })
+        
         
         return userData
       })

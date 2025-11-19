@@ -125,11 +125,11 @@ export default function ProfilePage() {
               }
             }
           } catch (error) {
-            console.error("Error fetching tweets:", error)
+            
             setTweetsError("Erro ao carregar tweets")
           }
         } catch (error) {
-          console.error("Error fetching profile data:", error)
+          
         } finally {
           setLoading(false)
           fetchingRef.current = false

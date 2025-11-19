@@ -37,7 +37,7 @@ export class LegendaryEffects {
       getAvailable = budgetModule.getAvailableParticles
     } catch (e) {
       // Budget system not available, skip budget check
-      console.warn('Particle budget system not available, skipping budget check')
+      
     }
     
     let particleCount = count

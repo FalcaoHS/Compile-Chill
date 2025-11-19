@@ -49,15 +49,7 @@ export const GET = withAuth(async (request: NextRequest, user) => {
     })
 
     // Debug: Log account info (without exposing token)
-    console.log("Account found:", {
-      hasAccount: !!account,
-      hasAccessToken: !!account?.access_token,
-      hasRefreshToken: !!account?.refresh_token,
-      providerAccountId: account?.providerAccountId,
-      expiresAt: account?.expires_at,
-      tokenType: account?.token_type,
-      scope: account?.scope,
-    })
+    
 
     if (!account) {
       return NextResponse.json(
@@ -112,10 +104,7 @@ export const GET = withAuth(async (request: NextRequest, user) => {
         // Rate limit é por aplicação, não por usuário
         // No plano Free do Twitter, o limite é bem restritivo
         const retryAfter = response.headers.get("retry-after") || "15"
-        console.warn("⚠️ Rate limit atingido na API do Twitter:", {
-          retryAfter,
-          endpoint: twitterApiUrl,
-        })
+        
         
         return NextResponse.json(
           {

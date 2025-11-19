@@ -57,7 +57,7 @@ export function getPendingScores(): PendingScore[] {
     
     return validScores
   } catch (error) {
-    console.error('Error reading pending scores:', error)
+    
     return []
   }
 }
@@ -71,7 +71,7 @@ function savePendingScores(scores: PendingScore[]): void {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(scores))
   } catch (error) {
-    console.error('Error saving pending scores:', error)
+    
   }
 }
 
@@ -162,7 +162,7 @@ async function submitScore(score: PendingScore): Promise<boolean> {
     
     return true
   } catch (error) {
-    console.error('Error submitting score:', error)
+    
     return false
   }
 }

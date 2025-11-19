@@ -151,7 +151,7 @@ export function EmoteBubble({
 
         animationFrameRef.current = requestAnimationFrame(render)
       } catch (error) {
-        console.error('EmoteBubble render error:', error)
+        
         if (handleCanvasCrash(error as Error, 'EmoteBubble')) {
           setTimeout(() => {
             animationFrameRef.current = requestAnimationFrame(render)

@@ -88,7 +88,7 @@ export function initMultiTabProtection(): void {
       requestOwnership()
     }
   } catch (error) {
-    console.warn('BroadcastChannel not supported, multi-tab protection disabled:', error)
+    
   }
 }
 
@@ -210,7 +210,7 @@ function sendMessage(data: any): void {
       timestamp: Date.now(),
     })
   } catch (error) {
-    console.warn('Error sending BroadcastChannel message:', error)
+    
   }
 }
 

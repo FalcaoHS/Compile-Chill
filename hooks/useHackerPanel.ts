@@ -70,7 +70,7 @@ async function fetchHackerPanelData(): Promise<{
       recentLogins: recentLoginsData.logins || [],
     }
   } catch (error) {
-    console.error('Error fetching hacker panel data:', error)
+    
     return {
       onlineUsers: 0,
       activeGames: 0,

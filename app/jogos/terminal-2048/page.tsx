@@ -159,12 +159,12 @@ export default function Terminal2048Page() {
           
           if (!response.ok) {
             const error = await response.json()
-            console.error('Failed to save score:', error)
+            
           } else {
-            console.log('Score saved successfully!')
+            
           }
         } catch (error) {
-          console.error('Error saving score:', error)
+          
         }
       }
       

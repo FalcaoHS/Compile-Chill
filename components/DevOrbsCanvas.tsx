@@ -165,15 +165,13 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
   useEffect(() => {
     setIsMounted(true)
     const size = calculateCanvasSize()
-    console.log("Canvas size calculated:", size)
-    if (size.width > 0 && size.height > 0) {
+        if (size.width > 0 && size.height > 0) {
       setCanvasSize(size)
     } else {
       // Retry after a short delay
       setTimeout(() => {
         const retrySize = calculateCanvasSize()
-        console.log("Canvas size retry:", retrySize)
-        if (retrySize.width > 0 && retrySize.height > 0) {
+                if (retrySize.width > 0 && retrySize.height > 0) {
           setCanvasSize(retrySize)
         }
       }, 100)
@@ -213,31 +211,25 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
   const loadAvatarImage = useCallback((avatarUrl: string | null, orbId: string): Promise<HTMLImageElement | null> => {
     return new Promise((resolve) => {
       if (!avatarUrl) {
-        console.log("⚠️ DevOrbsCanvas: Tentando carregar avatar sem URL para orb:", orbId)
-        resolve(null)
+                resolve(null)
         return
       }
 
       // Check cache
       if (imagesRef.current.has(avatarUrl)) {
-        console.log("✅ DevOrbsCanvas: Avatar já carregado (cache):", avatarUrl.substring(0, 50) + "...")
         resolve(imagesRef.current.get(avatarUrl)!)
         return
       }
-      
-      console.log("🔄 DevOrbsCanvas: Carregando novo avatar:", avatarUrl.substring(0, 50) + "...")
 
       const img = new Image()
       img.crossOrigin = "anonymous"
       
       img.onload = () => {
-        console.log("✅ DevOrbsCanvas: Avatar carregado com sucesso:", avatarUrl.substring(0, 50) + "...")
         imagesRef.current.set(avatarUrl, img)
         resolve(img)
       }
       
       img.onerror = (error) => {
-        console.warn(`❌ DevOrbsCanvas: Falha ao carregar avatar para orb ${orbId}:`, avatarUrl.substring(0, 50) + "...", error)
         resolve(null)
       }
       
@@ -364,12 +356,10 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
 
     // Only reset spawn index if we're starting fresh (no orbs exist)
     if (orbsRef.current.length === 0) {
-      console.log("DevOrbsCanvas: starting fresh spawn sequence")
-      spawnIndexRef.current = 0
+            spawnIndexRef.current = 0
     } else {
       // Continue from where we left off - don't clear existing orbs!
-      console.log(`DevOrbsCanvas: continuing spawn sequence. Current orbs: ${orbsRef.current.length}, spawnIndex: ${spawnIndexRef.current}`)
-    }
+          }
 
     const spawnNext = () => {
       // Stop if we've spawned all users or reached max orbs
@@ -378,8 +368,7 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
           clearInterval(spawnTimerRef.current)
           spawnTimerRef.current = null
         }
-        console.log(`DevOrbsCanvas: spawn sequence finished. Final orbs count: ${orbsRef.current.length}`)
-        return
+                return
       }
 
       const user = users[spawnIndexRef.current]
@@ -409,7 +398,6 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
     window.addEventListener("resize", handleResize)
     return () => window.removeEventListener("resize", handleResize)
   }, [isMounted])
-
 
   // Listen for test 99 baskets event
   useEffect(() => {
@@ -443,12 +431,10 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
 
     // Skip physics engine initialization in mobile lite mode
     if (isLiteMode) {
-      console.log("Mobile lite mode active - skipping physics engine initialization")
-      return
+            return
     }
 
-    console.log("Initializing physics engine...", { width: size.width, height: size.height })
-
+    
     // Get physics config based on device
     const config = getPhysicsConfig()
 
@@ -457,8 +443,7 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
     engineRef.current = engine
     worldRef.current = engine.world
 
-    console.log("Physics engine created:", !!engineRef.current)
-
+    
     // Create boundaries
     const boundaries = createBoundaries(size.width, size.height)
     boundaries.forEach((boundary) => {
@@ -640,8 +625,7 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
         clearInterval(spawnTimerRef.current)
       }
       Matter.Events.off(engine, 'collisionStart')
-      console.log("DevOrbsCanvas: cleaning up physics engine. Clearing orbs. Current count:", orbsRef.current.length)
-      if (engineRef.current) {
+            if (engineRef.current) {
         Matter.Engine.clear(engineRef.current)
         engineRef.current = null
         worldRef.current = null
@@ -657,12 +641,10 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
   useEffect(() => {
     // Skip spawn in mobile lite mode
     if (isLiteMode) {
-      console.log("Mobile lite mode active - skipping orb spawn")
       return
     }
     
-    console.log("Spawn effect triggered:", { usersCount: users.length, hasEngine: !!engineRef.current, currentOrbs: orbsRef.current.length })
-    
+        
     // Only start spawn if:
     // 1. We have users
     // 2. Engine is ready
@@ -672,11 +654,9 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
                          (orbsRef.current.length < MAX_ORBS && spawnIndexRef.current < users.length)
       
       if (shouldSpawn) {
-        console.log("Starting/continuing spawn sequence...")
-        startSpawnSequence()
+                startSpawnSequence()
       } else {
-        console.log("Spawn skipped - already have enough orbs or finished spawning")
-      }
+              }
     }
 
     return () => {
@@ -1071,7 +1051,6 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
       window.removeEventListener("touchcancel", onPointerUp)
     }
   }, [isMounted, canvasSize.width, canvasSize.height]) // Re-run when canvas is ready
-
 
   // Draw a single LED segment
   const drawSegment = useCallback((ctx: CanvasRenderingContext2D, x: number, y: number, width: number, height: number, angle: number, neonColor: string, isActive: boolean = true) => {
@@ -2002,8 +1981,7 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
         try {
           updatePhysics(engineRef.current)
         } catch (error) {
-          console.error('Physics update error:', error)
-          // Handle physics crash
+                    // Handle physics crash
           if (handleCanvasCrash(error as Error, 'DevOrbsCanvas-physics')) {
             // Retry after delay
             setTimeout(() => {
@@ -2020,8 +1998,7 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
       // Debug: log orbs count changes (to see when/why they "disappear")
       const currentOrbsCount = orbsRef.current.length
       if (currentOrbsCount !== lastOrbsCountRef.current) {
-        console.log("DevOrbsCanvas: orbs count changed", lastOrbsCountRef.current, "->", currentOrbsCount)
-        lastOrbsCountRef.current = currentOrbsCount
+                lastOrbsCountRef.current = currentOrbsCount
       }
 
       // Clear canvas with radial gradient
@@ -2132,8 +2109,7 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
 
         animationFrameId = requestAnimationFrame(render)
       } catch (error) {
-        console.error('Canvas render error:', error)
-        // Handle canvas crash
+                // Handle canvas crash
         if (handleCanvasCrash(error as Error, 'DevOrbsCanvas-render')) {
           // Retry after delay
           setTimeout(() => {

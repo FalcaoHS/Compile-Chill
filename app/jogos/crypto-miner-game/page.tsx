@@ -154,15 +154,15 @@ export default function CryptoMinerPage() {
 
             if (!response.ok) {
               if (response.status === 401) {
-                console.warn('[score-submission] User not authenticated, score not saved')
+                
               } else {
-                console.error('[score-submission] Failed to save score')
+                
               }
             } else {
-              console.log('[score-submission] Score saved successfully')
+              
             }
           } catch (error) {
-            console.error('Error submitting score:', error)
+            
           }
         }
 

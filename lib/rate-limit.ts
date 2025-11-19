@@ -19,10 +19,7 @@ function getRedisClient(): Redis | null {
 
     // If Redis is not configured, return null (rate limiting disabled)
     if (!url || !token) {
-      console.warn(
-        "⚠️  Upstash Redis not configured. Rate limiting is DISABLED. " +
-        "This is OK for local development, but configure it before deploying to production."
-      )
+      
       return null
     }
 

@@ -40,7 +40,7 @@ export const authAdapter: Adapter = {
       } catch (error) {
         // If error is about missing xUsername field, retry without it
         if (error instanceof Error && error.message.includes('xUsername')) {
-          console.warn("⚠️ xUsername field not found. Creating user without it.")
+          
           const newUser = await prisma.user.create({
             data: {
               xId,
@@ -57,11 +57,7 @@ export const authAdapter: Adapter = {
           } as any
         }
         // Log error for debugging
-        console.error("Error creating user in adapter:", {
-          message: error instanceof Error ? error.message : "Unknown error",
-          xId,
-          hasXUsername: !!xUsername,
-        })
+        
         throw error // Re-throw if it's a different error
       }
     }
@@ -70,9 +66,7 @@ export const authAdapter: Adapter = {
     try {
       return await defaultAdapter.createUser!(user)
     } catch (error) {
-      console.error("Error in default adapter createUser:", {
-        message: error instanceof Error ? error.message : "Unknown error",
-      })
+      
       throw error
     }
   },
@@ -82,6 +76,8 @@ export const authAdapter: Adapter = {
     // Este método é usado pelo NextAuth para buscar dados do usuário.
     // O campo 'image' DEVE sempre ser retornado (mesmo que null).
     // Se remover ou não retornar 'image', o avatar desaparecerá!
+    
+    
     
     // Convert id from string to int
     const userId = parseInt(id)
@@ -113,6 +109,8 @@ export const authAdapter: Adapter = {
   async getUserByAccount({ providerAccountId, provider }) {
     // Override to find user by xId for Twitter provider
     if (provider === "twitter") {
+      
+      
       const user = await prisma.user.findUnique({
         where: { xId: providerAccountId },
         include: {
@@ -138,16 +136,6 @@ export const authAdapter: Adapter = {
   },
   
   async linkAccount(account) {
-    // Debug: Log account linking attempt
-    console.log("🔗 linkAccount called:", {
-      provider: account.provider,
-      providerAccountId: account.providerAccountId,
-      userId: account.userId,
-      hasAccessToken: !!account.access_token,
-      hasRefreshToken: !!account.refresh_token,
-      tokenType: account.token_type,
-      expiresAt: account.expires_at,
-    })
 
     // Convert userId from string to int for Prisma
     const userId = parseInt(account.userId)
@@ -170,7 +158,6 @@ export const authAdapter: Adapter = {
 
     if (existingAccount) {
       // Update existing account with new tokens
-      console.log("📝 Updating existing account")
       linkedAccount = await prisma.account.update({
         where: { id: existingAccount.id },
         data: {
@@ -185,7 +172,6 @@ export const authAdapter: Adapter = {
       })
     } else {
       // Create new account
-      console.log("✨ Creating new account")
       linkedAccount = await prisma.account.create({
         data: {
           userId,
@@ -203,12 +189,6 @@ export const authAdapter: Adapter = {
       })
     }
 
-    console.log("✅ Account linked successfully:", {
-      accountId: linkedAccount.id,
-      userId: linkedAccount.userId,
-      provider: linkedAccount.provider,
-    })
-    
     return {
       ...linkedAccount,
       userId: linkedAccount.userId.toString(),
@@ -223,6 +203,19 @@ export const authAdapter: Adapter = {
       throw new Error(`Invalid userId: ${session.userId}`)
     }
     
+    // Verificar se já existe uma sessão com este token (NÃO DEVE ACONTECER)
+    const existingSession = await prisma.session.findUnique({
+      where: { sessionToken: session.sessionToken },
+      include: { user: { select: { id: true, xId: true, name: true } } },
+    })
+    
+    if (existingSession) {
+      // Deletar sessão antiga antes de criar nova (segurança)
+      await prisma.session.delete({
+        where: { sessionToken: session.sessionToken },
+      })
+    }
+    
     // Create session with converted userId
     const createdSession = await prisma.session.create({
       data: {
@@ -230,6 +223,7 @@ export const authAdapter: Adapter = {
         userId,
         expires: session.expires,
       },
+      include: { user: { select: { id: true, xId: true, name: true } } },
     })
     
     return {

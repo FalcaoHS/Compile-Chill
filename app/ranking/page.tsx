@@ -98,7 +98,7 @@ export default function RankingPage() {
           setPagination(data.pagination)
         }
       } catch (err) {
-        console.error("Error fetching rankings:", err)
+        
         setError("Não foi possível carregar os rankings. Tente novamente.")
         setRankings([])
         setPagination(null)

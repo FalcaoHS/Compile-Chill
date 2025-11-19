@@ -27,7 +27,7 @@ const validators: Record<string, GameValidator> = {
  * const result = validateScore(submission, { userId: 1, ip: "127.0.0.1" })
  * if (!result.valid) {
  *   // Handle validation errors
- *   console.error(result.errors)
+ *   
  * }
  * ```
  */

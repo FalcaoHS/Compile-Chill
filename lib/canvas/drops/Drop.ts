@@ -370,7 +370,7 @@ export class Drop {
       getAvailable = budgetModule.getAvailableParticles
     } catch (e) {
       // Budget system not available, skip budget check
-      console.warn('Particle budget system not available, skipping budget check')
+      
     }
     
     const baseParticleCount = 20 + Math.random() * 10 // 20-30 particles

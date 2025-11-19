@@ -212,18 +212,18 @@ export function useEmotes({
             // If both are numeric (IDs) or both are usernames, do exact match
             if ((isNumeric && ownerIsNumeric) || (!isNumeric && !ownerIsNumeric)) {
               if (userXId !== emoteData.ownerXId) {
-                console.warn(`🚫 Permission denied: Only ${emoteData.ownerXId} can use this emote`)
+                
                 return null
               }
             }
             // If one is ID and other is username, we'd need to fetch username from API
             // For now, deny if not exact match
             else if (userXId !== emoteData.ownerXId) {
-              console.warn(`🚫 Permission denied: Only ${emoteData.ownerXId} can use this emote`)
+              
               return null
             }
           } else if (!userXId) {
-            console.warn(`🚫 Permission denied: Must be logged in to use unique emotes`)
+            
             return null
           }
         }

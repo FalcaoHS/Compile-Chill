@@ -75,7 +75,7 @@ export function logEvent(
   
   // Log to console in development
   if (process.env.NODE_ENV === 'development') {
-    console.log('[Light Logging]', event)
+    
   }
   
   // TODO: Send to analytics service in production

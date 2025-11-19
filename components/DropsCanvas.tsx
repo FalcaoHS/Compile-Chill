@@ -180,7 +180,7 @@ export function DropsCanvas({
 
         animationFrameRef.current = requestAnimationFrame(render)
       } catch (error) {
-        console.error('DropsCanvas render error:', error)
+        
         if (handleCanvasCrash(error as Error, 'DropsCanvas')) {
           setTimeout(() => {
             animationFrameRef.current = requestAnimationFrame(render)

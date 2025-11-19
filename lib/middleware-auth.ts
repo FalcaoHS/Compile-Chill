@@ -48,7 +48,7 @@ export async function requireAuthMiddleware(
       return null
     }
     // For other errors, log and allow request to proceed
-    console.warn("Middleware auth check failed, allowing route handler to verify:", error)
+    
     return null
   }
 }

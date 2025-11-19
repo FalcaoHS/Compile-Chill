@@ -46,16 +46,16 @@ export default function Home() {
         
         if (!response.ok) {
           const errorText = await response.text()
-          console.error("API Error:", response.status, errorText)
+          
           throw new Error(`Failed to fetch users: ${response.status}`)
         }
 
         const data = await response.json()
-        console.log("Users fetched:", data.users?.length || 0, "users")
+        
         setUsers(data.users || [])
         setUsersError(null)
       } catch (error) {
-        console.error("Error fetching users:", error)
+        
         setUsersError("Failed to load users")
         // Fallback to empty array - fake profiles will be used
         setUsers([])
@@ -131,7 +131,7 @@ export default function Home() {
         <DropsCanvas
           onReward={(type, value) => {
             // Handle reward (client state only for now)
-            console.log(`Reward granted: ${type} = ${value}`)
+            
             // TODO: Display reward UI/animation
           }}
         />
@@ -279,7 +279,7 @@ export default function Home() {
                         const y = 100 + Math.random() * 200
                         spawnEmoteRef.current('product_owner', x, y)
                       } else {
-                        console.warn('Product Owner emote not found!')
+                        
                       }
                     }
                   }}

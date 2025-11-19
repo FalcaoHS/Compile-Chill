@@ -16,7 +16,7 @@ export async function middleware(request: NextRequest) {
   
   if (error) {
     // Log error server-side only
-    console.error("Authentication error:", error)
+    
     
     // Return generic error response
     return NextResponse.redirect(

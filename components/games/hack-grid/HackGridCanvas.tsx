@@ -386,7 +386,7 @@ export function HackGridCanvas({
           drawConnection(ctx, colors, fromNode, toNode, cellSize, padding, isActive || isRequired)
         } else {
           // Debug: log missing nodes
-          console.warn('Connection missing nodes:', conn, 'fromNode:', fromNode, 'toNode:', toNode)
+          
         }
       })
     }

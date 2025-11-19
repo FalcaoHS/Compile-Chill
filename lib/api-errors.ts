@@ -31,7 +31,7 @@ export function handleApiError(
     method: request?.method,
     timestamp: new Date().toISOString(),
   }
-  console.error("API Error:", errorContext)
+  
 
   // Handle ApiError type (custom errors with status codes)
   if (error && typeof error === "object" && "status" in error) {

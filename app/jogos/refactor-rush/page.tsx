@@ -177,10 +177,10 @@ export default function RefactorRushPage() {
       })
 
       if (!response.ok) {
-        console.error("Failed to submit score")
+        
       }
     } catch (error) {
-      console.error("Error submitting score:", error)
+      
     }
   }, [session])
 

@@ -122,7 +122,7 @@ export function getPath(from: Node, to: Node): Array<{ row: number; col: number 
     for (let col = from.col + colStep; col !== endCol; col += colStep) {
       // Safety check to prevent infinite loops
       if (path.length > GRID_SIZE * GRID_SIZE) {
-        console.error('Infinite loop detected in getPath', { from, to })
+        
         break
       }
       path.push({ row: from.row, col })
@@ -136,7 +136,7 @@ export function getPath(from: Node, to: Node): Array<{ row: number; col: number 
     for (let row = from.row + rowStep; row !== endRow; row += rowStep) {
       // Safety check to prevent infinite loops
       if (path.length > GRID_SIZE * GRID_SIZE) {
-        console.error('Infinite loop detected in getPath', { from, to })
+        
         break
       }
       path.push({ row, col: to.col })

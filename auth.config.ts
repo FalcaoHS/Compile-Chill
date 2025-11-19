@@ -4,6 +4,9 @@ import { prisma } from "@/lib/prisma"
 import type { NextAuthConfig } from "next-auth"
 
 export const authConfig: NextAuthConfig = {
+  // 🔐 CRÍTICO: Secret para criptografia de sessões
+  // Sem isso, sessões podem vazar entre usuários!
+  secret: process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET,
   adapter: authAdapter,
   providers: [
     Twitter({
@@ -38,11 +41,7 @@ export const authConfig: NextAuthConfig = {
           // Verificar se profile é um erro (tem title/detail/type)
           const isErrorProfile = rawProfile.title || rawProfile.detail || rawProfile.type
           if (isErrorProfile) {
-            console.warn("⚠️ Profile veio como erro do Twitter:", {
-              title: rawProfile.title,
-              detail: rawProfile.detail,
-              type: rawProfile.type,
-            })
+            
           }
           
           // Se for erro, usar objeto vazio (vai buscar via API)
@@ -82,7 +81,7 @@ export const authConfig: NextAuthConfig = {
           // Usar /2/users/me que retorna o usuário autenticado sem precisar do ID
           if ((!name || !avatar) && account.access_token) {
             try {
-              console.log("🔍 Buscando perfil completo via Twitter API...")
+              
               // Usar /2/users/me que não precisa do ID do usuário
               const twitterApiUrl = `https://api.twitter.com/2/users/me`
               const params = new URLSearchParams({
@@ -103,61 +102,26 @@ export const authConfig: NextAuthConfig = {
                 // Atualizar name se não tiver
                 if (!name && apiUser?.name) {
                   name = apiUser.name
-                  console.log("✅ Nome obtido via API:", name)
+                  
                 }
                 
                 // Atualizar avatar se não tiver (priorizar HTTPS)
                 if (!avatar) {
                   avatar = apiUser?.profile_image_url_https || apiUser?.profile_image_url || null
                   if (avatar) {
-                    console.log("✅ Avatar obtido via API")
+                    
                   }
                 }
                 
                 // Atualizar xUsername se não tiver
                 if (!xUsername && apiUser?.username) {
                   xUsername = apiUser.username
-                  console.log("✅ Username obtido via API:", xUsername)
+                  
                 }
-              } else {
-                const errorData = await apiResponse.json().catch(() => ({}))
-                console.warn("⚠️ Erro ao buscar perfil via API:", {
-                  status: apiResponse.status,
-                  error: errorData,
-                })
               }
             } catch (apiError) {
-              console.warn("⚠️ Erro ao buscar perfil via API (não crítico):", {
-                message: apiError instanceof Error ? apiError.message : "Unknown error",
-              })
               // Não bloquear login se a API falhar
             }
-          }
-
-          // Debug: Log profile structure para entender formato do X
-          console.log("Profile structure:", {
-            hasProfile: !!profile,
-            profileKeys: profile ? Object.keys(profile) : [],
-            hasData: !!(profile as any)?.data,
-            dataKeys: (profile as any)?.data ? Object.keys((profile as any).data) : [],
-            finalName: name,
-            finalUsername: xUsername || "NONE",
-            finalAvatar: avatar ? "HAS_AVATAR" : "NO_AVATAR",
-            userImage: user.image || "NO_USER_IMAGE",
-          })
-
-          // Debug: Log account token info (without exposing full token)
-          if (account.access_token) {
-            console.log("Account token received:", {
-              hasAccessToken: !!account.access_token,
-              tokenLength: account.access_token.length,
-              tokenType: account.token_type,
-              hasRefreshToken: !!account.refresh_token,
-              expiresAt: account.expires_at,
-              scope: account.scope,
-            })
-          } else {
-            console.warn("⚠️ No access_token in account object during signIn")
           }
 
           // Add xId and xUsername to user object so adapter can use it
@@ -180,7 +144,6 @@ export const authConfig: NextAuthConfig = {
             const userId = parseInt(user.id)
             // Se não for número válido, é primeiro login - deixa o adapter criar
             if (isNaN(userId)) {
-              console.log("⚠️ user.id não é numérico (primeiro login), deixando adapter criar usuário")
               // Apenas anexar xId/xUsername e deixar o adapter criar
               if (!user.id || typeof user.id === 'string') {
                 (user as any).xId = xId
@@ -193,14 +156,7 @@ export const authConfig: NextAuthConfig = {
             
             // Try to update with xUsername, but don't fail if field doesn't exist yet
             try {
-              console.log("📝 Atualizando usuário existente:", {
-                userId,
-                hasName: !!name,
-                hasAvatar: !!avatar,
-                hasUsername: !!xUsername,
-                nameValue: name || "VAZIO",
-                avatarValue: avatar ? "TEM_AVATAR" : "SEM_AVATAR",
-              })
+              
               
               await prisma.user.update({
                 where: { id: userId },
@@ -212,11 +168,11 @@ export const authConfig: NextAuthConfig = {
                 },
               })
               
-              console.log("✅ Usuário atualizado com sucesso")
+              
             } catch (updateError) {
               // If xUsername field doesn't exist, update without it
               if (updateError instanceof Error && updateError.message.includes('xUsername')) {
-                console.warn("⚠️ xUsername field not found. Updating user without it.")
+                
                 await prisma.user.update({
                   where: { id: userId },
                   data: {
@@ -243,7 +199,7 @@ export const authConfig: NextAuthConfig = {
 
             if (existingAccount) {
               // Update existing account with new tokens
-              console.log("📝 Updating account in signIn callback")
+              
               await prisma.account.update({
                 where: { id: existingAccount.id },
                 data: {
@@ -258,7 +214,7 @@ export const authConfig: NextAuthConfig = {
               })
             } else {
               // Create new account link
-              console.log("✨ Creating account in signIn callback")
+              
               await prisma.account.create({
                 data: {
                   userId,
@@ -277,11 +233,7 @@ export const authConfig: NextAuthConfig = {
             }
           }
         } catch (error) {
-          console.error("Error in signIn callback:", {
-            message: error instanceof Error ? error.message : "Unknown error",
-            stack: error instanceof Error ? error.stack : undefined,
-            xId: account.providerAccountId,
-          })
+          
           return false
         }
       }
@@ -299,13 +251,22 @@ export const authConfig: NextAuthConfig = {
         // Include user ID in session for future feature integration
         session.user.id = user.id.toString()
         
+        // Debug: Log qual usuário está sendo usado na sessão
+        
+        
         // Fetch user from database to ensure we have latest avatar
         // This ensures avatar is always up-to-date
         if (user.id) {
           const userId = parseInt(user.id)
           const dbUser = await prisma.user.findUnique({
             where: { id: userId },
-            select: { avatar: true, name: true },
+            select: { 
+              id: true,
+              avatar: true, 
+              name: true,
+              xId: true,
+              xUsername: true,
+            },
           })
           
           if (dbUser) {
@@ -313,18 +274,13 @@ export const authConfig: NextAuthConfig = {
             session.user.image = dbUser.avatar || null
             session.user.name = dbUser.name || null
             
-            // Debug: Log avatar status
-            console.log("🔍 Session callback - Avatar do banco:", {
-              userId,
-              hasAvatar: !!dbUser.avatar,
-              avatarValue: dbUser.avatar ? "TEM_AVATAR" : "SEM_AVATAR",
-              name: dbUser.name || "SEM_NOME",
-            })
+            // Debug: Log avatar status e dados do usuário
+            
           } else {
             // Fallback to user object from adapter
             session.user.image = user.image || null
             session.user.name = user.name || null
-            console.warn("⚠️ Usuário não encontrado no banco no session callback")
+            
           }
         } else {
           // Fallback to user object from adapter
@@ -336,13 +292,7 @@ export const authConfig: NextAuthConfig = {
     },
     async redirect({ url, baseUrl }) {
       // Debug: Log redirect info
-      console.log("Redirect callback:", {
-        url,
-        baseUrl,
-        envNextAuthUrl: process.env.NEXTAUTH_URL,
-        hasSecret: !!process.env.NEXTAUTH_SECRET,
-        secretLength: process.env.NEXTAUTH_SECRET?.length || 0,
-      })
+      
       
       // Redirect to home page after successful authentication
       if (url === baseUrl || url.startsWith(baseUrl + "/")) {
@@ -362,10 +312,7 @@ export const authConfig: NextAuthConfig = {
   },
   events: {
     async signIn({ user, account }) {
-      // Log successful sign in (server-side only)
-      if (account?.provider === "twitter") {
-        console.log(`User signed in: ${user.name} (${account.providerAccountId})`)
-      }
+      // Authentication successful
     },
   },
 }

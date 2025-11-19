@@ -25,7 +25,7 @@ export const useThemeStore = create<ThemeStore>()(
       
       setTheme: (themeId: ThemeId) => {
         if (!isValidTheme(themeId)) {
-          console.warn(`Invalid theme: ${themeId}`)
+          
           return
         }
 
@@ -76,10 +76,10 @@ export const useThemeStore = create<ThemeStore>()(
             })
             
             if (!response.ok) {
-              console.error('Failed to sync theme with database')
+              
             }
           } catch (error) {
-            console.error('Error syncing theme:', error)
+            
           }
         }, 500) // 500ms debounce
       },

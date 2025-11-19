@@ -103,7 +103,7 @@ export async function GET(request: NextRequest) {
     )
   } catch (error) {
     // Log detailed error server-side only
-    console.error("Error fetching leaderboard:", error)
+    
     
     // Return generic error message to frontend
     return NextResponse.json(

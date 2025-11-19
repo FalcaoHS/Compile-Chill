@@ -208,7 +208,7 @@ export default function StackOverflowDodgePage() {
               }),
             })
           } catch (error) {
-            console.error('Failed to save score:', error)
+            
           }
         }
 

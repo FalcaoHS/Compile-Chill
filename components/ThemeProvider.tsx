@@ -35,7 +35,7 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
             }
           }
         } catch (error) {
-          console.error("Error fetching user theme:", error)
+          
         } finally {
           setHasSynced(true)
         }

@@ -149,7 +149,7 @@ export default function BitRunnerPage() {
               }),
             })
           } catch (error) {
-            console.error('Failed to save score:', error)
+            
           }
         }
 
