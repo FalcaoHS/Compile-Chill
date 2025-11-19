@@ -187,8 +187,8 @@ export function ThemeSwitcher() {
                           backgroundColor: themeData.vars['--color-accent'],
                         }}
                       />
-                      <span className="text-[8px] mt-1 font-theme opacity-80">
-                        {themeData.name.split(' ')[0]}
+                      <span className="text-[7px] mt-1 font-theme opacity-80 text-center leading-tight">
+                        {themeData.name}
                       </span>
                     </div>
                     {isActive && (
