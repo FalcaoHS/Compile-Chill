@@ -19,8 +19,10 @@ const twitterProvider = Twitter({
 
     return {
       id: user.id ?? crypto.randomUUID(), // obrigatório para o NextAuth
-      name: user.name ?? "Anonymous Dev",
-      username: user.username ?? user.screen_name ?? "unknown",
+      // Deixa o nome cru; fallbacks são aplicados depois no callback de signIn
+      name: typeof user.name === "string" ? user.name : null,
+      // Username pode vir em campos diferentes
+      username: user.username ?? user.screen_name ?? null,
       // Deixa o avatar o mais fiel possível ao que a API retornar,
       // sem forçar placeholder aqui (o callback de sessão faz o fallback certo).
       image: user.profile_image_url ?? user.profile_image_url_https ?? null,
@@ -41,11 +43,29 @@ export const authConfig: NextAuthConfig = {
 
           // Extrair dados básicos do perfil com fallbacks seguros
           const rawProfile: any = profile ?? {}
+          // Username pode vir em campos diferentes
+          const xUsername =
+            rawProfile.username ||
+            rawProfile.screen_name ||
+            (rawProfile.data && rawProfile.data.username) ||
+            null
+
           const name =
             rawProfile.name ||
-            (rawProfile.data && rawProfile.data.name) ||
             user.name ||
-            "Anonymous Dev"
+            null
+
+          // Se não veio nome nenhum do X, não criamos usuário "anônimo":
+          // preferimos barrar o login para evitar cadastro lixo.
+          if (!name) {
+            console.error("⚠️ signIn: X profile sem name. Bloqueando criação de usuário.", {
+              xId,
+              rawProfileHasName: !!rawProfile.name,
+              userHasName: !!user.name,
+              xUsername,
+            })
+            return false
+          }
 
           // ⚠️ Avatar: voltar ao comportamento original que funcionava bem
           // Preferimos sempre o profile_image_url_https da API do X.
@@ -54,13 +74,6 @@ export const authConfig: NextAuthConfig = {
               ? rawProfile.profile_image_url_https
               : null) ||
             (typeof user.image === "string" ? user.image : null) ||
-            null
-
-          // Username pode vir em campos diferentes
-          const xUsername =
-            rawProfile.username ||
-            rawProfile.screen_name ||
-            (rawProfile.data && rawProfile.data.username) ||
             null
 
           // Log básico (sem tokens)
@@ -79,7 +92,7 @@ export const authConfig: NextAuthConfig = {
             ;(user as any).xUsername = xUsername
           }
 
-          // Garantir name/image consistentes para o adapter
+          // Garantir name/image consistentes para o adapter (sem fallback de "Anonymous Dev")
           user.name = name
           user.image = avatar || undefined
 
