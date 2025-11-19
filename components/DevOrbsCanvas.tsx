@@ -637,33 +637,49 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
     }
   }, [isMounted])
 
-  // Start spawn when users are available (only once, not on every users change)
+  // Generate a key from user IDs to detect actual user changes (not just length)
+  const usersKey = users.map(u => u.userId).join(',')
+  
+  // Start spawn when users are available and dynamically update when users change
   useEffect(() => {
     // Skip spawn in mobile lite mode
     if (isLiteMode) {
       return
     }
     
-        
-    // Only start spawn if:
-    // 1. We have users
-    // 2. Engine is ready
-    // 3. We don't have orbs yet (first time) OR we have less than max orbs and haven't spawned all users
-    if (users.length > 0 && engineRef.current) {
-      const shouldSpawn = orbsRef.current.length === 0 || 
-                         (orbsRef.current.length < MAX_ORBS && spawnIndexRef.current < users.length)
+    // Clear existing orbs when users change (not just on length change)
+    // This ensures new users replace old ones dynamically
+    if (users.length > 0 && engineRef.current && worldRef.current) {
+      // Remove old orbs from physics world
+      orbsRef.current.forEach(orb => {
+        Matter.Composite.remove(worldRef.current!, orb.body)
+      })
       
-      if (shouldSpawn) {
-                startSpawnSequence()
-      } else {
-              }
+      // Clear orbs array
+      orbsRef.current = []
+      
+      // Reset spawn index
+      spawnIndexRef.current = 0
+      
+      // Clear existing spawn timer
+      if (spawnTimerRef.current) {
+        clearInterval(spawnTimerRef.current)
+        spawnTimerRef.current = null
+      }
+      
+      // Start fresh spawn sequence with new users
+      startSpawnSequence()
     }
 
     return () => {
-      // Don't clear timer on users change - let it continue
-      // Only clear on unmount
+      // Cleanup on unmount
+      if (spawnTimerRef.current) {
+        clearInterval(spawnTimerRef.current)
+        spawnTimerRef.current = null
+      }
     }
-  }, [users.length, startSpawnSequence, isLiteMode]) // Only depend on users.length, not the whole users array
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [usersKey, startSpawnSequence, isLiteMode]) // Depend on usersKey to detect actual user changes
 
   // Handle shake function - throws all orbs upward with strong force
   const handleShake = useCallback(() => {
@@ -1789,9 +1805,14 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
     drawBackboard(ctx, colors)
     drawRim(ctx, colors)
     
-    // Generate static orbs if not already generated or if canvas size changed
-    if (staticOrbsRef.current.length === 0 || 
-        (staticOrbsRef.current[0] && (staticOrbsRef.current[0].x > canvas.width || staticOrbsRef.current[0].y > canvas.height))) {
+    // Regenerate static orbs if not generated, canvas size changed, or users changed
+    const currentUsersKey = users.map(u => u.userId).join(',')
+    const needsRegeneration = 
+      staticOrbsRef.current.length === 0 ||
+      (staticOrbsRef.current[0] && (staticOrbsRef.current[0].x > canvas.width || staticOrbsRef.current[0].y > canvas.height)) ||
+      (staticOrbsRef.current[0] && staticOrbsRef.current[0].userId !== users[0]?.userId) // Users changed
+    
+    if (needsRegeneration) {
       staticOrbsRef.current = generateStaticOrbs(canvas.width, canvas.height, users)
     }
     

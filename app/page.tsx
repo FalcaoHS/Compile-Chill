@@ -66,8 +66,8 @@ export default function Home() {
 
     fetchUsers()
 
-    // Refresh users every 10 seconds
-    const interval = setInterval(fetchUsers, 10000)
+    // Refresh users every 3 seconds for dynamic orb updates
+    const interval = setInterval(fetchUsers, 3000)
 
     return () => clearInterval(interval)
   }, [])

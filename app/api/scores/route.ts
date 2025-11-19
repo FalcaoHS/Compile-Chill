@@ -22,6 +22,19 @@ export const POST = withAuthAndRateLimit(
     try {
       // Parse and validate request body
       const body = await request.json()
+      
+      // Log suspicious score attempts before validation
+      if (body.score > 1_000_000) {
+        console.warn('🚨 [ANTI-CHEAT] Score manipulation attempt detected:', {
+          userId: user.id,
+          userName: user.name,
+          gameId: body.gameId,
+          attemptedScore: body.score,
+          timestamp: new Date().toISOString(),
+          ip: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip'),
+        })
+      }
+      
       const { gameId, score, duration, moves, level, metadata } = validate(
         body,
         scoreSubmissionSchema
