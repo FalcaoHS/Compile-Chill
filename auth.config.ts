@@ -83,31 +83,38 @@ export const authConfig: NextAuthConfig = {
           // If user already exists (has id), update their data
           if (user.id) {
             const userId = parseInt(user.id)
-            // Try to update with xUsername, but don't fail if field doesn't exist yet
-            try {
-              await prisma.user.update({
-                where: { id: userId },
-                data: {
-                  name,
-                  avatar,
-                  ...(xUsername ? { xUsername } : {}), // Only include if provided
-                  updatedAt: new Date(),
-                },
+
+            if (Number.isNaN(userId)) {
+              console.warn("⚠️ signIn: user.id não numérico, ignorando update", {
+                rawUserId: user.id,
               })
-            } catch (updateError) {
-              // If xUsername field doesn't exist, update without it
-              if (updateError instanceof Error && updateError.message.includes('xUsername')) {
-                console.warn("⚠️ xUsername field not found. Updating user without it.")
+            } else {
+              // Try to update with xUsername, but don't fail if field doesn't exist yet
+              try {
                 await prisma.user.update({
                   where: { id: userId },
                   data: {
                     name,
                     avatar,
+                    ...(xUsername ? { xUsername } : {}), // Only include if provided
                     updatedAt: new Date(),
                   },
                 })
-              } else {
-                throw updateError // Re-throw if it's a different error
+              } catch (updateError) {
+                // If xUsername field doesn't exist, update without it
+                if (updateError instanceof Error && updateError.message.includes('xUsername')) {
+                  console.warn("⚠️ xUsername field not found. Updating user without it.")
+                  await prisma.user.update({
+                    where: { id: userId },
+                    data: {
+                      name,
+                      avatar,
+                      updatedAt: new Date(),
+                    },
+                  })
+                } else {
+                  throw updateError // Re-throw if it's a different error
+                }
               }
             }
 
@@ -172,22 +179,29 @@ export const authConfig: NextAuthConfig = {
               // Retry without xUsername - user will be created/updated with just xId
               if (user.id) {
                 const userId = parseInt(user.id)
-                const retryName = profile?.name || user.name || ""
-                const retryAvatar = 
-                  (typeof profile?.profile_image_url_https === "string" 
-                    ? profile.profile_image_url_https 
-                    : null) || 
-                  (typeof user.image === "string" ? user.image : null) || 
-                  null
-                const updateData: any = {
-                  updatedAt: new Date(),
+
+                if (Number.isNaN(userId)) {
+                  console.warn("⚠️ signIn retry: user.id não numérico, ignorando update", {
+                    rawUserId: user.id,
+                  })
+                } else {
+                  const retryName = profile?.name || user.name || ""
+                  const retryAvatar = 
+                    (typeof profile?.profile_image_url_https === "string" 
+                      ? profile.profile_image_url_https 
+                      : null) || 
+                    (typeof user.image === "string" ? user.image : null) || 
+                    null
+                  const updateData: any = {
+                    updatedAt: new Date(),
+                  }
+                  if (retryName) updateData.name = retryName
+                  if (retryAvatar) updateData.avatar = retryAvatar
+                  await prisma.user.update({
+                    where: { id: userId },
+                    data: updateData,
+                  })
                 }
-                if (retryName) updateData.name = retryName
-                if (retryAvatar) updateData.avatar = retryAvatar
-                await prisma.user.update({
-                  where: { id: userId },
-                  data: updateData,
-                })
               }
               return true // Allow sign in even without xUsername
             } catch (retryError) {
