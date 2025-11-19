@@ -150,8 +150,8 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
     }
   }, [initMobileMode])
   
-  // Check if mobile mode (lite) is active
-  const isLiteMode = mobileMode === 'lite'
+  // Force dynamic mode for all devices - no more static mode
+  const isLiteMode = false // Always use physics-based orbs, never static
   
   // FPS level states
   const isFPSLevel0 = fpsLevel === 0 // FPS ≥ 50: everything enabled
@@ -637,7 +637,7 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
     }
   }, [isMounted])
 
-  // Start spawn when users are available (only once on first load)
+  // Start spawn when users are available (only once when users first load)
   const hasSpawnedRef = useRef(false)
   
   useEffect(() => {
@@ -646,8 +646,8 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
       return
     }
     
-    // Only spawn ONCE when component mounts with users
-    // Never re-spawn, even if users array changes
+    // Spawn ONCE when users are loaded and engine is ready
+    // Never re-spawn after that, even if users change
     if (users.length > 0 && engineRef.current && !hasSpawnedRef.current) {
       hasSpawnedRef.current = true
       startSpawnSequence()
@@ -660,8 +660,7 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
         spawnTimerRef.current = null
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []) // Empty dependency - only run once on mount
+  }, [users.length, engineRef.current, isLiteMode, startSpawnSequence]) // React when users are loaded
 
   // Handle shake function - throws all orbs upward with strong force
   const handleShake = useCallback(() => {
