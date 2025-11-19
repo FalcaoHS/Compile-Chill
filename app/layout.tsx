@@ -31,7 +31,7 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
-  metadataBase: new URL(process.env.NEXTAUTH_URL || "https://compileandchill.com"),
+  metadataBase: new URL(process.env.NEXTAUTH_URL || "https://compileandchill.dev"),
   alternates: {
     canonical: "/",
   },

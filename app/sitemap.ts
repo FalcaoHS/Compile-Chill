@@ -2,7 +2,7 @@ import { MetadataRoute } from 'next'
 import { getAllGames } from '@/lib/games'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXTAUTH_URL || 'https://compileandchill.com'
+  const baseUrl = process.env.NEXTAUTH_URL || 'https://compileandchill.dev'
   
   // Páginas estáticas principais
   const staticPages: MetadataRoute.Sitemap = [

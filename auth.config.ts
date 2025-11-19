@@ -227,6 +227,13 @@ export const authConfig: NextAuthConfig = {
       return session
     },
     async redirect({ url, baseUrl }) {
+      // Debug: Log redirect info
+      console.log("Redirect callback:", {
+        url,
+        baseUrl,
+        envNextAuthUrl: process.env.NEXTAUTH_URL,
+      })
+      
       // Redirect to home page after successful authentication
       if (url === baseUrl || url.startsWith(baseUrl + "/")) {
         return baseUrl
@@ -241,7 +248,7 @@ export const authConfig: NextAuthConfig = {
   },
   pages: {
     signIn: "/",
-    error: "/",
+    error: "/?error=auth_failed",
   },
   events: {
     async signIn({ user, account }) {

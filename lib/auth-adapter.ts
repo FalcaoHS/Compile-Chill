@@ -56,12 +56,25 @@ export const authAdapter: Adapter = {
             image: newUser.avatar || null,
           } as any
         }
+        // Log error for debugging
+        console.error("Error creating user in adapter:", {
+          message: error instanceof Error ? error.message : "Unknown error",
+          xId,
+          hasXUsername: !!xUsername,
+        })
         throw error // Re-throw if it's a different error
       }
     }
     
     // Fallback to default adapter behavior if no xId
-    return defaultAdapter.createUser!(user)
+    try {
+      return await defaultAdapter.createUser!(user)
+    } catch (error) {
+      console.error("Error in default adapter createUser:", {
+        message: error instanceof Error ? error.message : "Unknown error",
+      })
+      throw error
+    }
   },
   
   async getUser(id) {
