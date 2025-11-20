@@ -3174,8 +3174,8 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
         </button>
       )}
 
-      {/* PT: Botões de teste para cada efeito festivo | EN: Test buttons for each festive effect | ES: Botones de prueba para cada efecto festivo | FR: Boutons de test pour chaque effet festif | DE: Test-Schaltflächen für jeden festlichen Effekt */}
-      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-20 flex flex-wrap gap-2 justify-center max-w-[90vw]">
+      {/* PT: Botões de teste para cada efeito festivo (ocultos) | EN: Test buttons for each festive effect (hidden) | ES: Botones de prueba para cada efecto festivo (ocultos) | FR: Boutons de test pour chaque effet festif (cachés) | DE: Test-Schaltflächen für jeden festlichen Effekt (versteckt) */}
+      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-20 flex flex-wrap gap-2 justify-center max-w-[90vw] hidden">
         {testFestivities.map((festivity) => (
           <button
             key={festivity.type}
