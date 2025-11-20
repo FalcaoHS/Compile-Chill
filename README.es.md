@@ -404,6 +404,8 @@ Este proyecto está licenciado bajo la Licencia MIT - ver el archivo [LICENSE](L
 - 🇧🇷 **[Guía Completa para Principiantes (Português)](docs/GUIA_INICIANTE_PT.md)** - Explicaciones paso a paso, conceptos explicados, solución de problemas
 - 🇺🇸 **[Complete Beginner's Guide (English)](docs/BEGINNER_GUIDE_EN.md)** - Step-by-step explanations, concepts explained, troubleshooting
 - 🇪🇸 **[Guía Completa para Principiantes (Español)](docs/GUIA_INICIANTE_ES.md)** - Explicaciones paso a paso, conceptos explicados, solución de problemas
+- 🇹🇿 **[Mwongozo Kamili wa Mwanzo (Swahili)](docs/BEGINNER_GUIDE_SW.md)** - Guía completa para principiantes, todos los conceptos explicados, solución de problemas
+- 🇪🇹 **[ሙሉ የጀማሪ መመሪያ (Amharic)](docs/BEGINNER_GUIDE_AM.md)** - Guía completa para principiantes, todos los conceptos explicados, solución de problemas
 
 **Lo que encontrarás en las guías:**
 - ✅ Explicación de cada concepto (Node.js, npm, Git, etc.)
@@ -414,6 +416,21 @@ Este proyecto está licenciado bajo la Licencia MIT - ver el archivo [LICENSE](L
 - ✅ Calmando y animando a desarrolladores principiantes
 
 **¡Si sigues la guía, terminarás con el sistema corriendo localmente!** 🚀
+
+## 🌍 Impacto Social / Regiones de Interés
+
+Nuestro proyecto busca apoyar comunidades con **acceso limitado a recursos digitales**. Estamos enfocados en tres países donde vemos gran oportunidad de impacto:
+
+- **🇪🇹 Etiopía** — acceso digital bajo, muchos jóvenes sin conexión
+- **🇺🇬 Uganda** — barreras de infraestructura y alto costo de datos
+- **🇹🇿 Tanzania** — comunidades rurales con acceso limitado y gran interés por la tecnología
+
+**Cómo contribuir:**
+- 📝 Producir documentación y tutoriales en inglés + idiomas locales (amárico, suajili)
+- 💾 Crear versiones "light" de la herramienta para uso offline o con baja ancho de banda
+- 🤝 Conectar con ONGs locales, escuelas o proyectos de educación digital
+
+**Más información:** Visita nuestra [página de Impacto Social](/impacto-social) para más información sobre asociaciones y formas de contribuir.
 
 ---
 

@@ -63,6 +63,29 @@ Ao final deste guia, você vai:
 
 **Tudo isso você vai aprender aqui!**
 
+### Considerações Especiais para Regiões com Acesso Digital Limitado
+
+Este guia foi projetado para ser acessível para desenvolvedores, educadores e aprendizes na **Etiópia, Uganda e Tanzânia**, onde o acesso digital pode ser limitado. Aqui estão algumas dicas:
+
+**Se você tem internet lenta ou instável:**
+- Baixe o instalador do Node.js durante horários de menor tráfego quando possível
+- Considere usar um gerenciador de downloads para arquivos grandes
+- A etapa `npm install` pode levar mais tempo - isso é normal, tenha paciência
+- Serviços de banco de dados em nuvem (Neon, Supabase) funcionam bem mesmo com conexões mais lentas
+
+**Se você tem dados limitados:**
+- Use bancos de dados em nuvem (Neon/Supabase) em vez de PostgreSQL local para economizar largura de banda
+- O projeto foi projetado para funcionar eficientemente com recursos limitados
+- Considere usar "Modo Economia de Dados" quando disponível (recurso planejado)
+
+**Se você está em uma instituição educacional ou ONG:**
+- Este projeto é perfeito para ensinar conceitos de programação
+- Todas as ferramentas usadas são gratuitas e open-source
+- Pode ser adaptado para uso offline no futuro
+- Veja nossa [página de Impacto Social](/impacto-social) para oportunidades de parceria
+
+**Lembre-se:** A comunidade de programação é global e solidária. Não hesite em pedir ajuda!
+
 ---
 
 ## Passo 1: Entendendo o que vamos instalar
@@ -290,6 +313,8 @@ Instalamos todas as bibliotecas que o projeto precisa. Agora temos:
 
 **Tempo estimado:** 2-5 minutos (depende da sua internet)
 
+**Nota para regiões com conexões mais lentas:** Se você está na Etiópia, Uganda ou Tanzânia e tem internet mais lenta, esta etapa pode levar 10-15 minutos. Isso é completamente normal! Tenha paciência e deixe completar. A instalação funcionará da mesma forma independentemente da velocidade da conexão.
+
 ---
 
 ## Passo 5: Configurando o banco de dados
@@ -338,6 +363,8 @@ Neon é um serviço que oferece PostgreSQL "na nuvem" (online). É grátis e mui
    - Clique em "New Project"
    - Escolha um nome (ex: "compile-chill-dev")
    - Escolha a região mais próxima de você
+     - **Para Etiópia, Uganda, Tanzânia:** Escolha a região disponível mais próxima (geralmente regiões da Europa ou Oriente Médio funcionam bem)
+     - Não se preocupe se a região exata não estiver disponível - qualquer região funcionará
    - Clique em "Create Project"
 
 4. **Copie a connection string:**
@@ -875,6 +902,15 @@ Se você chegou até aqui e o projeto está rodando, **você conseguiu!** 🎊
 - Abra uma issue no GitHub
 - Leia a documentação oficial
 - Pergunte na comunidade
+- **Para desenvolvedores na Etiópia, Uganda, Tanzânia:** Confira nossa [página de Impacto Social](/impacto-social) para suporte regional e oportunidades de parceria
+
+### Contribuindo para Acesso Regional
+
+Se você é desenvolvedor, tradutor ou educador na Etiópia, Uganda ou Tanzânia, considere:
+- Traduzir documentação para idiomas locais (Amárico, Suaíli)
+- Criar tutoriais específicos para desafios regionais
+- Conectar com ONGs locais e escolas para distribuir este conteúdo
+- Veja nossa [página de Impacto Social](/impacto-social) para mais formas de contribuir
 
 **Você é capaz! Continue aprendendo! 🚀**
 

@@ -31,6 +31,8 @@
 - 🇧🇷 **[Guia Completo para Iniciantes (Português)](docs/GUIA_INICIANTE_PT.md)** - Explicações passo a passo, conceitos explicados, troubleshooting
 - 🇺🇸 **[Complete Beginner's Guide (English)](docs/BEGINNER_GUIDE_EN.md)** - Step-by-step explanations, concepts explained, troubleshooting
 - 🇪🇸 **[Guía Completa para Principiantes (Español)](docs/GUIA_INICIANTE_ES.md)** - Explicaciones paso a paso, conceptos explicados, solución de problemas
+- 🇹🇿 **[Mwongozo Kamili wa Mwanzo (Swahili)](docs/BEGINNER_GUIDE_SW.md)** - Mwongozo kamili kwa wanaoanza, dhana zote zilizo elezwa, kutatua matatizo
+- 🇪🇹 **[ሙሉ የጀማሪ መመሪያ (Amharic)](docs/BEGINNER_GUIDE_AM.md)** - ሙሉ መመሪያ ለጀማሪዎች፣ ሁሉም ጽንሰ-ሐሳቦች ተብራርተዋል፣ ችግሮችን መፍታት
 
 **O que você vai encontrar nos guias:**
 - ✅ Explicação de cada conceito (Node.js, npm, Git, etc.)
@@ -41,6 +43,21 @@
 - ✅ Acalmando e incentivando desenvolvedores iniciantes
 
 **Se você seguir qualquer guia, vai terminar com o sistema rodando localmente!** 🚀
+
+## 🌍 Impacto Social / Regiões de Interesse
+
+Nosso projeto busca apoiar comunidades com **acesso limitado a recursos digitais**. Estamos focados em três países onde vemos grande oportunidade de impacto:
+
+- **🇪🇹 Etiópia** — acesso digital baixo, muitos jovens sem conexão
+- **🇺🇬 Uganda** — barreiras de infraestrutura e alto custo de dados
+- **🇹🇿 Tanzânia** — comunidades rurais com acesso limitado e grande interesse por tecnologia
+
+**Como contribuir:**
+- 📝 Produzir documentação e tutoriais em inglês + línguas locais (amárico, suaíli)
+- 💾 Criar versões "light" da ferramenta para uso offline ou com baixa largura de banda
+- 🤝 Conectar com ONGs locais, escolas ou projetos de educação digital
+
+**Saiba mais:** Visite nossa [página de Impacto Social](/impacto-social) para mais informações sobre parcerias e formas de contribuir.
 
 ## ✨ Sobre o Projeto
 
@@ -354,6 +371,37 @@ O Prisma está configurado para logar queries em desenvolvimento. Verifique o co
 - **Upstash Redis** - Rate limiting
 - **Vercel** - Deploy (recomendado)
 
+## 🤖 Desenvolvimento com Agent OS
+
+Este projeto foi desenvolvido usando **[Agent OS](https://github.com/buildermethods/agent-os)**, um sistema para melhor planejamento e execução de tarefas de desenvolvimento de software com agentes de IA.
+
+### O que é Agent OS?
+
+**Agent OS** transforma agentes de IA de programação de "estagiários confusos" em desenvolvedores produtivos. Com workflows estruturados que capturam seus padrões, sua stack e os detalhes únicos do seu codebase, o Agent OS fornece aos seus agentes as especificações necessárias para entregar código de qualidade na primeira tentativa—não na quinta.
+
+### Características do Agent OS
+
+- ✅ **Spec-Driven Development**: Desenvolvimento guiado por especificações detalhadas
+- ✅ **Workflows Estruturados**: Processos organizados de planejamento e implementação
+- ✅ **Padrões e Standards**: Captura e aplica padrões do projeto automaticamente
+- ✅ **Documentação Automática**: Gera documentação técnica durante o desenvolvimento
+- ✅ **Compatível com**: Claude Code, Cursor, ou qualquer outra ferramenta de IA
+
+### Especificações Técnicas
+
+Todas as especificações detalhadas de features, planejamento e implementação estão disponíveis em [`specs/`](./specs/). Essas specs documentam:
+
+- 📋 **Planejamento**: Requisitos, ideias iniciais e decisões de design
+- 📝 **Especificações**: Documentação técnica detalhada de cada feature
+- ✅ **Implementação**: Passo a passo de como cada feature foi implementada
+- 🎯 **Verificações**: Testes e validações realizadas
+
+Cada feature tem sua própria pasta com data, contendo todo o histórico de desenvolvimento, desde a ideia inicial até a implementação completa.
+
+**Repositório oficial do Agent OS**: [https://github.com/buildermethods/agent-os](https://github.com/buildermethods/agent-os)
+
+---
+
 ## 📁 Estrutura do Projeto
 
 ```
@@ -372,6 +420,12 @@ compile-and-chill/
 ├── hooks/                  # React hooks customizados
 ├── prisma/                 # Schema e migrations
 ├── public/                 # Arquivos estáticos
+├── specs/                  # Especificações técnicas (Agent OS)
+│   └── [features]/        # Especificações de cada feature
+├── agent-os/              # Configuração do Agent OS
+│   ├── commands/          # Comandos do Agent OS
+│   ├── product/           # Missão, roadmap e tech stack
+│   └── standards/         # Padrões de código
 └── types/                  # Definições TypeScript
 ```
 

@@ -23,6 +23,6 @@
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules", "agent-os/specs/**/planning/code-base/**"]
+  "exclude": ["node_modules", "specs/**/planning/code-base/**"]
 }
 

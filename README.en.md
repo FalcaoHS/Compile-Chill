@@ -404,6 +404,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - 🇧🇷 **[Complete Beginner's Guide (Português)](docs/GUIA_INICIANTE_PT.md)** - Step-by-step explanations, concepts explained, troubleshooting
 - 🇺🇸 **[Complete Beginner's Guide (English)](docs/BEGINNER_GUIDE_EN.md)** - Step-by-step explanations, concepts explained, troubleshooting
 - 🇪🇸 **[Complete Beginner's Guide (Español)](docs/GUIA_INICIANTE_ES.md)** - Step-by-step explanations, concepts explained, troubleshooting
+- 🇹🇿 **[Mwongozo Kamili wa Mwanzo (Swahili)](docs/BEGINNER_GUIDE_SW.md)** - Complete guide for beginners, all concepts explained, troubleshooting
+- 🇪🇹 **[ሙሉ የጀማሪ መመሪያ (Amharic)](docs/BEGINNER_GUIDE_AM.md)** - Complete guide for beginners, all concepts explained, troubleshooting
 
 **What you'll find in the guides:**
 - ✅ Explanation of each concept (Node.js, npm, Git, etc.)
@@ -414,6 +416,21 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - ✅ Calming and encouraging beginner developers
 
 **If you follow the guide, you'll end up with the system running locally!** 🚀
+
+## 🌍 Social Impact / Regions of Interest
+
+Our project seeks to support communities with **limited access to digital resources**. We are focused on three countries where we see great opportunity for impact:
+
+- **🇪🇹 Ethiopia** — low digital access, many young people without connection
+- **🇺🇬 Uganda** — infrastructure barriers and high data costs
+- **🇹🇿 Tanzania** — rural communities with limited access and great interest in technology
+
+**How to contribute:**
+- 📝 Produce documentation and tutorials in English + local languages (Amharic, Swahili)
+- 💾 Create "light" versions of the tool for offline use or with low bandwidth
+- 🤝 Connect with local NGOs, schools, or digital education projects
+
+**Learn more:** Visit our [Social Impact page](/impacto-social) for more information about partnerships and ways to contribute.
 
 ---
 

@@ -1250,6 +1250,8 @@ Este guia foi feito com muito carinho para você. Sabemos que aprender programa�
 
 **Se tiver dúvidas, pergunte!** A comunidade de desenvolvedores é muito acolhedora e está sempre disposta a ajudar.
 
+**🌍 Contribuindo para Acesso Digital:** Se você está na Etiópia, Uganda ou Tanzânia, ou quer ajudar comunidades com acesso digital limitado, visite nossa [página de Impacto Social](/impacto-social) para saber como contribuir!
+
 **Parabéns por ter chegado até aqui!** Você é incrível! 🎉🎊🌟
 
 ---

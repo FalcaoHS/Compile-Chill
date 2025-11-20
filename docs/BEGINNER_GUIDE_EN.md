@@ -63,6 +63,29 @@ By the end of this guide, you will:
 
 **You'll learn all of this here!**
 
+### Special Considerations for Regions with Limited Digital Access
+
+This guide is designed to be accessible for developers, educators, and learners in **Ethiopia, Uganda, and Tanzania**, where digital access may be limited. Here are some tips:
+
+**If you have slow or unstable internet:**
+- Download Node.js installer during off-peak hours when possible
+- Consider using a download manager for large files
+- The `npm install` step may take longer - this is normal, be patient
+- Cloud database services (Neon, Supabase) work well even with slower connections
+
+**If you have limited data:**
+- Use cloud databases (Neon/Supabase) instead of local PostgreSQL to save bandwidth
+- The project is designed to work efficiently with limited resources
+- Consider using "Data Economy Mode" when available (planned feature)
+
+**If you're in an educational institution or NGO:**
+- This project is perfect for teaching programming concepts
+- All tools used are free and open-source
+- Can be adapted for offline use in the future
+- See our [Social Impact page](/impacto-social) for partnership opportunities
+
+**Remember:** The programming community is global and supportive. Don't hesitate to ask for help!
+
 ---
 
 ## Step 1: Understanding what we'll install
@@ -290,6 +313,8 @@ We installed all the libraries the project needs. Now we have:
 
 **Estimated time:** 2-5 minutes (depends on your internet)
 
+**Note for regions with slower connections:** If you're in Ethiopia, Uganda, or Tanzania and have slower internet, this step may take 10-15 minutes. This is completely normal! Be patient and let it complete. The installation will work the same way regardless of connection speed.
+
 ---
 
 ## Step 5: Setting up the database
@@ -338,6 +363,8 @@ Neon is a service that offers PostgreSQL "in the cloud" (online). It's free and 
    - Click "New Project"
    - Choose a name (e.g., "compile-chill-dev")
    - Choose the region closest to you
+     - **For Ethiopia, Uganda, Tanzania:** Choose the nearest available region (often Europe or Middle East regions work well)
+     - Don't worry if exact region isn't available - any region will work
    - Click "Create Project"
 
 4. **Copy the connection string:**
@@ -875,6 +902,15 @@ If you made it here and the project is running, **you did it!** 🎊
 - Open an issue on GitHub
 - Read official documentation
 - Ask the community
+- **For developers in Ethiopia, Uganda, Tanzania:** Check our [Social Impact page](/impacto-social) for regional support and partnership opportunities
+
+### Contributing to Regional Access
+
+If you're a developer, translator, or educator in Ethiopia, Uganda, or Tanzania, consider:
+- Translating documentation to local languages (Amharic, Swahili)
+- Creating tutorials specific to regional challenges
+- Connecting with local NGOs and schools to distribute this content
+- See our [Social Impact page](/impacto-social) for more ways to contribute
 
 **You can do it! Keep learning! 🚀**
 
