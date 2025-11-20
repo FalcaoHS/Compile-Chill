@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { handleApiError, ApiErrors } from "@/lib/api-errors"
+import { handleApiError, ApiErrors } from "@/lib/utils/api-errors"
 
 /**
  * GET /api/users/[id]

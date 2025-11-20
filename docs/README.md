@@ -37,6 +37,16 @@ Análise da organização do projeto:
 
 - **[Análise de Estrutura](PROJECT_STRUCTURE_ANALYSIS.md)** - Análise completa da estrutura de pastas
 
+### 🤖 Drivers Automatizados
+Drivers para automatizar tarefas do projeto com IA:
+
+- **[Drivers](DRIVERS/)** - Índice de todos os drivers
+  - [Architecture Hygiene](DRIVERS/ARCHYGIENE/) - Organiza estrutura de arquivos
+  - [Commit & Push](DRIVERS/COMMIT_AND_PUSH/) - Padroniza commits e branches
+  - [Theme Creation](DRIVERS/THEME_CREATION/) - Cria novos temas
+  - [Environment Setup](DRIVERS/SETUP/) - Configura ambiente completo automaticamente
+  - [Auto Deploy](DRIVERS/AUTO/) - Executa organização + commit automaticamente
+
 ### 📋 Backlog
 Features, melhorias e ideias futuras:
 
@@ -53,6 +63,19 @@ Features, melhorias e ideias futuras:
 ```
 docs/
 ├── README.md                    # Este arquivo (índice principal)
+│
+├── DRIVERS/                      # 🤖 Drivers Automatizados
+│   ├── README.md                # Índice de todos os drivers
+│   ├── ARCHYGIENE/              # Driver de organização
+│   ├── COMMIT_AND_PUSH/         # Driver de commit
+│   ├── THEME_CREATION/          # Driver de criação de temas
+│   ├── SETUP/                   # Driver de setup de ambiente
+│   └── AUTO/                    # Driver automático completo
+│   ├── ARCHYGIENE/              # Driver de organização
+│   ├── COMMIT_AND_PUSH/         # Driver de commit
+│   ├── THEME_CREATION/          # Driver de criação de temas
+│   ├── SETUP/                   # Driver de setup de ambiente
+│   └── AUTO/                    # Driver automático completo
 │
 ├── setup/                        # ⚙️ Setup e Configuração
 │   ├── README.md

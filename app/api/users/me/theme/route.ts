@@ -2,10 +2,10 @@ import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { themeUpdateSchema } from "@/lib/validations/theme"
 import { validate } from "@/lib/validations/validate"
-import { withAuth } from "@/lib/api-auth"
-import { withAuthAndRateLimit } from "@/lib/api-rate-limit"
+import { withAuth } from "@/lib/utils/api-auth"
+import { withAuthAndRateLimit } from "@/lib/utils/api-rate-limit"
 import { getThemeUpdateLimiter } from "@/lib/rate-limit"
-import { handleApiError } from "@/lib/api-errors"
+import { handleApiError } from "@/lib/utils/api-errors"
 
 /**
  * GET /api/users/me/theme

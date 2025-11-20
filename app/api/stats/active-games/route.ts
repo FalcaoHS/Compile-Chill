@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { handleApiError } from "@/lib/api-errors"
+import { handleApiError } from "@/lib/utils/api-errors"
 
 /**
  * Cache structure for in-memory caching

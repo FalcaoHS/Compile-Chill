@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { validateQuery } from "@/lib/validations/validate"
 import { paginationQuerySchema } from "@/lib/validations/query"
-import { handleApiError } from "@/lib/api-errors"
+import { handleApiError } from "@/lib/utils/api-errors"
 import { getGame } from "@/lib/games"
 
 /**

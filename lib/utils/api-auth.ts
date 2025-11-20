@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/auth"
-import { ApiErrors, handleApiError } from "@/lib/api-errors"
+import { ApiErrors, handleApiError } from "@/lib/utils/api-errors"
 
 /**
  * User type from NextAuth session

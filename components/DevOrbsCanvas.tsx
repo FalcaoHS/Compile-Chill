@@ -30,6 +30,31 @@ interface UserData {
   lastLogin: string
 }
 
+// Indiana Jones theme: Orb variant types
+export type IndianaOrbVariant =
+  | "sacred-usb"
+  | "golden-keycap"
+  | "tech-compass"
+  | "cursed-mouse"
+  | "debugger-idol"
+  | "ancient-cpu"
+  | "serpent-byte"
+  | "broken-dependency"
+  | "forgotten-commit"
+  | "arc-codevenant"
+
+export type StarWarsOrbVariant =
+  | "blue-energy-blade-ring"
+  | "red-void-blade"
+  | "green-circuit-arc"
+  | "astromech-pulse-orb"
+  | "rebel-radiant-badge"
+  | "imperial-core-ring"
+  | "holocron-blue"
+  | "holocron-red"
+  | "starfighter-scope"
+  | "hyperspace-tunnel-ring"
+
 interface Orb {
   id: string
   userId: number
@@ -38,6 +63,10 @@ interface Orb {
   body: Matter.Body
   image: HTMLImageElement | null
   imageLoaded: boolean
+  meta?: {
+    indyVariant?: IndianaOrbVariant
+    starWarsVariant?: StarWarsOrbVariant
+  }
 }
 
 interface StaticOrb {
@@ -246,6 +275,906 @@ function calculateEaster(year: number): Date {
 /**
  * PT: Desenha elementos decorativos temáticos ao redor da orb | EN: Draws theme-specific decorative elements around orb | ES: Dibuja elementos decorativos temáticos alrededor de orb | FR: Dessine éléments décoratifs thématiques autour de orb | DE: Zeichnet themenspezifische dekorative Elemente um Orb
  */
+/**
+ * Pick a random Indiana Jones orb variant with equal probability
+ */
+function pickRandomVariant(): IndianaOrbVariant {
+  const variants: IndianaOrbVariant[] = [
+    "sacred-usb",
+    "golden-keycap",
+    "tech-compass",
+    "cursed-mouse",
+    "debugger-idol",
+    "ancient-cpu",
+    "serpent-byte",
+    "broken-dependency",
+    "forgotten-commit",
+    "arc-codevenant",
+  ]
+  return variants[Math.floor(Math.random() * variants.length)]
+}
+
+/**
+ * Pick a random Star Wars orb variant with equal probability (10% each)
+ */
+function pickRandomStarWarsVariant(): StarWarsOrbVariant {
+  const variants: StarWarsOrbVariant[] = [
+    "blue-energy-blade-ring",
+    "red-void-blade",
+    "green-circuit-arc",
+    "astromech-pulse-orb",
+    "rebel-radiant-badge",
+    "imperial-core-ring",
+    "holocron-blue",
+    "holocron-red",
+    "starfighter-scope",
+    "hyperspace-tunnel-ring",
+  ]
+  return variants[Math.floor(Math.random() * variants.length)]
+}
+
+/**
+ * Draw Indiana Jones theme orb ring with variant-specific design
+ * User photo is drawn first, then ring is drawn around it with circular clipping
+ */
+function drawIndianaJonesOrbRing(
+  ctx: CanvasRenderingContext2D,
+  orb: Orb,
+  variant: IndianaOrbVariant,
+  colors: { primary: string; accent: string; text: string; bg?: string; bgSoft?: string; glow?: string; border?: string; highlight?: string },
+  pos: { x: number; y: number },
+  radius: number
+) {
+  if (!colors) return
+
+  ctx.save()
+
+  // Draw user photo first (existing orb rendering)
+  if (orb.imageLoaded && orb.image) {
+    ctx.beginPath()
+    ctx.arc(pos.x, pos.y, radius - 2, 0, Math.PI * 2)
+    ctx.clip()
+    ctx.drawImage(orb.image, pos.x - radius + 2, pos.y - radius + 2, (radius - 2) * 2, (radius - 2) * 2)
+    ctx.restore()
+    ctx.save()
+  }
+
+  // Ring radius (outside the photo)
+  const ringRadius = radius * 1.3
+  const ringWidth = radius * 0.15
+
+  // Apply circular clipping to ensure ring doesn't cover photo
+  ctx.beginPath()
+  ctx.arc(pos.x, pos.y, ringRadius, 0, Math.PI * 2)
+  ctx.arc(pos.x, pos.y, radius, 0, Math.PI * 2)
+  ctx.clip("evenodd")
+
+  // Render decorative ring based on variant type
+  switch (variant) {
+    case "sacred-usb": {
+      // Stone ring with hex runes, golden USB cable contour
+      ctx.strokeStyle = colors.bgSoft || "#8A6B45"
+      ctx.fillStyle = colors.bgSoft || "#8A6B45"
+      ctx.lineWidth = 2
+
+      // Stone ring base
+      ctx.beginPath()
+      ctx.arc(pos.x, pos.y, ringRadius, 0, Math.PI * 2)
+      ctx.arc(pos.x, pos.y, ringRadius - ringWidth, 0, Math.PI * 2)
+      ctx.fill("evenodd")
+
+      // Hex runes around ring
+      ctx.fillStyle = colors.primary || "#DAB466"
+      ctx.font = `${radius * 0.2}px monospace`
+      ctx.textAlign = "center"
+      ctx.textBaseline = "middle"
+      const hexRunes = ["0x", "FF", "DE", "AD", "BE", "EF"]
+      hexRunes.forEach((rune, i) => {
+        const angle = (i / hexRunes.length) * Math.PI * 2
+        const x = pos.x + Math.cos(angle) * (ringRadius - ringWidth / 2)
+        const y = pos.y + Math.sin(angle) * (ringRadius - ringWidth / 2)
+        ctx.fillText(rune, x, y)
+      })
+
+      // Golden USB cable contour
+      ctx.strokeStyle = colors.primary || "#DAB466"
+      ctx.lineWidth = 3
+      ctx.beginPath()
+      // USB connector shape
+      const usbWidth = radius * 0.4
+      const usbHeight = radius * 0.2
+      ctx.rect(pos.x - usbWidth / 2, pos.y - ringRadius - usbHeight, usbWidth, usbHeight)
+      ctx.stroke()
+      // Cable line
+      ctx.beginPath()
+      ctx.moveTo(pos.x, pos.y - ringRadius - usbHeight)
+      ctx.lineTo(pos.x, pos.y - ringRadius - usbHeight * 2)
+      ctx.stroke()
+      break
+    }
+
+    case "golden-keycap": {
+      // Golden Enter key shape with ASCII glyphs
+      ctx.fillStyle = colors.primary || "#DAB466"
+      ctx.strokeStyle = colors.glow || "#FFB95A"
+      ctx.lineWidth = 2
+
+      // Enter key shape (rectangular with notch)
+      const keyWidth = radius * 0.6
+      const keyHeight = radius * 0.3
+      ctx.beginPath()
+      ctx.rect(pos.x - keyWidth / 2, pos.y - ringRadius - keyHeight / 2, keyWidth, keyHeight)
+      // Notch on right side
+      ctx.moveTo(pos.x + keyWidth / 2, pos.y - ringRadius - keyHeight / 2)
+      ctx.lineTo(pos.x + keyWidth / 2 + radius * 0.1, pos.y - ringRadius)
+      ctx.lineTo(pos.x + keyWidth / 2, pos.y - ringRadius + keyHeight / 2)
+      ctx.fill()
+      ctx.stroke()
+
+      // ASCII glyphs
+      ctx.fillStyle = colors.text || "#FFF4D0"
+      ctx.font = `bold ${radius * 0.25}px monospace`
+      ctx.textAlign = "center"
+      ctx.textBaseline = "middle"
+      ctx.fillText("↵", pos.x, pos.y - ringRadius)
+
+      // Golden ring around orb
+      ctx.strokeStyle = colors.primary || "#DAB466"
+      ctx.lineWidth = 3
+      ctx.beginPath()
+      ctx.arc(pos.x, pos.y, ringRadius, 0, Math.PI * 2)
+      ctx.stroke()
+      break
+    }
+
+    case "tech-compass": {
+      // Circular compass with rotating pointer, "N,S,E,W → 0,1,X,F" symbols
+      ctx.strokeStyle = colors.primary || "#DAB466"
+      ctx.fillStyle = colors.bgSoft || "#8A6B45"
+      ctx.lineWidth = 2
+
+      // Compass circle
+      ctx.beginPath()
+      ctx.arc(pos.x, pos.y, ringRadius, 0, Math.PI * 2)
+      ctx.fill()
+      ctx.stroke()
+
+      // Inner circle
+      ctx.beginPath()
+      ctx.arc(pos.x, pos.y, ringRadius - ringWidth, 0, Math.PI * 2)
+      ctx.stroke()
+
+      // Cardinal directions with dev symbols
+      const directions = [
+        { symbol: "0", label: "N", angle: -Math.PI / 2 },
+        { symbol: "1", label: "S", angle: Math.PI / 2 },
+        { symbol: "X", label: "E", angle: 0 },
+        { symbol: "F", label: "W", angle: Math.PI },
+      ]
+      ctx.fillStyle = colors.text || "#FFF4D0"
+      ctx.font = `${radius * 0.2}px monospace`
+      ctx.textAlign = "center"
+      ctx.textBaseline = "middle"
+      directions.forEach((dir) => {
+        const x = pos.x + Math.cos(dir.angle) * (ringRadius - ringWidth / 2)
+        const y = pos.y + Math.sin(dir.angle) * (ringRadius - ringWidth / 2)
+        ctx.fillText(dir.symbol, x, y)
+        ctx.fillText(dir.label, x, y + radius * 0.15)
+      })
+
+      // Rotating pointer (always points "north" = up)
+      ctx.strokeStyle = colors.accent || "#4AFF8A"
+      ctx.lineWidth = 3
+      ctx.beginPath()
+      ctx.moveTo(pos.x, pos.y)
+      ctx.lineTo(pos.x, pos.y - ringRadius + ringWidth)
+      ctx.stroke()
+
+      // Center dot
+      ctx.fillStyle = colors.accent || "#4AFF8A"
+      ctx.beginPath()
+      ctx.arc(pos.x, pos.y, radius * 0.1, 0, Math.PI * 2)
+      ctx.fill()
+      break
+    }
+
+    case "cursed-mouse": {
+      // Worn scroll wheel ring with scratches, dust particles
+      ctx.strokeStyle = colors.bgSoft || "#8A6B45"
+      ctx.fillStyle = colors.bgSoft || "#8A6B45"
+      ctx.lineWidth = 2
+
+      // Worn ring base
+      ctx.beginPath()
+      ctx.arc(pos.x, pos.y, ringRadius, 0, Math.PI * 2)
+      ctx.arc(pos.x, pos.y, ringRadius - ringWidth, 0, Math.PI * 2)
+      ctx.fill("evenodd")
+
+      // Scroll wheel notches
+      const notchCount = 12
+      for (let i = 0; i < notchCount; i++) {
+        const angle = (i / notchCount) * Math.PI * 2
+        const x1 = pos.x + Math.cos(angle) * (ringRadius - ringWidth)
+        const y1 = pos.y + Math.sin(angle) * (ringRadius - ringWidth)
+        const x2 = pos.x + Math.cos(angle) * ringRadius
+        const y2 = pos.y + Math.sin(angle) * ringRadius
+        ctx.beginPath()
+        ctx.moveTo(x1, y1)
+        ctx.lineTo(x2, y2)
+        ctx.stroke()
+      }
+
+      // Scratches (random lines)
+      ctx.strokeStyle = colors.border || "#4A3924"
+      ctx.lineWidth = 1
+      for (let i = 0; i < 5; i++) {
+        const angle1 = Math.random() * Math.PI * 2
+        const angle2 = Math.random() * Math.PI * 2
+        const r1 = ringRadius - ringWidth + Math.random() * ringWidth
+        const r2 = ringRadius - ringWidth + Math.random() * ringWidth
+        ctx.beginPath()
+        ctx.moveTo(pos.x + Math.cos(angle1) * r1, pos.y + Math.sin(angle1) * r1)
+        ctx.lineTo(pos.x + Math.cos(angle2) * r2, pos.y + Math.sin(angle2) * r2)
+        ctx.stroke()
+      }
+
+      // Dust particles
+      ctx.fillStyle = colors.bgSoft || "#8A6B45"
+      for (let i = 0; i < 8; i++) {
+        const angle = Math.random() * Math.PI * 2
+        const r = ringRadius - ringWidth / 2 + (Math.random() - 0.5) * ringWidth
+        const x = pos.x + Math.cos(angle) * r
+        const y = pos.y + Math.sin(angle) * r
+        ctx.beginPath()
+        ctx.arc(x, y, radius * 0.05, 0, Math.PI * 2)
+        ctx.fill()
+      }
+      break
+    }
+
+    case "debugger-idol": {
+      // Golden idol shape with debug symbols (➤, ⏹)
+      ctx.fillStyle = colors.primary || "#DAB466"
+      ctx.strokeStyle = colors.glow || "#FFB95A"
+      ctx.lineWidth = 2
+
+      // Idol shape (simplified head/torso)
+      const idolWidth = radius * 0.5
+      const idolHeight = radius * 0.7
+      ctx.beginPath()
+      // Head (circle)
+      ctx.arc(pos.x, pos.y - ringRadius - idolHeight / 2, radius * 0.2, 0, Math.PI * 2)
+      // Body (rectangle)
+      ctx.rect(pos.x - idolWidth / 2, pos.y - ringRadius - idolHeight / 2 + radius * 0.2, idolWidth, idolHeight - radius * 0.2)
+      ctx.fill()
+      ctx.stroke()
+
+      // Debug symbols
+      ctx.fillStyle = colors.text || "#FFF4D0"
+      ctx.font = `${radius * 0.25}px sans-serif`
+      ctx.textAlign = "center"
+      ctx.textBaseline = "middle"
+      ctx.fillText("➤", pos.x - radius * 0.15, pos.y - ringRadius)
+      ctx.fillText("⏹", pos.x + radius * 0.15, pos.y - ringRadius)
+
+      // Golden ring
+      ctx.strokeStyle = colors.primary || "#DAB466"
+      ctx.lineWidth = 3
+      ctx.beginPath()
+      ctx.arc(pos.x, pos.y, ringRadius, 0, Math.PI * 2)
+      ctx.stroke()
+      break
+    }
+
+    case "ancient-cpu": {
+      // Cracked chip with vegetation, burned circuit borders
+      ctx.fillStyle = colors.bgSoft || "#8A6B45"
+      ctx.strokeStyle = colors.border || "#4A3924"
+      ctx.lineWidth = 2
+
+      // Chip base (square with rounded corners)
+      const chipSize = radius * 0.6
+      const cornerRadius = radius * 0.1
+      ctx.beginPath()
+      // Manually draw rounded rectangle
+      ctx.moveTo(pos.x - chipSize / 2 + cornerRadius, pos.y - ringRadius - chipSize / 2)
+      ctx.lineTo(pos.x + chipSize / 2 - cornerRadius, pos.y - ringRadius - chipSize / 2)
+      ctx.quadraticCurveTo(pos.x + chipSize / 2, pos.y - ringRadius - chipSize / 2, pos.x + chipSize / 2, pos.y - ringRadius - chipSize / 2 + cornerRadius)
+      ctx.lineTo(pos.x + chipSize / 2, pos.y - ringRadius + chipSize / 2 - cornerRadius)
+      ctx.quadraticCurveTo(pos.x + chipSize / 2, pos.y - ringRadius + chipSize / 2, pos.x + chipSize / 2 - cornerRadius, pos.y - ringRadius + chipSize / 2)
+      ctx.lineTo(pos.x - chipSize / 2 + cornerRadius, pos.y - ringRadius + chipSize / 2)
+      ctx.quadraticCurveTo(pos.x - chipSize / 2, pos.y - ringRadius + chipSize / 2, pos.x - chipSize / 2, pos.y - ringRadius + chipSize / 2 - cornerRadius)
+      ctx.lineTo(pos.x - chipSize / 2, pos.y - ringRadius - chipSize / 2 + cornerRadius)
+      ctx.quadraticCurveTo(pos.x - chipSize / 2, pos.y - ringRadius - chipSize / 2, pos.x - chipSize / 2 + cornerRadius, pos.y - ringRadius - chipSize / 2)
+      ctx.closePath()
+      ctx.fill()
+      ctx.stroke()
+
+      // Cracks
+      ctx.strokeStyle = colors.border || "#4A3924"
+      ctx.lineWidth = 1.5
+      ctx.beginPath()
+      ctx.moveTo(pos.x - chipSize / 4, pos.y - ringRadius - chipSize / 2)
+      ctx.lineTo(pos.x, pos.y - ringRadius)
+      ctx.lineTo(pos.x + chipSize / 4, pos.y - ringRadius + chipSize / 4)
+      ctx.stroke()
+
+      // Vegetation (green pixels)
+      ctx.fillStyle = colors.accent || "#4AFF8A"
+      for (let i = 0; i < 6; i++) {
+        const x = pos.x - chipSize / 2 + Math.random() * chipSize
+        const y = pos.y - ringRadius - chipSize / 2 + Math.random() * chipSize
+        ctx.fillRect(x, y, radius * 0.08, radius * 0.08)
+      }
+
+      // Burned circuit borders
+      ctx.strokeStyle = colors.glow || "#FFB95A"
+      ctx.lineWidth = 1
+      ctx.beginPath()
+      // Top border
+      ctx.moveTo(pos.x - chipSize / 2, pos.y - ringRadius - chipSize / 2)
+      ctx.lineTo(pos.x + chipSize / 2, pos.y - ringRadius - chipSize / 2)
+      // Bottom border
+      ctx.moveTo(pos.x - chipSize / 2, pos.y - ringRadius + chipSize / 2)
+      ctx.lineTo(pos.x + chipSize / 2, pos.y - ringRadius + chipSize / 2)
+      ctx.stroke()
+
+      // Ring with circuit pattern
+      ctx.strokeStyle = colors.primary || "#DAB466"
+      ctx.lineWidth = 2
+      ctx.beginPath()
+      ctx.arc(pos.x, pos.y, ringRadius, 0, Math.PI * 2)
+      ctx.stroke()
+      break
+    }
+
+    case "serpent-byte": {
+      // Pixel snake contouring ring, green glowing eyes
+      ctx.strokeStyle = colors.accent || "#4AFF8A"
+      ctx.fillStyle = colors.accent || "#4AFF8A"
+      ctx.lineWidth = 2
+
+      // Pixel snake body (segmented)
+      const segments = 8
+      const segmentSize = radius * 0.15
+      for (let i = 0; i < segments; i++) {
+        const angle = (i / segments) * Math.PI * 2
+        const x = pos.x + Math.cos(angle) * (ringRadius - ringWidth / 2)
+        const y = pos.y + Math.sin(angle) * (ringRadius - ringWidth / 2)
+        ctx.fillRect(x - segmentSize / 2, y - segmentSize / 2, segmentSize, segmentSize)
+      }
+
+      // Green glowing eyes
+      ctx.fillStyle = colors.accent || "#4AFF8A"
+      ctx.shadowBlur = 8
+      ctx.shadowColor = colors.accent || "#4AFF8A"
+      const eyeSize = radius * 0.12
+      // Left eye
+      ctx.beginPath()
+      ctx.arc(pos.x - radius * 0.3, pos.y - radius * 0.3, eyeSize, 0, Math.PI * 2)
+      ctx.fill()
+      // Right eye
+      ctx.beginPath()
+      ctx.arc(pos.x + radius * 0.3, pos.y - radius * 0.3, eyeSize, 0, Math.PI * 2)
+      ctx.fill()
+      ctx.shadowBlur = 0
+
+      // Ring outline
+      ctx.strokeStyle = colors.accent || "#4AFF8A"
+      ctx.lineWidth = 2
+      ctx.beginPath()
+      ctx.arc(pos.x, pos.y, ringRadius, 0, Math.PI * 2)
+      ctx.stroke()
+      break
+    }
+
+    case "broken-dependency": {
+      // Broken chains around ring, "{ peerMissing: true }" inscription
+      ctx.strokeStyle = colors.border || "#4A3924"
+      ctx.fillStyle = colors.bgSoft || "#8A6B45"
+      ctx.lineWidth = 2
+
+      // Broken chain links
+      const linkCount = 6
+      for (let i = 0; i < linkCount; i++) {
+        const angle = (i / linkCount) * Math.PI * 2
+        const x = pos.x + Math.cos(angle) * (ringRadius - ringWidth / 2)
+        const y = pos.y + Math.sin(angle) * (ringRadius - ringWidth / 2)
+        const linkSize = radius * 0.2
+
+        // Broken link (incomplete circle)
+        ctx.beginPath()
+        ctx.arc(x, y, linkSize / 2, 0, Math.PI * 1.8)
+        ctx.stroke()
+
+        // Break in chain
+        if (i % 2 === 0) {
+          ctx.strokeStyle = colors.accent || "#4AFF8A"
+          ctx.lineWidth = 1
+          ctx.beginPath()
+          ctx.moveTo(x + linkSize / 2, y)
+          ctx.lineTo(x + linkSize, y)
+          ctx.stroke()
+          ctx.strokeStyle = colors.border || "#4A3924"
+          ctx.lineWidth = 2
+        }
+      }
+
+      // Inscription
+      ctx.fillStyle = colors.text || "#FFF4D0"
+      ctx.font = `${radius * 0.15}px monospace`
+      ctx.textAlign = "center"
+      ctx.textBaseline = "middle"
+      ctx.fillText("{ peerMissing: true }", pos.x, pos.y - ringRadius - radius * 0.3)
+
+      // Ring
+      ctx.strokeStyle = colors.primary || "#DAB466"
+      ctx.lineWidth = 2
+      ctx.beginPath()
+      ctx.arc(pos.x, pos.y, ringRadius, 0, Math.PI * 2)
+      ctx.stroke()
+      break
+    }
+
+    case "forgotten-commit": {
+      // Scroll/papyrus ring with "git log –forgotten" text, red seals
+      ctx.fillStyle = colors.highlight || "#FFF4D0"
+      ctx.strokeStyle = colors.bgSoft || "#8A6B45"
+      ctx.lineWidth = 2
+
+      // Scroll shape (curved rectangle)
+      const scrollWidth = radius * 0.8
+      const scrollHeight = radius * 0.25
+      const scrollCornerRadius = radius * 0.05
+      ctx.beginPath()
+      // Manually draw rounded rectangle
+      ctx.moveTo(pos.x - scrollWidth / 2 + scrollCornerRadius, pos.y - ringRadius - scrollHeight / 2)
+      ctx.lineTo(pos.x + scrollWidth / 2 - scrollCornerRadius, pos.y - ringRadius - scrollHeight / 2)
+      ctx.quadraticCurveTo(pos.x + scrollWidth / 2, pos.y - ringRadius - scrollHeight / 2, pos.x + scrollWidth / 2, pos.y - ringRadius - scrollHeight / 2 + scrollCornerRadius)
+      ctx.lineTo(pos.x + scrollWidth / 2, pos.y - ringRadius + scrollHeight / 2 - scrollCornerRadius)
+      ctx.quadraticCurveTo(pos.x + scrollWidth / 2, pos.y - ringRadius + scrollHeight / 2, pos.x + scrollWidth / 2 - scrollCornerRadius, pos.y - ringRadius + scrollHeight / 2)
+      ctx.lineTo(pos.x - scrollWidth / 2 + scrollCornerRadius, pos.y - ringRadius + scrollHeight / 2)
+      ctx.quadraticCurveTo(pos.x - scrollWidth / 2, pos.y - ringRadius + scrollHeight / 2, pos.x - scrollWidth / 2, pos.y - ringRadius + scrollHeight / 2 - scrollCornerRadius)
+      ctx.lineTo(pos.x - scrollWidth / 2, pos.y - ringRadius - scrollHeight / 2 + scrollCornerRadius)
+      ctx.quadraticCurveTo(pos.x - scrollWidth / 2, pos.y - ringRadius - scrollHeight / 2, pos.x - scrollWidth / 2 + scrollCornerRadius, pos.y - ringRadius - scrollHeight / 2)
+      ctx.closePath()
+      ctx.fill()
+      ctx.stroke()
+
+      // Text
+      ctx.fillStyle = colors.border || "#4A3924"
+      ctx.font = `${radius * 0.12}px monospace`
+      ctx.textAlign = "center"
+      ctx.textBaseline = "middle"
+      ctx.fillText("git log –forgotten", pos.x, pos.y - ringRadius)
+
+      // Red seals
+      ctx.fillStyle = "#8B0000"
+      const sealSize = radius * 0.1
+      // Left seal
+      ctx.beginPath()
+      ctx.arc(pos.x - scrollWidth / 2 + sealSize, pos.y - ringRadius, sealSize, 0, Math.PI * 2)
+      ctx.fill()
+      // Right seal
+      ctx.beginPath()
+      ctx.arc(pos.x + scrollWidth / 2 - sealSize, pos.y - ringRadius, sealSize, 0, Math.PI * 2)
+      ctx.fill()
+
+      // Ring
+      ctx.strokeStyle = colors.primary || "#DAB466"
+      ctx.lineWidth = 2
+      ctx.beginPath()
+      ctx.arc(pos.x, pos.y, ringRadius, 0, Math.PI * 2)
+      ctx.stroke()
+      break
+    }
+
+    case "arc-codevenant": {
+      // Golden arc with ∞ symbols flowing, white light interior
+      ctx.fillStyle = colors.primary || "#DAB466"
+      ctx.strokeStyle = colors.glow || "#FFB95A"
+      ctx.lineWidth = 3
+
+      // Golden arc (top half of ring)
+      ctx.beginPath()
+      ctx.arc(pos.x, pos.y, ringRadius, Math.PI, 0, false)
+      ctx.lineWidth = ringWidth
+      ctx.stroke()
+
+      // ∞ symbols flowing
+      ctx.fillStyle = colors.text || "#FFF4D0"
+      ctx.font = `${radius * 0.2}px sans-serif`
+      ctx.textAlign = "center"
+      ctx.textBaseline = "middle"
+      const infinityCount = 4
+      for (let i = 0; i < infinityCount; i++) {
+        const angle = (i / infinityCount) * Math.PI - Math.PI / 2
+        const x = pos.x + Math.cos(angle) * (ringRadius - ringWidth / 2)
+        const y = pos.y + Math.sin(angle) * (ringRadius - ringWidth / 2)
+        ctx.fillText("∞", x, y)
+      }
+
+      // White light interior (glow effect)
+      ctx.fillStyle = colors.highlight || "#FFF4D0"
+      ctx.globalAlpha = 0.3
+      ctx.beginPath()
+      ctx.arc(pos.x, pos.y, radius, 0, Math.PI * 2)
+      ctx.fill()
+      ctx.globalAlpha = 1
+
+      // Ring outline
+      ctx.strokeStyle = colors.primary || "#DAB466"
+      ctx.lineWidth = 2
+      ctx.beginPath()
+      ctx.arc(pos.x, pos.y, ringRadius, 0, Math.PI * 2)
+      ctx.stroke()
+      break
+    }
+  }
+
+  ctx.restore()
+}
+
+/**
+ * Draw Star Wars theme orb ring with variant-specific design
+ * User photo is drawn first, then ring is drawn around it with circular clipping
+ * All designs are abstract and geometric (not direct IP copies)
+ */
+function drawStarWarsOrb(
+  ctx: CanvasRenderingContext2D,
+  orb: Orb,
+  variant: StarWarsOrbVariant,
+  colors: { primary: string; accent: string; text: string; bg?: string; bgSoft?: string; glow?: string; border?: string; highlight?: string },
+  pos: { x: number; y: number },
+  radius: number
+) {
+  if (!colors) return
+
+  ctx.save()
+
+  // Note: User photo is already drawn in renderOrb, so we only draw the decorative ring here
+  // Ring radius (outside the photo)
+  const ringRadius = radius * 1.3
+  const ringWidth = radius * 0.15
+
+  // Ensure we're drawing on top of everything
+  ctx.globalCompositeOperation = 'source-over'
+  ctx.globalAlpha = 1
+  
+  // Render decorative ring based on variant type
+  switch (variant) {
+    case "blue-energy-blade-ring": {
+      // Thin blue vibrant energy ring with diagonal strokes
+      ctx.strokeStyle = colors.primary || "#2F9BFF"
+      ctx.lineWidth = 3 // Increased for visibility
+      ctx.shadowBlur = 15 // Increased for visibility
+      ctx.shadowColor = colors.primary || "#2F9BFF"
+      ctx.globalAlpha = 1 // Ensure full opacity
+      
+      // Main ring
+      ctx.beginPath()
+      ctx.arc(pos.x, pos.y, ringRadius, 0, Math.PI * 2)
+      ctx.stroke()
+      
+      // Diagonal energy strokes
+      for (let i = 0; i < 8; i++) {
+        const angle = (i / 8) * Math.PI * 2
+        const x1 = pos.x + Math.cos(angle) * (ringRadius - ringWidth)
+        const y1 = pos.y + Math.sin(angle) * (ringRadius - ringWidth)
+        const x2 = pos.x + Math.cos(angle + 0.3) * ringRadius
+        const y2 = pos.y + Math.sin(angle + 0.3) * ringRadius
+        ctx.beginPath()
+        ctx.moveTo(x1, y1)
+        ctx.lineTo(x2, y2)
+        ctx.stroke()
+      }
+      break
+    }
+
+    case "red-void-blade": {
+      // Thick red ring with internal pulsing glow, unstable texture
+      ctx.fillStyle = colors.accent || "#FF2B2B"
+      ctx.strokeStyle = colors.accent || "#FF2B2B"
+      ctx.lineWidth = 5 // Increased for visibility
+      ctx.shadowBlur = 20 // Increased for visibility
+      ctx.shadowColor = colors.accent || "#FF2B2B"
+      ctx.globalAlpha = 1 // Ensure full opacity
+      
+      // Thick ring base
+      ctx.beginPath()
+      ctx.arc(pos.x, pos.y, ringRadius, 0, Math.PI * 2)
+      ctx.arc(pos.x, pos.y, ringRadius - ringWidth, 0, Math.PI * 2)
+      ctx.fill("evenodd")
+      
+      // Internal glow (pulsing effect via opacity)
+      ctx.globalAlpha = 0.6
+      ctx.beginPath()
+      ctx.arc(pos.x, pos.y, ringRadius - ringWidth / 2, 0, Math.PI * 2)
+      ctx.fill()
+      ctx.globalAlpha = 1
+      
+      // Unstable texture (cracks/glitch lines)
+      ctx.strokeStyle = colors.bg || "#050508"
+      ctx.lineWidth = 1
+      for (let i = 0; i < 6; i++) {
+        const angle = Math.random() * Math.PI * 2
+        const r = ringRadius - ringWidth + Math.random() * ringWidth
+        ctx.beginPath()
+        ctx.moveTo(pos.x + Math.cos(angle) * r, pos.y + Math.sin(angle) * r)
+        ctx.lineTo(pos.x + Math.cos(angle + 0.2) * (r + 3), pos.y + Math.sin(angle + 0.2) * (r + 3))
+        ctx.stroke()
+      }
+      break
+    }
+
+    case "green-circuit-arc": {
+      // Green semicircular circuit traces like active circuit
+      ctx.strokeStyle = "#4AFF8A" // Green circuit color
+      ctx.lineWidth = 3 // Increased for visibility
+      ctx.shadowBlur = 15 // Increased for visibility
+      ctx.shadowColor = "#4AFF8A"
+      ctx.globalAlpha = 1 // Ensure full opacity
+      
+      // Semicircular arcs (circuit traces)
+      for (let i = 0; i < 4; i++) {
+        const startAngle = (i / 4) * Math.PI * 2
+        const endAngle = startAngle + Math.PI
+        ctx.beginPath()
+        ctx.arc(pos.x, pos.y, ringRadius - ringWidth / 2, startAngle, endAngle)
+        ctx.stroke()
+      }
+      
+      // Circuit nodes (small circles)
+      ctx.fillStyle = "#4AFF8A"
+      for (let i = 0; i < 8; i++) {
+        const angle = (i / 8) * Math.PI * 2
+        const x = pos.x + Math.cos(angle) * (ringRadius - ringWidth / 2)
+        const y = pos.y + Math.sin(angle) * (ringRadius - ringWidth / 2)
+        ctx.beginPath()
+        ctx.arc(x, y, radius * 0.08, 0, Math.PI * 2)
+        ctx.fill()
+      }
+      break
+    }
+
+    case "astromech-pulse-orb": {
+      // Concentric rings that rotate slowly
+      ctx.strokeStyle = colors.primary || "#2F9BFF"
+      ctx.lineWidth = 2
+      ctx.shadowBlur = 8
+      ctx.shadowColor = colors.primary || "#2F9BFF"
+      
+      // Multiple concentric rings
+      for (let i = 0; i < 3; i++) {
+        const r = ringRadius - ringWidth / 2 - (i * ringWidth / 3)
+        ctx.beginPath()
+        ctx.arc(pos.x, pos.y, r, 0, Math.PI * 2)
+        ctx.stroke()
+      }
+      
+      // Pulse dots around ring
+      ctx.fillStyle = colors.glow || "#59E0FF"
+      for (let i = 0; i < 6; i++) {
+        const angle = (i / 6) * Math.PI * 2
+        const x = pos.x + Math.cos(angle) * (ringRadius - ringWidth / 2)
+        const y = pos.y + Math.sin(angle) * (ringRadius - ringWidth / 2)
+        ctx.beginPath()
+        ctx.arc(x, y, radius * 0.1, 0, Math.PI * 2)
+        ctx.fill()
+      }
+      break
+    }
+
+    case "rebel-radiant-badge": {
+      // Abstract double-wing symbol + soft amber light
+      ctx.fillStyle = colors.highlight || "#FFC23D"
+      ctx.strokeStyle = colors.highlight || "#FFC23D"
+      ctx.lineWidth = 2
+      ctx.shadowBlur = 10
+      ctx.shadowColor = colors.highlight || "#FFC23D"
+      
+      // Abstract wing symbol (geometric, not direct copy)
+      const wingSize = radius * 0.4
+      // Left wing
+      ctx.beginPath()
+      ctx.moveTo(pos.x - wingSize, pos.y - ringRadius)
+      ctx.lineTo(pos.x - wingSize * 0.5, pos.y - ringRadius - wingSize * 0.3)
+      ctx.lineTo(pos.x, pos.y - ringRadius)
+      ctx.fill()
+      // Right wing
+      ctx.beginPath()
+      ctx.moveTo(pos.x + wingSize, pos.y - ringRadius)
+      ctx.lineTo(pos.x + wingSize * 0.5, pos.y - ringRadius - wingSize * 0.3)
+      ctx.lineTo(pos.x, pos.y - ringRadius)
+      ctx.fill()
+      
+      // Soft amber glow ring
+      ctx.globalAlpha = 0.4
+      ctx.beginPath()
+      ctx.arc(pos.x, pos.y, ringRadius, 0, Math.PI * 2)
+      ctx.stroke()
+      ctx.globalAlpha = 1
+      break
+    }
+
+    case "imperial-core-ring": {
+      // Geometric symmetrical ring, hard, with angular lines
+      ctx.strokeStyle = colors.bgSoft || "#0C0F14"
+      ctx.fillStyle = colors.bgSoft || "#0C0F14"
+      ctx.lineWidth = 3
+      
+      // Hard geometric ring
+      ctx.beginPath()
+      ctx.arc(pos.x, pos.y, ringRadius, 0, Math.PI * 2)
+      ctx.arc(pos.x, pos.y, ringRadius - ringWidth, 0, Math.PI * 2)
+      ctx.fill("evenodd")
+      
+      // Angular lines (symmetrical)
+      ctx.strokeStyle = colors.text || "#D8F2FF"
+      ctx.lineWidth = 2
+      for (let i = 0; i < 8; i++) {
+        const angle = (i / 8) * Math.PI * 2
+        const x1 = pos.x + Math.cos(angle) * (ringRadius - ringWidth)
+        const y1 = pos.y + Math.sin(angle) * (ringRadius - ringWidth)
+        const x2 = pos.x + Math.cos(angle) * ringRadius
+        const y2 = pos.y + Math.sin(angle) * ringRadius
+        ctx.beginPath()
+        ctx.moveTo(x1, y1)
+        ctx.lineTo(x2, y2)
+        ctx.stroke()
+      }
+      break
+    }
+
+    case "holocron-blue": {
+      // Blue geometric patterns, pulsating luminance
+      ctx.fillStyle = colors.primary || "#2F9BFF"
+      ctx.strokeStyle = colors.glow || "#59E0FF"
+      ctx.lineWidth = 2
+      ctx.shadowBlur = 10
+      ctx.shadowColor = colors.primary || "#2F9BFF"
+      
+      // Geometric triangular pattern
+      for (let i = 0; i < 6; i++) {
+        const angle = (i / 6) * Math.PI * 2
+        const x1 = pos.x + Math.cos(angle) * (ringRadius - ringWidth / 2)
+        const y1 = pos.y + Math.sin(angle) * (ringRadius - ringWidth / 2)
+        const x2 = pos.x + Math.cos(angle + Math.PI / 3) * (ringRadius - ringWidth / 2)
+        const y2 = pos.y + Math.sin(angle + Math.PI / 3) * (ringRadius - ringWidth / 2)
+        ctx.beginPath()
+        ctx.moveTo(pos.x, pos.y)
+        ctx.lineTo(x1, y1)
+        ctx.lineTo(x2, y2)
+        ctx.closePath()
+        ctx.stroke()
+      }
+      
+      // Pulsating center
+      ctx.globalAlpha = 0.5
+      ctx.beginPath()
+      ctx.arc(pos.x, pos.y, radius * 0.3, 0, Math.PI * 2)
+      ctx.fill()
+      ctx.globalAlpha = 1
+      break
+    }
+
+    case "holocron-red": {
+      // Red version with triangulation
+      ctx.fillStyle = colors.accent || "#FF2B2B"
+      ctx.strokeStyle = colors.accent || "#FF2B2B"
+      ctx.lineWidth = 2
+      ctx.shadowBlur = 10
+      ctx.shadowColor = colors.accent || "#FF2B2B"
+      
+      // Triangular pattern (red)
+      for (let i = 0; i < 6; i++) {
+        const angle = (i / 6) * Math.PI * 2
+        const x1 = pos.x + Math.cos(angle) * (ringRadius - ringWidth / 2)
+        const y1 = pos.y + Math.sin(angle) * (ringRadius - ringWidth / 2)
+        const x2 = pos.x + Math.cos(angle + Math.PI / 3) * (ringRadius - ringWidth / 2)
+        const y2 = pos.y + Math.sin(angle + Math.PI / 3) * (ringRadius - ringWidth / 2)
+        ctx.beginPath()
+        ctx.moveTo(pos.x, pos.y)
+        ctx.lineTo(x1, y1)
+        ctx.lineTo(x2, y2)
+        ctx.closePath()
+        ctx.fill()
+      }
+      break
+    }
+
+    case "starfighter-scope": {
+      // x/y markers like targeting scope
+      ctx.strokeStyle = colors.primary || "#2F9BFF"
+      ctx.lineWidth = 2
+      ctx.shadowBlur = 6
+      ctx.shadowColor = colors.primary || "#2F9BFF"
+      
+      // Crosshair pattern
+      // Horizontal line
+      ctx.beginPath()
+      ctx.moveTo(pos.x - ringRadius, pos.y)
+      ctx.lineTo(pos.x + ringRadius, pos.y)
+      ctx.stroke()
+      // Vertical line
+      ctx.beginPath()
+      ctx.moveTo(pos.x, pos.y - ringRadius)
+      ctx.lineTo(pos.x, pos.y + ringRadius)
+      ctx.stroke()
+      
+      // Corner brackets (targeting markers)
+      const bracketSize = radius * 0.2
+      // Top-left
+      ctx.beginPath()
+      ctx.moveTo(pos.x - ringRadius, pos.y - ringRadius)
+      ctx.lineTo(pos.x - ringRadius + bracketSize, pos.y - ringRadius)
+      ctx.lineTo(pos.x - ringRadius, pos.y - ringRadius + bracketSize)
+      ctx.stroke()
+      // Top-right
+      ctx.beginPath()
+      ctx.moveTo(pos.x + ringRadius, pos.y - ringRadius)
+      ctx.lineTo(pos.x + ringRadius - bracketSize, pos.y - ringRadius)
+      ctx.lineTo(pos.x + ringRadius, pos.y - ringRadius + bracketSize)
+      ctx.stroke()
+      // Bottom-left
+      ctx.beginPath()
+      ctx.moveTo(pos.x - ringRadius, pos.y + ringRadius)
+      ctx.lineTo(pos.x - ringRadius + bracketSize, pos.y + ringRadius)
+      ctx.lineTo(pos.x - ringRadius, pos.y + ringRadius - bracketSize)
+      ctx.stroke()
+      // Bottom-right
+      ctx.beginPath()
+      ctx.moveTo(pos.x + ringRadius, pos.y + ringRadius)
+      ctx.lineTo(pos.x + ringRadius - bracketSize, pos.y + ringRadius)
+      ctx.lineTo(pos.x + ringRadius, pos.y + ringRadius - bracketSize)
+      ctx.stroke()
+      break
+    }
+
+    case "hyperspace-tunnel-ring": {
+      // Radial streaks from center, warp-like
+      ctx.strokeStyle = colors.glow || "#59E0FF"
+      ctx.lineWidth = 2
+      ctx.shadowBlur = 8
+      ctx.shadowColor = colors.glow || "#59E0FF"
+      
+      // Radial streaks
+      for (let i = 0; i < 12; i++) {
+        const angle = (i / 12) * Math.PI * 2
+        const x1 = pos.x + Math.cos(angle) * radius
+        const y1 = pos.y + Math.sin(angle) * radius
+        const x2 = pos.x + Math.cos(angle) * ringRadius
+        const y2 = pos.y + Math.sin(angle) * ringRadius
+        ctx.beginPath()
+        ctx.moveTo(x1, y1)
+        ctx.lineTo(x2, y2)
+        ctx.stroke()
+      }
+      
+      // Outer ring
+      ctx.beginPath()
+      ctx.arc(pos.x, pos.y, ringRadius, 0, Math.PI * 2)
+      ctx.stroke()
+      break
+    }
+    
+    default: {
+      // Fallback: draw a simple ring if variant is not recognized
+      console.warn('[Star Wars Orb] Unknown variant:', variant)
+      ctx.strokeStyle = colors.primary || "#2F9BFF"
+      ctx.lineWidth = 3
+      ctx.shadowBlur = 15
+      ctx.shadowColor = colors.primary || "#2F9BFF"
+      ctx.beginPath()
+      ctx.arc(pos.x, pos.y, ringRadius, 0, Math.PI * 2)
+      ctx.stroke()
+      break
+    }
+  }
+
+  ctx.restore()
+}
+
 function drawThemeDecorations(
   ctx: CanvasRenderingContext2D,
   themeId: string,
@@ -850,6 +1779,95 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
   const backboardShakeRef = useRef<number>(0) // Backboard shake offset
   const isShakingRef = useRef<boolean>(false) // Shake state
   
+  // Shake visual effect state (theme-specific)
+  interface ShakeEffect {
+    startTime: number
+    duration: number
+    themeId: ThemeId
+  }
+  const shakeEffectRef = useRef<ShakeEffect | null>(null)
+  
+  // Chaves theme: El Chavo character animation (appears from barrel)
+  interface ChavesShakeEffect {
+    startTime: number
+    duration: number
+    cryingSoundPlayed?: boolean
+  }
+  const chavesShakeEffectRef = useRef<ChavesShakeEffect | null>(null)
+  
+  // Chaves theme: Crying particles
+  interface CryingParticle {
+    x: number
+    y: number
+    vx: number
+    vy: number
+    life: number
+    maxLife: number
+  }
+  const chavesCryingParticlesRef = useRef<CryingParticle[]>([])
+  
+  // Star Wars theme: Proton beam easter egg
+  interface ProtonBeam {
+    x: number
+    y: number
+    targetX: number
+    targetY: number
+    progress: number
+    side: 'left' | 'right'
+    index: number
+  }
+  interface StarWarsEasterEgg {
+    startTime: number
+    beams: ProtonBeam[]
+    explosionPhase: 'traveling' | 'exploding' | 'done'
+    explosionProgress: number
+  }
+  const starWarsEasterEggRef = useRef<StarWarsEasterEgg | null>(null)
+  
+  // Star Wars theme: Neon Assault easter egg
+  interface NeonBeam {
+    x: number
+    y: number
+    targetX: number
+    targetY: number
+    vx: number
+    vy: number
+    group: 1 | 2 | 3
+    index: number
+    active: boolean
+  }
+  interface ShipFragment {
+    x: number
+    y: number
+    vx: number
+    vy: number
+    rotation: number
+    rotationSpeed: number
+    life: number
+    maxLife: number
+  }
+  interface ExplosionParticle {
+    x: number
+    y: number
+    vx: number
+    vy: number
+    life: number
+    maxLife: number
+  }
+  type NeonAssaultState = 'idle' | 'firing_group_1' | 'firing_group_2' | 'firing_group_3' | 'impact' | 'explosion' | 'done'
+  interface NeonAssaultEasterEgg {
+    state: NeonAssaultState
+    startTime: number
+    beams: NeonBeam[]
+    shipShake: number
+    shipAlpha: number
+    fragments: ShipFragment[]
+    explosionParticles: ExplosionParticle[]
+    explosionRadius: number
+  }
+  const neonAssaultEasterEggRef = useRef<NeonAssaultEasterEgg | null>(null)
+  const neonAssaultTriggeredRef = useRef<boolean>(false) // Track if already triggered this session
+  
   // Fireworks particles
   interface FireworkParticle {
     x: number
@@ -863,6 +1881,126 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
   }
   const fireworksRef = useRef<FireworkParticle[]>([])
   const createFireworksRef = useRef<((x: number, y: number, colors: ReturnType<typeof getThemeColors>) => void) | null>(null)
+  
+  // Indiana Jones theme: Visual effects state
+  interface DustParticle {
+    x: number
+    y: number
+    vx: number
+    vy: number
+    life: number
+    maxLife: number
+    size: number
+  }
+  const dustParticlesRef = useRef<DustParticle[]>([])
+  
+  // Starfield for Star Wars theme
+  const starfieldRef = useRef<Array<{ x: number; y: number; speed: number; size: number; opacity: number }>>([])
+  
+  interface DivineLightEffect {
+    startTime: number
+    duration: number
+    x: number
+    y: number
+  }
+  const divineLightRef = useRef<DivineLightEffect | null>(null)
+  
+  // Star Wars theme effects
+  interface SaberFlashEffect {
+    startTime: number
+    duration: number
+    x: number
+    y: number
+    color: 'blue' | 'red'
+  }
+  const saberFlashRef = useRef<SaberFlashEffect | null>(null)
+  
+  interface DarkShockEffect {
+    startTime: number
+    duration: number
+    x: number
+    y: number
+  }
+  const darkShockRef = useRef<DarkShockEffect | null>(null)
+  
+  interface HyperspaceBurstEffect {
+    startTime: number
+    duration: number
+  }
+  const hyperspaceBurstRef = useRef<HyperspaceBurstEffect | null>(null)
+  
+  interface AstromechPingEffect {
+    startTime: number
+    duration: number
+    x: number
+    y: number
+  }
+  const astromechPingRef = useRef<AstromechPingEffect | null>(null)
+  
+  // Track floor collisions per orb for hyperspace burst
+  const orbFloorCollisionsRef = useRef<Map<string, number>>(new Map())
+  
+  const templeShakeRef = useRef<{ active: boolean; startTime: number; duration: number; intensity: number }>({
+    active: false,
+    startTime: 0,
+    duration: 300, // 300ms
+    intensity: 2, // ±2px
+  })
+  
+  // Indiana Jones theme: Temple Collapse Event Easter Egg state
+  interface TempleCollapsePhase {
+    phase: 1 | 2 | 3 | 4 | 5 // 1-4: phases, 5: final message
+    startTime: number
+  }
+  const templeCollapseRef = useRef<TempleCollapsePhase | null>(null)
+  
+  interface FallingStone {
+    x: number
+    y: number
+    vy: number
+    size: number
+    life: number
+  }
+  const fallingStonesRef = useRef<FallingStone[]>([])
+  
+  // Portal system state
+  interface PortalParticle {
+    x: number
+    y: number
+    vx: number
+    vy: number
+    life: number
+    maxLife: number
+    color: string
+    size: number
+    isGlitch?: boolean
+  }
+  
+  interface Portal {
+    x: number
+    y: number
+    width: number
+    height: number
+    color: string
+    type: 'orange' | 'blue'
+  }
+  
+  interface WarpEffect {
+    x: number
+    y: number
+    startTime: number
+    duration: number
+  }
+  
+  const portalOrangeRef = useRef<Portal>({ x: 0, y: 0, width: 120, height: 40, color: '#ff7a00', type: 'orange' })
+  const portalBlueRef = useRef<Portal>({ x: 0, y: 0, width: 80, height: 35, color: '#24b0ff', type: 'blue' })
+  const portalParticlesRef = useRef<PortalParticle[]>([])
+  const warpEffectsRef = useRef<WarpEffect[]>([])
+  const portalDragStateRef = useRef<{ isDragging: boolean; portal: 'orange' | 'blue' | null; startX: number; startY: number; startPortalX: number; startPortalY: number }>({ isDragging: false, portal: null, startX: 0, startY: 0, startPortalX: 0, startPortalY: 0 })
+  const orbTeleportCooldownRef = useRef<Map<string, number>>(new Map())
+  const hoopBendProgressRef = useRef<number>(0)
+  const glitchTextRef = useRef<{ visible: boolean; time: number }>({ visible: false, time: 0 })
+  const audioContextRef = useRef<AudioContext | null>(null)
   
   const { theme: themeId } = useThemeStore()
   const { mode: mobileMode, init: initMobileMode } = useMobileModeStore()
@@ -906,22 +2044,89 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
   // Multi-tab protection: check if we should pause
   const shouldPause = useMultiTabStore((state) => state.shouldPause())
 
+  // Track previous canvas size for portal resize
+  const prevCanvasSizeRef = useRef({ width: 0, height: 0 })
+  
   // Ensure component is mounted (client-side only)
   useEffect(() => {
     setIsMounted(true)
     const size = calculateCanvasSize()
         if (size.width > 0 && size.height > 0) {
       setCanvasSize(size)
+      // Initialize portals (direct initialization, not using callback to avoid dependency issues)
+      if (themeId === "portal") {
+        const headerHeight = 96
+        const wallThickness = 50
+        
+        // Orange portal on floor - positioned slightly above floor to swallow resting orbs
+        portalOrangeRef.current.x = size.width * 0.2
+        portalOrangeRef.current.y = size.height - 45 // Slightly above floor to swallow resting orbs
+        
+        // Blue portal on ceiling - positioned very close to header
+        portalBlueRef.current.x = size.width / 2
+        portalBlueRef.current.y = headerHeight + 5 // Very close to header, almost touching
+      }
+      
+      // Trigger Neon Assault easter egg (0.3% chance, only once per session, only on star-wars theme)
+      if (themeId === "star-wars" && !neonAssaultTriggeredRef.current) {
+        const { mode: currentMobileMode } = useMobileModeStore.getState()
+        if (currentMobileMode !== 'lite' && Math.random() < 0.003) {
+          neonAssaultTriggeredRef.current = true
+          // Delay trigger slightly to ensure canvas is ready
+          setTimeout(() => {
+            triggerNeonAssault()
+          }, 500)
+        }
+      }
     } else {
       // Retry after a short delay
       setTimeout(() => {
         const retrySize = calculateCanvasSize()
                 if (retrySize.width > 0 && retrySize.height > 0) {
           setCanvasSize(retrySize)
+          // Initialize portals (direct initialization)
+          if (themeId === "portal") {
+            const headerHeight = 96
+            
+            // Orange portal on floor - positioned slightly above floor to swallow resting orbs
+            portalOrangeRef.current.x = retrySize.width * 0.2
+            portalOrangeRef.current.y = retrySize.height - 45 // Slightly above floor to swallow resting orbs
+            
+            // Blue portal on ceiling - positioned close to header
+            portalBlueRef.current.x = retrySize.width / 2
+            portalBlueRef.current.y = headerHeight + 5 // Very close to header, almost touching
+          }
         }
       }, 100)
     }
-  }, [])
+  }, [themeId])
+  
+  // Update portals on canvas resize
+  useEffect(() => {
+    if (canvasSize.width > 0 && canvasSize.height > 0 && themeId === "portal") {
+      if (prevCanvasSizeRef.current.width > 0 && prevCanvasSizeRef.current.height > 0) {
+        // Update portals proportionally
+        const scaleX = canvasSize.width / prevCanvasSizeRef.current.width
+        const scaleY = canvasSize.height / prevCanvasSizeRef.current.height
+        portalOrangeRef.current.x *= scaleX
+        portalOrangeRef.current.y *= scaleY
+        portalBlueRef.current.x *= scaleX
+        portalBlueRef.current.y *= scaleY
+      } else {
+        // First time, just initialize
+        const headerHeight = 96
+        
+        // Orange portal on floor - positioned slightly above floor to swallow resting orbs
+        portalOrangeRef.current.x = canvasSize.width * 0.2
+        portalOrangeRef.current.y = canvasSize.height - 45 // Slightly above floor to swallow resting orbs
+        
+        // Blue portal on ceiling - positioned close to header
+        portalBlueRef.current.x = canvasSize.width / 2
+        portalBlueRef.current.y = headerHeight + 5 // Very close to header, almost touching
+      }
+      prevCanvasSizeRef.current = { width: canvasSize.width, height: canvasSize.height }
+    }
+  }, [canvasSize.width, canvasSize.height, themeId])
 
   // Get theme colors from CSS variables
   const getThemeColors = () => {
@@ -1072,15 +2277,26 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
     // Create physics body
     const body = createOrbBody(x, y, radius, config)
     
-    // Create orb object
+    // Create orb object with unique ID (timestamp + random to ensure uniqueness)
     const orb: Orb = {
-      id: `orb-${user.userId}-${index}`,
+      id: `orb-${user.userId}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       userId: user.userId,
       avatar: user.avatar,
       username: user.username,
       body,
       image: null,
       imageLoaded: false,
+      meta: {}, // Always initialize meta as empty object
+    }
+
+    // Assign Indiana Jones variant if theme is active
+    if (themeId === "indiana-jones") {
+      orb.meta.indyVariant = pickRandomVariant()
+    }
+
+    // Assign Star Wars variant if theme is active
+    if (themeId === "star-wars") {
+      orb.meta.starWarsVariant = pickRandomStarWarsVariant()
     }
 
     // Load avatar image via proxy
@@ -1105,7 +2321,7 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
     // Add to physics world
     addBodyToWorld(worldRef.current, body)
     orbsRef.current.push(orb)
-  }, [loadAvatarImage])
+  }, [loadAvatarImage, themeId])
 
   // Start sequential spawn
   const startSpawnSequence = useCallback(() => {
@@ -1191,6 +2407,9 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
 
     // Set initial canvas size
     setCanvasSize(size)
+
+    // Indiana Jones theme: Check for easter egg trigger on canvas load
+    triggerIndianaJonesEasterEgg()
 
     // Skip physics engine initialization in mobile lite mode
     if (isLiteMode) {
@@ -1290,7 +2509,7 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
     Matter.World.add(engine.world, sensor)
     sensorBodyRef.current = sensor
 
-    // Setup collision detection for scoring
+    // Setup collision detection for scoring and portal teleportation
     Matter.Events.on(engine, 'collisionStart', (event) => {
       event.pairs.forEach((pair) => {
         const { bodyA, bodyB } = pair
@@ -1298,24 +2517,116 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
         
         if (!sensor) return
 
+        // Portal teleportation is now handled in the render loop for continuous checking
+
+            // Star Wars theme: Check for rim hit (dark shock effect)
+        if (themeId === "star-wars") {
+          const { mode: mobileMode } = useMobileModeStore.getState()
+          if (mobileMode !== 'lite') {
+            // Check if collision involves rim supports and an orb
+            const rimBody = leftSupportBodyRef.current || rightSupportBodyRef.current
+            if (rimBody && (bodyA === rimBody || bodyB === rimBody)) {
+              const orbBody = bodyA === rimBody ? bodyB : bodyA
+              const orb = orbsRef.current.find((o) => o.body === orbBody)
+              if (orb) {
+                const rimPos = getBodyPosition(rimBody)
+                triggerDarkShock(rimPos.x, rimPos.y)
+              }
+            }
+          }
+        }
+        
+        // Star Wars theme: Check for orb-to-orb collision (astromech ping on any orb collision)
+        if (themeId === "star-wars") {
+          const { mode: mobileMode } = useMobileModeStore.getState()
+          if (mobileMode !== 'lite') {
+            // Check if collision involves two orbs (orb-to-orb collision)
+            const orbA = orbsRef.current.find((o) => o.body === bodyA)
+            const orbB = orbsRef.current.find((o) => o.body === bodyB)
+            
+            if (orbA && orbB) {
+              // Two orbs collided - trigger astromech ping at collision point
+              const posA = getBodyPosition(bodyA)
+              const posB = getBodyPosition(bodyB)
+              const collisionX = (posA.x + posB.x) / 2
+              const collisionY = (posA.y + posB.y) / 2
+              triggerAstromechPing(collisionX, collisionY)
+            }
+          }
+        }
+        
+        // Star Wars theme: Check for floor collision (hyperspace burst after 3 collisions)
+        if (themeId === "star-wars") {
+          const { mode: mobileMode } = useMobileModeStore.getState()
+          if (mobileMode !== 'lite') {
+            // Check if collision involves an orb and a static body (likely boundary/ground)
+            const orb = orbsRef.current.find((o) => o.body === bodyA || o.body === bodyB)
+            if (orb) {
+              // Check if it's a floor collision (body is static and at bottom)
+              const staticBody = (bodyA.label?.includes('boundary') || bodyB.label?.includes('boundary')) 
+                ? (bodyA.label?.includes('boundary') ? bodyA : bodyB)
+                : null
+              if (staticBody) {
+                const currentCount = orbFloorCollisionsRef.current.get(orb.id) || 0
+                const newCount = currentCount + 1
+                orbFloorCollisionsRef.current.set(orb.id, newCount)
+                
+                // Trigger hyperspace burst after 3 collisions
+                if (newCount >= 3) {
+                  triggerHyperspaceBurst()
+                  orbFloorCollisionsRef.current.set(orb.id, 0) // Reset counter
+                }
+              }
+            }
+          }
+        }
+
+        // Indiana Jones theme: Check for ground collision (dust puff effect)
+        if (themeId === "indiana-jones") {
+          const { mode: mobileMode } = useMobileModeStore.getState()
+          if (mobileMode !== 'lite') {
+            // Check if collision involves an orb and a static body (likely boundary/ground)
+            const orb = orbsRef.current.find((o) => o.body === bodyA || o.body === bodyB)
+            if (orb) {
+              const orbBody = orb.body === bodyA ? bodyA : bodyB
+              const otherBody = orb.body === bodyA ? bodyB : bodyA
+              
+              // Check if other body is static (boundary/ground) and orb is near bottom
+              if (otherBody.isStatic) {
+                const orbPos = getBodyPosition(orbBody)
+                const floorY = canvasSize.height - 25 // Floor is at height - wallThickness/2
+                
+                // Check if orb is near ground (within 20px of floor)
+                if (orbPos.y >= floorY - 20 && orbPos.y <= floorY + 20) {
+                  const colors = getThemeColors()
+                  if (colors) {
+                    createDustPuff(orbPos.x, floorY, colors)
+                  }
+                }
+              }
+            }
+          }
+        }
+
         // Check if collision involves sensor and an orb
         if ((bodyA === sensor || bodyB === sensor)) {
           const orbBody = bodyA === sensor ? bodyB : bodyA
           
           // Find the orb
           const orb = orbsRef.current.find((o) => o.body === orbBody)
-          if (orb && !scoredOrbsRef.current.has(orb.id)) {
-            // CRITICAL: Only score if orb is moving downward with sufficient velocity
-            // This prevents scoring when orb bounces UP through the sensor or is barely moving
+          if (orb) {
+            // CRITICAL: Only score if orb is moving downward (coming from above)
+            // This prevents scoring when orb bounces UP through the sensor
+            // In Matter.js: positive Y velocity = downward movement, negative = upward
             const velocity = orbBody.velocity
-            const MIN_DOWNWARD_VELOCITY = 2 // Minimum downward velocity to register as "falling into basket"
-            if (velocity.y < MIN_DOWNWARD_VELOCITY) {
-              // Orb is moving upward, stationary, or falling too slowly - don't score
+            // Only score if velocity.y is positive (downward movement)
+            // Allow even slow falls to score, as long as it's moving down
+            if (velocity.y <= 0) {
+              // Orb is moving upward (negative) or stationary (0) - don't score
               return
             }
             
-            // Mark as scored to prevent double scoring
-            scoredOrbsRef.current.add(orb.id)
+            // Allow multiple scores from the same orb - just needs to come from above
             
             // Get orb position for fireworks
             const orbPos = getBodyPosition(orbBody)
@@ -1328,6 +2639,29 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
             // Increment score
             const prevScore = scoreRef.current
             scoreRef.current += 1
+            
+            // Indiana Jones theme: Visual effects on basket made
+            if (themeId === "indiana-jones") {
+              // Divine light effect
+              const basketX = canvasSize.width / 2
+              const basketY = headerHeight + 20 + 70 // Approximate basket position
+              triggerDivineLight(basketX, basketY)
+              
+              // Temple shake every 5 baskets
+              if (scoreRef.current % 5 === 0) {
+                triggerTempleShake()
+              }
+            }
+            
+            // Star Wars theme: Visual effects on basket made
+            if (themeId === "star-wars") {
+              const basketX = canvasSize.width / 2
+              const basketY = headerHeight + 20 + 70 // Approximate basket position
+              // Saber flash (color depends on orb variant)
+              triggerSaberFlash(basketX, basketY, orb.meta?.starWarsVariant)
+              // Astromech ping
+              triggerAstromechPing(basketX, basketY)
+            }
             
             // Check for 99 baskets easter egg
             if (prevScore < 99 && scoreRef.current === 99) {
@@ -1447,7 +2781,23 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
   const handleShake = useCallback(() => {
     if (!engineRef.current || !worldRef.current || isShakingRef.current) return
     
+    // For Chaves theme, also check if animation is already running
+    if (themeId === 'chaves' && chavesShakeEffectRef.current) {
+      return // Wait for animation to finish
+    }
+    
     isShakingRef.current = true
+    
+    // Trigger theme-specific visual effect
+    // Chaves theme: Easter egg only activates by clicking barrel, not shake button
+    if (themeId !== 'chaves') {
+      // Other themes: Standard center screen effect
+      shakeEffectRef.current = {
+        startTime: Date.now(),
+        duration: 800, // Match shake duration
+        themeId: themeId,
+      }
+    }
     
     // Apply strong upward impulses to all orbs (jogar todas pro alto)
     orbsRef.current.forEach((orb) => {
@@ -1473,19 +2823,55 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
       orb.body.restitution = Math.min(orb.body.restitution * 1.8, 0.95)
     })
     
-    // Vibrate rim slightly
-    rimShakeRef.current = 3
-    setTimeout(() => {
-      rimShakeRef.current = 0
-    }, 100)
+    // Theme-specific shake intensity
+    const { mode: mobileMode } = useMobileModeStore.getState()
+    if (mobileMode !== 'lite') {
+      let rimShakeIntensity = 3
+      let backboardShakeIntensity = 2
+      
+      // Adjust intensity based on theme
+      switch (themeId) {
+        case 'chaves':
+          rimShakeIntensity = 4
+          backboardShakeIntensity = 3
+          break
+        case 'pomemin':
+          rimShakeIntensity = 5
+          backboardShakeIntensity = 4
+          break
+        case 'dracula':
+          rimShakeIntensity = 4
+          backboardShakeIntensity = 3
+          break
+        case 'portal':
+          rimShakeIntensity = 6
+          backboardShakeIntensity = 5
+          break
+        case 'indiana-jones':
+          rimShakeIntensity = 4
+          backboardShakeIntensity = 3
+          break
+        case 'star-wars':
+          rimShakeIntensity = 5
+          backboardShakeIntensity = 4
+          break
+      }
+      
+      // Vibrate rim
+      rimShakeRef.current = rimShakeIntensity
+      setTimeout(() => {
+        rimShakeRef.current = 0
+      }, 100)
+      
+      // Shake backboard
+      backboardShakeRef.current = backboardShakeIntensity
+      setTimeout(() => {
+        backboardShakeRef.current = 0
+      }, 100)
+    }
     
-    // Shake backboard slightly
-    backboardShakeRef.current = 2
-    setTimeout(() => {
-      backboardShakeRef.current = 0
-    }, 100)
-    
-    // Reset after 0.8s
+    // Reset after 0.8s (or longer for Chaves theme)
+    const resetDelay = themeId === 'chaves' ? 2000 : 800
     setTimeout(() => {
       // Restore original restitution
       orbsRef.current.forEach((orb) => {
@@ -1493,8 +2879,18 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
         orb.body.restitution = config.restitution
       })
       isShakingRef.current = false
-    }, 800)
-  }, [])
+      if (themeId !== 'chaves') {
+        shakeEffectRef.current = null
+      }
+    }, resetDelay)
+    
+    // Clean up Chaves effect separately
+    if (themeId === 'chaves') {
+      setTimeout(() => {
+        chavesShakeEffectRef.current = null
+      }, 2000)
+    }
+  }, [themeId])
 
   // Expose handleShake to parent component
   useEffect(() => {
@@ -1706,12 +3102,162 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
     }
 
     // Handle pointer down (start drag)
+    // Check if click is on Chaves barrel (easter egg)
+    // The barrel is drawn on the floor in the bottom right corner
+    const checkChavesBarrelClick = (pos: { x: number; y: number }): boolean => {
+      if (themeId !== 'chaves') return false
+      
+      // Barrel position matches drawFloor function
+      const barrelSize = Math.min(canvasSize.width * 0.15, canvasSize.height * 0.15) // 15% do menor lado
+      const barrelX = canvasSize.width - barrelSize - 20 // Canto direito, com margem
+      const barrelY = canvasSize.height - barrelSize - 10 // Próximo ao chão, com margem
+      
+      // Barrel dimensions (matches drawFloor)
+      const barrelWidth = barrelSize * 0.8
+      const barrelHeight = barrelSize
+      
+      // Check if click is within barrel bounds (with some tolerance for easier clicking)
+      const tolerance = 10 // Extra pixels for easier clicking
+      return pos.x >= barrelX - tolerance && 
+             pos.x <= barrelX + barrelWidth + tolerance &&
+             pos.y >= barrelY - tolerance && 
+             pos.y <= barrelY + barrelHeight + tolerance
+    }
+    
+    const checkStarWarsTriangleClick = (pos: { x: number; y: number }): boolean => {
+      if (themeId !== 'star-wars') return false
+      if (starWarsEasterEggRef.current) return false // Already active
+      
+      // Triangle position matches drawThemeDecorativeObject (Mini Starfighter)
+      const objectSize = Math.min(canvasSize.width * 0.15, canvasSize.height * 0.15)
+      const starfighterX = canvasSize.width * 0.1
+      const starfighterY = canvasSize.height * 0.15
+      const starfighterSize = objectSize * 0.4
+      
+      // Triangle bounds (approximate)
+      const triangleLeft = starfighterX - starfighterSize * 0.3
+      const triangleRight = starfighterX + starfighterSize * 0.3
+      const triangleTop = starfighterY
+      const triangleBottom = starfighterY + starfighterSize * 0.5
+      
+      // Check if click is within triangle bounds (with tolerance)
+      const tolerance = 15
+      return pos.x >= triangleLeft - tolerance && 
+             pos.x <= triangleRight + tolerance &&
+             pos.y >= triangleTop - tolerance && 
+             pos.y <= triangleBottom + tolerance
+    }
+    
     const onPointerDown = (e: MouseEvent | TouchEvent) => {
       const target = e.target as HTMLElement
       if (target !== canvas) return
 
       const pos = getPointerPos(e)
       if (!pos || !worldRef.current) return
+      
+      // Check for Star Wars triangle click (easter egg)
+      if (checkStarWarsTriangleClick(pos)) {
+        // Trigger proton beam easter egg
+        const centerX = canvasSize.width / 2
+        const centerY = canvasSize.height / 2
+        
+        // Create 3 beams from left side and 3 from right side
+        const beams: ProtonBeam[] = []
+        const beamSpacing = 40 // Vertical spacing between beams
+        
+        // Left side beams (coming from left, going to center)
+        for (let i = 0; i < 3; i++) {
+          const startY = centerY - beamSpacing + (i * beamSpacing)
+          beams.push({
+            x: 0,
+            y: startY,
+            targetX: centerX,
+            targetY: centerY - beamSpacing + (i * beamSpacing),
+            progress: 0,
+            side: 'left',
+            index: i
+          })
+        }
+        
+        // Right side beams (coming from right, going to center)
+        for (let i = 0; i < 3; i++) {
+          const startY = centerY - beamSpacing + (i * beamSpacing)
+          beams.push({
+            x: canvasSize.width,
+            y: startY,
+            targetX: centerX,
+            targetY: centerY - beamSpacing + (i * beamSpacing),
+            progress: 0,
+            side: 'right',
+            index: i
+          })
+        }
+        
+        starWarsEasterEggRef.current = {
+          startTime: Date.now(),
+          beams,
+          explosionPhase: 'traveling',
+          explosionProgress: 0
+        }
+        
+        // Play "Piu Piu Piu" sound (Atari style)
+        playStarWarsProtonBeamSound()
+        
+        e.preventDefault()
+        e.stopPropagation()
+        return
+      }
+      
+      // Check for Chaves barrel click (easter egg)
+      if (checkChavesBarrelClick(pos)) {
+        // Only activate if animation is not already running
+        if (!chavesShakeEffectRef.current) {
+          chavesShakeEffectRef.current = {
+            startTime: Date.now(),
+            duration: 2000, // 2 seconds for full animation
+          }
+          // Play sound when character appears
+          playChavesAppearSound()
+        }
+        e.preventDefault()
+        e.stopPropagation()
+        return
+      }
+
+      // Check for portal dragging (only when theme is "portal")
+      if (themeId === "portal" && mobileMode !== 'lite') {
+        // Check orange portal (draggable freely on floor)
+        if (isPointInPortal(pos.x, pos.y, portalOrangeRef.current)) {
+          portalDragStateRef.current = {
+            isDragging: true,
+            portal: 'orange',
+            startX: pos.x,
+            startY: pos.y,
+            startPortalX: portalOrangeRef.current.x,
+            startPortalY: portalOrangeRef.current.y,
+          }
+          if (canvas) canvas.style.cursor = 'grabbing'
+          e.preventDefault()
+          e.stopPropagation()
+          return
+        }
+        
+        // Check blue portal (draggable horizontally only)
+        if (isPointInPortal(pos.x, pos.y, portalBlueRef.current)) {
+          portalDragStateRef.current = {
+            isDragging: true,
+            portal: 'blue',
+            startX: pos.x,
+            startY: pos.y,
+            startPortalX: portalBlueRef.current.x,
+            startPortalY: portalBlueRef.current.y,
+          }
+          if (canvas) canvas.style.cursor = 'grabbing'
+          e.preventDefault()
+          e.stopPropagation()
+          return
+        }
+      }
 
       // Find orb at pointer position (check from back to front for top orb)
       for (let i = orbsRef.current.length - 1; i >= 0; i--) {
@@ -1797,6 +3343,58 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
 
     // Handle pointer move (update drag)
     const onPointerMove = (e: MouseEvent | TouchEvent) => {
+      // Handle portal dragging
+      if (portalDragStateRef.current.isDragging && themeId === "portal" && mobileMode !== 'lite') {
+        const pos = getPointerPos(e)
+        if (!pos) return
+        
+        const dragState = portalDragStateRef.current
+        const dx = pos.x - dragState.startX
+        const dy = pos.y - dragState.startY
+        
+        if (dragState.portal === 'orange') {
+          // Orange portal: free drag on floor - allow positioning slightly above floor to swallow orbs
+          const wallThickness = 50
+          const floorLevel = canvasSize.height - 45 // Slightly above floor to swallow resting orbs
+          const newX = dragState.startPortalX + dx
+          const newY = dragState.startPortalY + dy
+          
+          // Keep within canvas bounds horizontally
+          portalOrangeRef.current.x = Math.max(portalOrangeRef.current.width / 2, Math.min(canvasSize.width - portalOrangeRef.current.width / 2, newX))
+          // Allow Y to be slightly above floor level to swallow resting orbs
+          const minY = canvasSize.height - 150 // Allow some movement up
+          const maxY = floorLevel // Slightly above floor to swallow resting orbs
+          portalOrangeRef.current.y = Math.max(minY, Math.min(maxY, newY))
+        } else if (dragState.portal === 'blue') {
+          // Blue portal: horizontal drag only (stays on ceiling)
+          const newX = dragState.startPortalX + dx
+          // Snap to 6px grid to avoid micro vibrations
+          const snappedX = Math.round(newX / 6) * 6
+          
+          // Keep within canvas bounds
+          portalBlueRef.current.x = Math.max(portalBlueRef.current.width / 2, Math.min(canvasSize.width - portalBlueRef.current.width / 2, snappedX))
+          // Y stays on ceiling (very close to header)
+          const headerHeight = 96
+          portalBlueRef.current.y = headerHeight + 5 // Very close to header
+        }
+        
+        e.preventDefault()
+        e.stopPropagation()
+        return
+      }
+      
+      // Check if hovering over portal (for cursor change)
+      if (themeId === "portal" && mobileMode !== 'lite' && !portalDragStateRef.current.isDragging && !isDraggingRef.current) {
+        const pos = getPointerPos(e)
+        if (pos) {
+          if (isPointInPortal(pos.x, pos.y, portalOrangeRef.current) || isPointInPortal(pos.x, pos.y, portalBlueRef.current)) {
+            if (canvas) canvas.style.cursor = 'grab'
+          } else {
+            if (canvas) canvas.style.cursor = 'default'
+          }
+        }
+      }
+      
       if (!isDraggingRef.current || !draggedOrbRef.current) return
 
       const pos = getPointerPos(e)
@@ -1836,6 +3434,15 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
 
     // Handle pointer up (end drag, throw)
     const onPointerUp = (e: MouseEvent | TouchEvent) => {
+      // Handle portal drag end
+      if (portalDragStateRef.current.isDragging) {
+        portalDragStateRef.current = { isDragging: false, portal: null, startX: 0, startY: 0, startPortalX: 0, startPortalY: 0 }
+        if (canvas) canvas.style.cursor = 'default'
+        e.preventDefault()
+        e.stopPropagation()
+        return
+      }
+      
       if (!isDraggingRef.current || !draggedOrbRef.current) {
         return
       }
@@ -1893,31 +3500,45 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
         if (dragStartRef.current) {
           const force = calculateThrowForce(dragStartRef.current, pos)
           
-          // Cap maximum throw velocity to prevent orbs from flying off screen
-          const MAX_VELOCITY = 25 // Maximum velocity in any direction
-          const magnitude = Math.sqrt(force.x * force.x + force.y * force.y)
+          // Check if there was actual movement (not just clicked and released)
+          const dx = pos.x - dragStartRef.current.x
+          const dy = pos.y - dragStartRef.current.y
+          const movementDistance = Math.sqrt(dx * dx + dy * dy)
           
-          let finalForce = force
-          if (magnitude > MAX_VELOCITY) {
-            // Scale down to max velocity while preserving direction
-            const scale = MAX_VELOCITY / magnitude
-            finalForce = {
-              x: force.x * scale,
-              y: force.y * scale,
+          // Only apply throw force if there was significant movement (more than 5px)
+          if (movementDistance > 5) {
+            // Cap maximum throw velocity to prevent orbs from flying off screen
+            const MAX_VELOCITY = 25 // Maximum velocity in any direction
+            const magnitude = Math.sqrt(force.x * force.x + force.y * force.y)
+            
+            let finalForce = force
+            if (magnitude > MAX_VELOCITY) {
+              // Scale down to max velocity while preserving direction
+              const scale = MAX_VELOCITY / magnitude
+              finalForce = {
+                x: force.x * scale,
+                y: force.y * scale,
+              }
             }
+            
+            // Apply throw force
+            Body.setVelocity(orb.body, {
+              x: finalForce.x,
+              y: finalForce.y,
+            })
+          } else {
+            // No movement detected - just let it fall naturally (no velocity applied)
+            // Gravity will handle the fall
+            Body.setVelocity(orb.body, {
+              x: 0,
+              y: 0, // No initial velocity, let gravity do its work
+            })
           }
-          
-          // Apply throw force
-          Body.setVelocity(orb.body, {
-            x: finalForce.x,
-            y: finalForce.y,
-          })
         } else {
-          // If no drag movement detected, apply gentle downward velocity
-          // This prevents orbs from being "stuck" when released without movement
+          // If no drag start position, just let it fall naturally
           Body.setVelocity(orb.body, {
             x: 0,
-            y: 2, // Gentle downward push
+            y: 0, // No initial velocity, let gravity do its work
           })
         }
       }
@@ -2203,21 +3824,24 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
     const leftModuleX = x + margin
     
     // Draw title (centered in module)
-    ctx.fillStyle = colors.accent // Use neon color (slightly less saturated would be ideal, but using accent for now)
+    // Use primary color for titles to match theme better
+    ctx.fillStyle = colors.primary || colors.accent
     ctx.font = '600 11px "JetBrains Mono", monospace'
     ctx.textAlign = 'center'
     ctx.textBaseline = 'top'
     ctx.fillText('HI-SCORE', leftModuleX + moduleWidth / 2, titleY)
 
     // Draw 2 LED digits for HI-SCORE (best score)
+    // Use primary color for LED digits to match theme better
     const digitWidth = 35
     const digitGap = 6 // Space between digits
     const leftDigitsStartX = leftModuleX + modulePadding + (moduleWidth - modulePadding * 2 - (digitWidth * 2 + digitGap)) / 2 // Center the 2 digits
     const bestStr = bestScoreRef.current.toString().padStart(2, '0').slice(-2) // Last 2 digits
+    const ledColor = colors.primary || colors.accent // Use primary color for LED digits
     for (let i = 0; i < 2; i++) {
       const digitX = leftDigitsStartX + i * (digitWidth + digitGap)
       const digitValue = parseInt(bestStr[i] || '0')
-      drawDigit(ctx, digitX, digitY, digitValue, colors.accent, digitScaleRef.current)
+      drawDigit(ctx, digitX, digitY, digitValue, ledColor, digitScaleRef.current)
     }
 
     // Right module: SCORE
@@ -2233,7 +3857,7 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
     for (let i = 0; i < 2; i++) {
       const digitX = rightDigitsStartX + i * (digitWidth + digitGap)
       const digitValue = parseInt(scoreStr[i] || '0')
-      drawDigit(ctx, digitX, digitY, digitValue, colors.accent, digitScaleRef.current)
+      drawDigit(ctx, digitX, digitY, digitValue, ledColor, digitScaleRef.current)
     }
 
     ctx.restore()
@@ -2585,6 +4209,347 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
     createFireworksRef.current = createFireworks
   }, [createFireworks])
 
+  // Indiana Jones theme: Create dust puff effect
+  const createDustPuff = useCallback((x: number, y: number, colors: ReturnType<typeof getThemeColors>) => {
+    if (!colors) return
+    
+    const { mode: mobileMode } = useMobileModeStore.getState()
+    if (mobileMode === 'lite') return // Disabled in mobile-lite mode
+    
+    // Spawn 8-12 particles
+    const particleCount = 8 + Math.floor(Math.random() * 5) // 8-12 particles
+    // Get bgSoft from CSS variables (Indiana Jones theme specific)
+    const root = typeof window !== 'undefined' ? document.documentElement : null
+    const dustColor = root ? getComputedStyle(root).getPropertyValue('--color-bg-secondary').trim() || '#8A6B45' : '#8A6B45'
+    
+    // Check particle budget (use 'theme' type for dust particles)
+    if (!allocateParticles('theme', particleCount)) {
+      const available = useParticleBudgetStore.getState().getAvailable('theme')
+      if (available <= 0) return
+      const adjustedCount = Math.min(particleCount, available)
+      if (!allocateParticles('theme', adjustedCount)) return
+    }
+    
+    const particles: DustParticle[] = []
+    for (let i = 0; i < particleCount; i++) {
+      const angle = (Math.PI * 2 * i) / particleCount + (Math.random() - 0.5) * 0.3
+      const speed = 0.5 + Math.random() * 1.5
+      const lifeMs = 800 + Math.random() * 400 // 800-1200ms
+      const life = Math.floor(lifeMs / 16.67)
+      
+      particles.push({
+        x,
+        y,
+        vx: Math.cos(angle) * speed,
+        vy: -Math.abs(Math.sin(angle) * speed) - 0.5, // Rise upward
+        life,
+        maxLife: life,
+        size: 2 + Math.random() * 2, // 2-4px
+      })
+    }
+    
+    dustParticlesRef.current.push(...particles)
+  }, [])
+
+  // Indiana Jones theme: Trigger divine light effect
+  const triggerDivineLight = useCallback((basketX: number, basketY: number) => {
+    const { mode: mobileMode } = useMobileModeStore.getState()
+    if (mobileMode === 'lite') return // Disabled in mobile-lite mode
+    
+    divineLightRef.current = {
+      startTime: Date.now(),
+      duration: 600, // 600ms
+      x: basketX,
+      y: basketY,
+    }
+  }, [])
+
+  // Indiana Jones theme: Trigger temple shake effect
+  const triggerTempleShake = useCallback(() => {
+    const { mode: mobileMode, isMobile } = useMobileModeStore.getState()
+    if (mobileMode === 'lite') return // Disabled in mobile-lite mode
+    
+    const intensity = mobileMode === 'full' && isMobile ? 1 : 2 // ±1px mobile-full, ±2px desktop
+    templeShakeRef.current = {
+      active: true,
+      startTime: Date.now(),
+      duration: 300, // 300ms
+      intensity,
+    }
+    
+    // Auto-disable after duration
+    setTimeout(() => {
+      templeShakeRef.current.active = false
+    }, 300)
+  }, [])
+
+  // Star Wars theme: Trigger saber flash effect (on basket made)
+  const triggerSaberFlash = useCallback((basketX: number, basketY: number, orbVariant?: StarWarsOrbVariant) => {
+    const { mode: mobileMode } = useMobileModeStore.getState()
+    if (mobileMode === 'lite') return // Disabled in mobile-lite mode
+    
+    // Determine color based on variant (blue for most, red for red variants)
+    const isRedVariant = orbVariant === 'red-void-blade' || orbVariant === 'holocron-red'
+    const color = isRedVariant ? 'red' : 'blue'
+    
+    saberFlashRef.current = {
+      startTime: Date.now(),
+      duration: 250, // 200-300ms average
+      x: basketX,
+      y: basketY,
+      color,
+    }
+  }, [])
+
+  // Star Wars theme: Trigger dark shock effect (on rim hit)
+  const triggerDarkShock = useCallback((rimX: number, rimY: number) => {
+    const { mode: mobileMode } = useMobileModeStore.getState()
+    if (mobileMode === 'lite') return // Disabled in mobile-lite mode
+    
+    darkShockRef.current = {
+      startTime: Date.now(),
+      duration: 150, // Quick effect
+      x: rimX,
+      y: rimY,
+    }
+    
+    // Micro shake on rim
+    rimShakeRef.current = 2 // Small shake
+    setTimeout(() => {
+      rimShakeRef.current = 0
+    }, 150)
+  }, [])
+
+  // Star Wars theme: Trigger hyperspace burst (after 3 floor collisions)
+  const triggerHyperspaceBurst = useCallback(() => {
+    const { mode: mobileMode } = useMobileModeStore.getState()
+    if (mobileMode === 'lite') return // Disabled in mobile-lite mode
+    
+    hyperspaceBurstRef.current = {
+      startTime: Date.now(),
+      duration: 200, // Quick, disappear in 200ms
+    }
+  }, [])
+
+  // Star Wars theme: Trigger astromech ping effect
+  const triggerAstromechPing = useCallback((x: number, y: number) => {
+    const { mode: mobileMode } = useMobileModeStore.getState()
+    if (mobileMode === 'lite') return // Disabled in mobile-lite mode
+    
+    astromechPingRef.current = {
+      startTime: Date.now(),
+      duration: 400, // Pulse duration
+      x,
+      y,
+    }
+  }, [])
+
+  // Indiana Jones theme: Trigger Temple Collapse Event Easter Egg
+  const triggerIndianaJonesEasterEgg = useCallback(() => {
+    if (themeId !== "indiana-jones") return
+    
+    // Check if already unlocked
+    if (typeof window !== "undefined") {
+      const unlocked = localStorage.getItem("ij_temple_event_unlocked")
+      if (unlocked === "true") return
+    }
+    
+    // 0.5% chance
+    if (Math.random() > 0.005) return
+    
+    // Trigger easter egg
+    templeCollapseRef.current = {
+      phase: 1,
+      startTime: Date.now(),
+    }
+    
+    // Mark as unlocked
+    if (typeof window !== "undefined") {
+      localStorage.setItem("ij_temple_event_unlocked", "true")
+    }
+  }, [themeId])
+
+  // Indiana Jones theme: Render Temple Collapse Event
+  const renderTempleCollapse = useCallback((ctx: CanvasRenderingContext2D, colors: ReturnType<typeof getThemeColors>) => {
+    if (!templeCollapseRef.current || !colors) return
+    
+    const { mode: mobileMode } = useMobileModeStore.getState()
+    const effect = templeCollapseRef.current
+    const elapsed = Date.now() - effect.startTime
+    
+    ctx.save()
+    
+    if (effect.phase === 1) {
+      // Phase 1: Initial Tremor (0.4s)
+      const phaseDuration = 400
+      const progress = Math.min(elapsed / phaseDuration, 1)
+      
+      if (progress >= 1) {
+        effect.phase = 2
+        effect.startTime = Date.now()
+      } else {
+        // Darken canvas 20%
+        ctx.fillStyle = "rgba(0, 0, 0, 0.2)"
+        ctx.fillRect(0, 0, canvasSize.width, canvasSize.height)
+        
+        // Shake ±2px
+        const shakeX = (Math.random() - 0.5) * 2
+        const shakeY = (Math.random() - 0.5) * 2
+        ctx.translate(shakeX, shakeY)
+        
+        // Spawn dust particles (reuse createDustPuff)
+        if (Math.random() < 0.1) { // Spawn occasionally
+          createDustPuff(canvasSize.width / 2, canvasSize.height * 0.9, colors)
+        }
+      }
+    } else if (effect.phase === 2) {
+      // Phase 2: Illuminated Cracks (0.6s)
+      const phaseDuration = 600
+      const progress = Math.min(elapsed / phaseDuration, 1)
+      
+      if (progress >= 1) {
+        effect.phase = 3
+        effect.startTime = Date.now()
+        // Spawn falling stones
+        if (mobileMode !== 'lite') {
+          const stoneCount = 3 + Math.floor(Math.random() * 3) // 3-5 stones
+          fallingStonesRef.current = []
+          for (let i = 0; i < stoneCount; i++) {
+            fallingStonesRef.current.push({
+              x: canvasSize.width * 0.2 + (i * canvasSize.width * 0.2),
+              y: 0,
+              vy: 2 + Math.random() * 2,
+              size: 15 + Math.random() * 10,
+              life: 1,
+            })
+          }
+        }
+      } else {
+        // Crack pattern overlay
+        const amberColor = "#FFB95A"
+        const pulse = Math.sin(progress * Math.PI * 4) * 0.5 + 0.5
+        ctx.strokeStyle = amberColor
+        ctx.lineWidth = 2
+        ctx.globalAlpha = 0.3 + pulse * 0.4
+        ctx.shadowBlur = 8
+        ctx.shadowColor = amberColor
+        
+        // Draw crack lines
+        for (let i = 0; i < 8; i++) {
+          const x1 = Math.random() * canvasSize.width
+          const y1 = Math.random() * canvasSize.height * 0.5
+          const x2 = x1 + (Math.random() - 0.5) * 100
+          const y2 = y1 + 50 + Math.random() * 50
+          ctx.beginPath()
+          ctx.moveTo(x1, y1)
+          ctx.lineTo(x2, y2)
+          ctx.stroke()
+        }
+      }
+    } else if (effect.phase === 3) {
+      // Phase 3: Falling Stones (0.8s)
+      const phaseDuration = 800
+      const progress = Math.min(elapsed / phaseDuration, 1)
+      
+      if (progress >= 1) {
+        effect.phase = 4
+        effect.startTime = Date.now()
+        fallingStonesRef.current = []
+      } else if (mobileMode !== 'lite') {
+        // Update and render falling stones
+        fallingStonesRef.current = fallingStonesRef.current.filter((stone) => {
+          stone.y += stone.vy
+          
+          // Check ground impact
+          const groundY = canvasSize.height * 0.9
+          if (stone.y >= groundY) {
+            stone.life -= 0.05
+            if (stone.life <= 0) return false
+          }
+          
+          // Get bgSoft from CSS variables
+          const root = typeof window !== 'undefined' ? document.documentElement : null
+          const bgSoft = root ? getComputedStyle(root).getPropertyValue('--color-bg-secondary').trim() || '#8A6B45' : '#8A6B45'
+          
+          // Draw stone
+          ctx.fillStyle = bgSoft
+          ctx.globalAlpha = stone.life
+          ctx.beginPath()
+          ctx.arc(stone.x, stone.y, stone.size, 0, Math.PI * 2)
+          ctx.fill()
+          
+          // Shadow on impact
+          if (stone.y >= groundY) {
+            ctx.fillStyle = "rgba(0, 0, 0, 0.3)"
+            ctx.beginPath()
+            ctx.ellipse(stone.x, groundY, stone.size, stone.size * 0.3, 0, 0, Math.PI * 2)
+            ctx.fill()
+          }
+          
+          return true
+        })
+      }
+    } else if (effect.phase === 4) {
+      // Phase 4: Divine Glow (0.7s)
+      const phaseDuration = 700
+      const progress = Math.min(elapsed / phaseDuration, 1)
+      
+      if (progress >= 1) {
+        effect.phase = 5
+        effect.startTime = Date.now()
+      } else {
+        // Golden beam descending
+        const basketX = canvasSize.width / 2
+        const headerHeight = 96
+        const basketY = headerHeight + 20 + 70
+        const beamHeight = progress * canvasSize.height * 0.5
+        
+        // Get highlight color from CSS variables
+        const root = typeof window !== 'undefined' ? document.documentElement : null
+        const highlightColor = root ? getComputedStyle(root).getPropertyValue('--color-text').trim() || '#FFF4D0' : '#FFF4D0'
+        
+        ctx.fillStyle = highlightColor
+        ctx.globalAlpha = 0.4 * (1 - progress)
+        ctx.fillRect(basketX - 20, basketY - beamHeight, 40, beamHeight)
+        
+        // "CODE OF ANCIENTS" text
+        ctx.fillStyle = colors.primary || '#DAB466'
+        ctx.font = "bold 24px sans-serif"
+        ctx.textAlign = "center"
+        ctx.textBaseline = "middle"
+        ctx.shadowBlur = 12
+        ctx.shadowColor = colors.primary || '#DAB466'
+        ctx.globalAlpha = 1 - progress
+        ctx.fillText("CODE OF ANCIENTS", basketX, basketY - beamHeight / 2)
+      }
+    } else if (effect.phase === 5) {
+      // Phase 5: Final Message (2s)
+      const phaseDuration = 2000
+      const progress = Math.min(elapsed / phaseDuration, 1)
+      
+      if (progress >= 1) {
+        templeCollapseRef.current = null
+      } else {
+        // Final message overlay
+        ctx.fillStyle = "rgba(0, 0, 0, 0.7)"
+        ctx.fillRect(0, 0, canvasSize.width, canvasSize.height)
+        
+        ctx.fillStyle = colors.text || '#FFF4D0'
+        ctx.font = "20px sans-serif"
+        ctx.textAlign = "center"
+        ctx.textBaseline = "middle"
+        ctx.globalAlpha = 0.85
+        ctx.fillText(
+          "🏺 Você testemunhou o Templo do Código Antigo. Raridade: 0.5%",
+          canvasSize.width / 2,
+          canvasSize.height / 2
+        )
+      }
+    }
+    
+    ctx.restore()
+  }, [canvasSize, createDustPuff, themeId])
+
   // Render fireworks particles
   const renderFireworks = useCallback((ctx: CanvasRenderingContext2D) => {
     if (fireworksRef.current.length === 0) return
@@ -2649,6 +4614,423 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
     ctx.restore()
   }, [isFPSLevel1, isFPSLevel2])
 
+  // Indiana Jones theme: Render dust particles
+  const renderDustParticles = useCallback((ctx: CanvasRenderingContext2D, colors: ReturnType<typeof getThemeColors>) => {
+    if (!colors || dustParticlesRef.current.length === 0) return
+    
+    const { mode: mobileMode } = useMobileModeStore.getState()
+    if (mobileMode === 'lite') return
+    
+    if (isFPSLevel2) return
+    
+    ctx.save()
+    
+    // Get bgSoft from CSS variables
+    const root = typeof window !== 'undefined' ? document.documentElement : null
+    const dustColor = root ? getComputedStyle(root).getPropertyValue('--color-bg-secondary').trim() || '#8A6B45' : '#8A6B45'
+    let deadParticleCount = 0
+    
+    dustParticlesRef.current = dustParticlesRef.current.filter((particle) => {
+      particle.x += particle.vx
+      particle.y += particle.vy
+      particle.vy += 0.05 // Light gravity
+      particle.life -= 1
+      
+      if (particle.life <= 0) {
+        deadParticleCount++
+        return false
+      }
+      
+      const alpha = particle.life / particle.maxLife
+      ctx.globalAlpha = alpha * 0.6
+      ctx.fillStyle = dustColor
+      ctx.beginPath()
+      ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2)
+      ctx.fill()
+      
+      return true
+    })
+    
+    if (deadParticleCount > 0) {
+      deallocateParticles('theme', deadParticleCount)
+    }
+    
+    ctx.restore()
+  }, [isFPSLevel2])
+
+  // Indiana Jones theme: Render divine light effect
+  const renderDivineLight = useCallback((ctx: CanvasRenderingContext2D, colors: ReturnType<typeof getThemeColors>) => {
+    if (!divineLightRef.current || !colors) return
+    
+    const { mode: mobileMode } = useMobileModeStore.getState()
+    if (mobileMode === 'lite') return
+    
+    const effect = divineLightRef.current
+    const elapsed = Date.now() - effect.startTime
+    const progress = Math.min(elapsed / effect.duration, 1)
+    
+    if (progress >= 1) {
+      divineLightRef.current = null
+      return
+    }
+    
+    ctx.save()
+    
+    // Golden triangular overlay (fade in/out)
+    const alpha = progress < 0.5 ? progress * 2 : (1 - progress) * 2
+    ctx.globalAlpha = alpha * 0.4
+    
+    // Get highlight color from CSS variables
+    const root = typeof window !== 'undefined' ? document.documentElement : null
+    const highlightColor = root ? getComputedStyle(root).getPropertyValue('--color-text').trim() || '#FFF4D0' : '#FFF4D0'
+    ctx.fillStyle = highlightColor
+    
+    // Triangle pointing down (over basket)
+    const triangleSize = 80
+    ctx.beginPath()
+    ctx.moveTo(effect.x, effect.y - triangleSize)
+    ctx.lineTo(effect.x - triangleSize, effect.y + triangleSize)
+    ctx.lineTo(effect.x + triangleSize, effect.y + triangleSize)
+    ctx.closePath()
+    ctx.fill()
+    
+    ctx.restore()
+  }, [])
+
+  // Star Wars theme: Render saber flash effect
+  const renderSaberFlash = useCallback((ctx: CanvasRenderingContext2D, colors: ReturnType<typeof getThemeColors>) => {
+    if (!saberFlashRef.current || !colors) return
+    
+    const { mode: mobileMode } = useMobileModeStore.getState()
+    if (mobileMode === 'lite') return
+    
+    const effect = saberFlashRef.current
+    const elapsed = Date.now() - effect.startTime
+    const progress = Math.min(elapsed / effect.duration, 1)
+    
+    if (progress >= 1) {
+      saberFlashRef.current = null
+      return
+    }
+    
+    ctx.save()
+    
+    // Diagonal flash (fade in/out) - make it more visible
+    const alpha = progress < 0.5 ? progress * 2 : (1 - progress) * 2
+    ctx.globalAlpha = alpha * 0.9 // Increased from 0.7
+    
+    const flashColor = effect.color === 'red' ? colors.accent || '#FF2B2B' : colors.primary || '#2F9BFF'
+    ctx.strokeStyle = flashColor
+    ctx.lineWidth = 6 // Increased from 4
+    ctx.shadowBlur = 20 // Increased from 12
+    ctx.shadowColor = flashColor
+    
+    // Diagonal line (top-left to bottom-right)
+    const flashLength = 100
+    ctx.beginPath()
+    ctx.moveTo(effect.x - flashLength / 2, effect.y - flashLength / 2)
+    ctx.lineTo(effect.x + flashLength / 2, effect.y + flashLength / 2)
+    ctx.stroke()
+    
+    ctx.restore()
+  }, [])
+
+  // Star Wars theme: Render dark shock effect
+  const renderDarkShock = useCallback((ctx: CanvasRenderingContext2D, colors: ReturnType<typeof getThemeColors>) => {
+    if (!darkShockRef.current || !colors) return
+    
+    const { mode: mobileMode } = useMobileModeStore.getState()
+    if (mobileMode === 'lite') return
+    
+    const effect = darkShockRef.current
+    const elapsed = Date.now() - effect.startTime
+    const progress = Math.min(elapsed / effect.duration, 1)
+    
+    if (progress >= 1) {
+      darkShockRef.current = null
+      return
+    }
+    
+    ctx.save()
+    
+    // Red spark particles - make them more visible
+    const sparkColor = colors.accent || '#FF2B2B'
+    ctx.fillStyle = sparkColor
+    ctx.shadowBlur = 10 // Add glow to sparks
+    ctx.shadowColor = sparkColor
+    ctx.globalAlpha = (1 - progress) * 1.0 // Increased from 0.8
+    
+    // Small sparks around rim - make them bigger and more visible
+    for (let i = 0; i < 8; i++) { // Increased from 6
+      const angle = (i / 8) * Math.PI * 2
+      const distance = 20 + progress * 15 // Increased distance
+      const x = effect.x + Math.cos(angle) * distance
+      const y = effect.y + Math.sin(angle) * distance
+      ctx.beginPath()
+      ctx.arc(x, y, 3, 0, Math.PI * 2) // Increased from 2
+      ctx.fill()
+    }
+    
+    ctx.restore()
+  }, [])
+
+  // Star Wars theme: Render hyperspace burst effect
+  const renderHyperspaceBurst = useCallback((ctx: CanvasRenderingContext2D, colors: ReturnType<typeof getThemeColors>) => {
+    if (!hyperspaceBurstRef.current || !colors) return
+    
+    const { mode: mobileMode } = useMobileModeStore.getState()
+    if (mobileMode === 'lite') return
+    
+    const effect = hyperspaceBurstRef.current
+    const elapsed = Date.now() - effect.startTime
+    const progress = Math.min(elapsed / effect.duration, 1)
+    
+    if (progress >= 1) {
+      hyperspaceBurstRef.current = null
+      return
+    }
+    
+    ctx.save()
+    
+    // Radial streaks in background - make them more visible
+    const streakColor = colors.glow || '#59E0FF'
+    ctx.strokeStyle = streakColor
+    ctx.lineWidth = 3 // Increased from 2
+    ctx.shadowBlur = 15 // Increased from 8
+    ctx.shadowColor = streakColor
+    ctx.globalAlpha = (1 - progress) * 0.8 // Increased from 0.6
+    
+    const centerX = canvasSize.width / 2
+    const centerY = canvasSize.height / 2
+    
+    // Radial streaks from center
+    for (let i = 0; i < 12; i++) {
+      const angle = (i / 12) * Math.PI * 2
+      const length = 200 + progress * 100
+      ctx.beginPath()
+      ctx.moveTo(centerX, centerY)
+      ctx.lineTo(centerX + Math.cos(angle) * length, centerY + Math.sin(angle) * length)
+      ctx.stroke()
+    }
+    
+    ctx.restore()
+  }, [])
+
+  // Star Wars theme: Render astromech ping effect
+  const renderAstromechPing = useCallback((ctx: CanvasRenderingContext2D, colors: ReturnType<typeof getThemeColors>) => {
+    if (!astromechPingRef.current || !colors) return
+    
+    const { mode: mobileMode } = useMobileModeStore.getState()
+    if (mobileMode === 'lite') return
+    
+    const effect = astromechPingRef.current
+    const elapsed = Date.now() - effect.startTime
+    const progress = Math.min(elapsed / effect.duration, 1)
+    
+    if (progress >= 1) {
+      astromechPingRef.current = null
+      return
+    }
+    
+    ctx.save()
+    
+    // Circular pulse (internal → external) - make it more visible
+    const pingColor = colors.primary || '#2F9BFF'
+    ctx.strokeStyle = pingColor
+    ctx.lineWidth = 4 // Increased from 2
+    ctx.shadowBlur = 20 // Increased from 6
+    ctx.shadowColor = pingColor
+    ctx.globalAlpha = (1 - progress) * 0.9 // Increased from 0.5
+    
+    const maxRadius = 60 // Increased from 50
+    const radius = progress * maxRadius
+    ctx.beginPath()
+    ctx.arc(effect.x, effect.y, radius, 0, Math.PI * 2)
+    ctx.stroke()
+    
+    // Add inner circle for more visibility
+    ctx.globalAlpha = (1 - progress) * 0.6
+    ctx.beginPath()
+    ctx.arc(effect.x, effect.y, radius * 0.6, 0, Math.PI * 2)
+    ctx.stroke()
+    
+    ctx.restore()
+  }, [])
+
+  // Render theme-specific shake visual effects
+  const renderShakeEffect = useCallback((ctx: CanvasRenderingContext2D, colors: ReturnType<typeof getThemeColors>) => {
+    if (!shakeEffectRef.current || !colors) return
+    
+    const { mode: mobileMode } = useMobileModeStore.getState()
+    if (mobileMode === 'lite') return
+    
+    const effect = shakeEffectRef.current
+    const elapsed = Date.now() - effect.startTime
+    const progress = Math.min(elapsed / effect.duration, 1)
+    
+    if (progress >= 1) {
+      shakeEffectRef.current = null
+      return
+    }
+    
+    ctx.save()
+    
+    // Fade out effect
+    const alpha = 1 - progress
+    ctx.globalAlpha = alpha * 0.6
+    
+    const centerX = canvasSize.width / 2
+    const centerY = canvasSize.height / 2
+    
+    switch (effect.themeId) {
+      case 'chaves': {
+        // Chaves theme: No center screen effect (character animation is shown near shake button)
+        // Just skip rendering here
+        break
+      }
+      
+      case 'pomemin': {
+        // Colorful sparkles
+        const colors_pomemin = ['#FFD700', '#FF1493', '#8A2BE2']
+        for (let i = 0; i < 20; i++) {
+          const angle = (i / 20) * Math.PI * 2
+          const distance = 100 + progress * 150
+          const x = centerX + Math.cos(angle) * distance
+          const y = centerY + Math.sin(angle) * distance
+          const color = colors_pomemin[i % colors_pomemin.length]
+          
+          ctx.fillStyle = color
+          ctx.shadowBlur = 15
+          ctx.shadowColor = color
+          ctx.beginPath()
+          ctx.arc(x, y, 4 + Math.random() * 4, 0, Math.PI * 2)
+          ctx.fill()
+        }
+        break
+      }
+      
+      case 'dracula': {
+        // Red/purple energy waves
+        const waveColor1 = '#8B0000'
+        const waveColor2 = '#4B0082'
+        ctx.strokeStyle = waveColor1
+        ctx.lineWidth = 3
+        ctx.shadowBlur = 25
+        ctx.shadowColor = waveColor1
+        
+        // Concentric circles
+        for (let i = 0; i < 5; i++) {
+          const radius = 50 + (i * 30) + progress * 100
+          ctx.beginPath()
+          ctx.arc(centerX, centerY, radius, 0, Math.PI * 2)
+          ctx.stroke()
+          
+          if (i % 2 === 1) {
+            ctx.strokeStyle = waveColor2
+            ctx.shadowColor = waveColor2
+          } else {
+            ctx.strokeStyle = waveColor1
+            ctx.shadowColor = waveColor1
+          }
+        }
+        break
+      }
+      
+      case 'portal': {
+        // Orange/blue portal rings
+        const orangeColor = '#ff7a00'
+        const blueColor = '#24b0ff'
+        ctx.lineWidth = 4
+        ctx.shadowBlur = 20
+        
+        // Alternating rings
+        for (let i = 0; i < 6; i++) {
+          const radius = 40 + (i * 25) + progress * 120
+          const color = i % 2 === 0 ? orangeColor : blueColor
+          ctx.strokeStyle = color
+          ctx.shadowColor = color
+          ctx.beginPath()
+          ctx.arc(centerX, centerY, radius, 0, Math.PI * 2)
+          ctx.stroke()
+        }
+        break
+      }
+      
+      case 'indiana-jones': {
+        // Golden sand/dust explosion
+        const goldColor = '#DAB466'
+        ctx.fillStyle = goldColor
+        ctx.shadowBlur = 30
+        ctx.shadowColor = goldColor
+        
+        // Particle burst
+        for (let i = 0; i < 30; i++) {
+          const angle = (i / 30) * Math.PI * 2
+          const distance = 80 + progress * 200
+          const x = centerX + Math.cos(angle) * distance
+          const y = centerY + Math.sin(angle) * distance
+          const size = 3 + Math.random() * 4
+          
+          ctx.beginPath()
+          ctx.arc(x, y, size, 0, Math.PI * 2)
+          ctx.fill()
+        }
+        break
+      }
+      
+      case 'star-wars': {
+        // Blue energy burst with hyperspace streaks
+        const blueColor = '#2F9BFF'
+        const cyanColor = '#59E0FF'
+        ctx.strokeStyle = blueColor
+        ctx.lineWidth = 3
+        ctx.shadowBlur = 25
+        ctx.shadowColor = blueColor
+        
+        // Hyperspace streaks
+        for (let i = 0; i < 16; i++) {
+          const angle = (i / 16) * Math.PI * 2
+          const length = 200 + progress * 300
+          ctx.beginPath()
+          ctx.moveTo(centerX, centerY)
+          ctx.lineTo(centerX + Math.cos(angle) * length, centerY + Math.sin(angle) * length)
+          ctx.stroke()
+          
+          // Alternate colors
+          if (i % 2 === 0) {
+            ctx.strokeStyle = blueColor
+            ctx.shadowColor = blueColor
+          } else {
+            ctx.strokeStyle = cyanColor
+            ctx.shadowColor = cyanColor
+          }
+        }
+        
+        // Central energy core
+        ctx.fillStyle = cyanColor
+        ctx.shadowBlur = 40
+        ctx.shadowColor = cyanColor
+        ctx.beginPath()
+        ctx.arc(centerX, centerY, 30 + progress * 50, 0, Math.PI * 2)
+        ctx.fill()
+        break
+      }
+      
+      default: {
+        // Default: simple flash
+        ctx.fillStyle = colors.accent
+        ctx.shadowBlur = 30
+        ctx.shadowColor = colors.accent
+        ctx.beginPath()
+        ctx.arc(centerX, centerY, 100 + progress * 150, 0, Math.PI * 2)
+        ctx.fill()
+        break
+      }
+    }
+    
+    ctx.restore()
+  }, [canvasSize])
+
   // Draw rim (basket hoop)
   const drawRim = useCallback((ctx: CanvasRenderingContext2D, colors: ReturnType<typeof getThemeColors>) => {
     // FPS Guardian Level 2: Skip rim rendering
@@ -2669,6 +5051,13 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
     const arcSpacing = 3 // Espaçamento vertical entre arcos
 
     ctx.save()
+    
+    // Apply hoop bend animation (portal theme)
+    if (themeId === "portal" && hoopBendProgressRef.current > 0) {
+      ctx.translate(centerX, centerY)
+      ctx.scale(1, hoopBendProgressRef.current)
+      ctx.translate(-centerX, -centerY)
+    }
 
     // Apply pulse alpha effect
     // FPS Guardian Level 1: Decrease neon opacity by 50%
@@ -2679,19 +5068,21 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
     ctx.globalAlpha = alpha
 
     // Layer 1: Main neon arc (thick)
-    ctx.strokeStyle = colors.accent
+    // Use primary color to match theme better
+    const rimColor = colors.primary || colors.accent
+    ctx.strokeStyle = rimColor
     ctx.lineWidth = 6
     // FPS Guardian Level 1: Reduce glow intensity by 50%
     const baseGlow = rimGlowRef.current // Dynamic glow (8 default, 16 on score)
     ctx.shadowBlur = isFPSLevel1 ? baseGlow * 0.5 : baseGlow
     ctx.shadowOffsetY = 4 // Vertical offset for depth
-    ctx.shadowColor = colors.accent // Use neon color directly
+    ctx.shadowColor = rimColor // Use primary color to match theme
     ctx.beginPath()
     ctx.arc(centerX, centerY, radius, 0, Math.PI)
     ctx.stroke()
 
     // Layer 2: Secondary neon arc (thin, 3px below)
-    ctx.strokeStyle = colors.accent
+    ctx.strokeStyle = rimColor
     ctx.lineWidth = 2
     // FPS Guardian Level 1: Reduce glow intensity by 50%
     const innerGlow = rimGlowRef.current * 0.5 // Half glow for inner arc
@@ -2713,6 +5104,1324 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
     ctx.globalAlpha = 1
     ctx.restore()
   }, [canvasSize.width, isFPSLevel1, isFPSLevel2])
+
+  // Initialize portals position (proportional to canvas)
+  const initializePortals = useCallback((canvasWidth: number, canvasHeight: number) => {
+    const headerHeight = 96
+    
+    // Orange portal on floor - positioned slightly above floor to swallow resting orbs
+    portalOrangeRef.current.x = canvasWidth * 0.2
+    portalOrangeRef.current.y = canvasHeight - 45 // Slightly above floor to swallow resting orbs
+    
+    // Blue portal on ceiling - positioned very close to header
+    portalBlueRef.current.x = canvasWidth / 2
+    portalBlueRef.current.y = headerHeight + 5 // Very close to header, almost touching
+  }, [])
+
+  // Update portal positions on resize (proportional)
+  const updatePortalsOnResize = useCallback((oldWidth: number, oldHeight: number, newWidth: number, newHeight: number) => {
+    if (oldWidth === 0 || oldHeight === 0) return
+    
+    const scaleX = newWidth / oldWidth
+    const scaleY = newHeight / oldHeight
+    
+    // Update orange portal
+    portalOrangeRef.current.x *= scaleX
+    portalOrangeRef.current.y *= scaleY
+    
+    // Update blue portal
+    portalBlueRef.current.x *= scaleX
+    portalBlueRef.current.y *= scaleY
+  }, [])
+
+  // Create Chaves appear sound (when character rises from barrel)
+  const playChavesAppearSound = useCallback(() => {
+    if (typeof window === 'undefined' || (!window.AudioContext && !(window as any).webkitAudioContext)) return
+    
+    try {
+      const AudioContext = window.AudioContext || (window as any).webkitAudioContext
+      if (!audioContextRef.current) {
+        audioContextRef.current = new AudioContext()
+      }
+      
+      const ctx = audioContextRef.current
+      if (ctx.state === 'suspended') {
+        ctx.resume()
+      }
+      
+      // Short "pop" sound when appearing
+      const oscillator = ctx.createOscillator()
+      const gainNode = ctx.createGain()
+      
+      oscillator.connect(gainNode)
+      gainNode.connect(ctx.destination)
+      
+      oscillator.type = 'sine'
+      oscillator.frequency.setValueAtTime(300, ctx.currentTime)
+      oscillator.frequency.exponentialRampToValueAtTime(200, ctx.currentTime + 0.1)
+      
+      gainNode.gain.setValueAtTime(0.15, ctx.currentTime)
+      gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1)
+      
+      oscillator.start(ctx.currentTime)
+      oscillator.stop(ctx.currentTime + 0.1)
+    } catch (error) {
+      // Silently fail if audio context is not available
+    }
+  }, [])
+  
+  // Create Chaves crying sound ("Piiii... Pipipipipipi")
+  const playChavesCryingSound = useCallback(() => {
+    if (typeof window === 'undefined' || (!window.AudioContext && !(window as any).webkitAudioContext)) return
+    
+    try {
+      const AudioContext = window.AudioContext || (window as any).webkitAudioContext
+      if (!audioContextRef.current) {
+        audioContextRef.current = new AudioContext()
+      }
+      
+      const ctx = audioContextRef.current
+      if (ctx.state === 'suspended') {
+        ctx.resume()
+      }
+      
+      const startTime = ctx.currentTime
+      
+      // "Piiii..." - long descending tone
+      const longOsc = ctx.createOscillator()
+      const longGain = ctx.createGain()
+      longOsc.connect(longGain)
+      longGain.connect(ctx.destination)
+      
+      longOsc.type = 'sine'
+      longOsc.frequency.setValueAtTime(400, startTime)
+      longOsc.frequency.exponentialRampToValueAtTime(250, startTime + 0.3)
+      
+      longGain.gain.setValueAtTime(0.12, startTime)
+      longGain.gain.exponentialRampToValueAtTime(0.08, startTime + 0.3)
+      
+      longOsc.start(startTime)
+      longOsc.stop(startTime + 0.3)
+      
+      // "Pipipipipipi" - rapid short tones
+      for (let i = 0; i < 6; i++) {
+        const delay = 0.3 + (i * 0.08)
+        const osc = ctx.createOscillator()
+        const gain = ctx.createGain()
+        osc.connect(gain)
+        gain.connect(ctx.destination)
+        
+        osc.type = 'sine'
+        osc.frequency.setValueAtTime(350 - (i * 10), startTime + delay)
+        
+        gain.gain.setValueAtTime(0.1, startTime + delay)
+        gain.gain.exponentialRampToValueAtTime(0.01, startTime + delay + 0.05)
+        
+        osc.start(startTime + delay)
+        osc.stop(startTime + delay + 0.05)
+      }
+    } catch (error) {
+      // Silently fail if audio context is not available
+    }
+  }, [])
+  
+  // Create Star Wars proton beam sound ("Piu Piu Piu" - Atari style)
+  const playStarWarsProtonBeamSound = useCallback(() => {
+    if (typeof window === 'undefined' || (!window.AudioContext && !(window as any).webkitAudioContext)) return
+    
+    try {
+      const AudioContext = window.AudioContext || (window as any).webkitAudioContext
+      if (!audioContextRef.current) {
+        audioContextRef.current = new AudioContext()
+      }
+      
+      const ctx = audioContextRef.current
+      if (ctx.state === 'suspended') {
+        ctx.resume()
+      }
+      
+      const startTime = ctx.currentTime
+      
+      // "Piu Piu Piu" - 3 short beeps (Atari style, square wave)
+      for (let i = 0; i < 3; i++) {
+        const delay = i * 0.15
+        const osc = ctx.createOscillator()
+        const gain = ctx.createGain()
+        osc.connect(gain)
+        gain.connect(ctx.destination)
+        
+        osc.type = 'square' // Atari style
+        osc.frequency.setValueAtTime(800 - (i * 50), startTime + delay) // Descending pitch
+        
+        gain.gain.setValueAtTime(0.15, startTime + delay)
+        gain.gain.exponentialRampToValueAtTime(0.01, startTime + delay + 0.1)
+        
+        osc.start(startTime + delay)
+        osc.stop(startTime + delay + 0.1)
+      }
+    } catch (error) {
+      // Silently fail if audio context is not available
+    }
+  }, [])
+  
+  // Create Star Wars explosion sound ("BOOM" - Atari style)
+  const playStarWarsExplosionSound = useCallback(() => {
+    if (typeof window === 'undefined' || (!window.AudioContext && !(window as any).webkitAudioContext)) return
+    
+    try {
+      const AudioContext = window.AudioContext || (window as any).webkitAudioContext
+      if (!audioContextRef.current) {
+        audioContextRef.current = new AudioContext()
+      }
+      
+      const ctx = audioContextRef.current
+      if (ctx.state === 'suspended') {
+        ctx.resume()
+      }
+      
+      const startTime = ctx.currentTime
+      
+      // "BOOM" - Low frequency explosion (Atari style, noise + low tone)
+      // Low rumble
+      const lowOsc = ctx.createOscillator()
+      const lowGain = ctx.createGain()
+      lowOsc.connect(lowGain)
+      lowGain.connect(ctx.destination)
+      
+      lowOsc.type = 'sawtooth' // Atari style
+      lowOsc.frequency.setValueAtTime(60, startTime)
+      lowOsc.frequency.exponentialRampToValueAtTime(30, startTime + 0.3)
+      
+      lowGain.gain.setValueAtTime(0.2, startTime)
+      lowGain.gain.exponentialRampToValueAtTime(0.01, startTime + 0.3)
+      
+      lowOsc.start(startTime)
+      lowOsc.stop(startTime + 0.3)
+      
+      // High frequency crack
+      const highOsc = ctx.createOscillator()
+      const highGain = ctx.createGain()
+      highOsc.connect(highGain)
+      highGain.connect(ctx.destination)
+      
+      highOsc.type = 'square'
+      highOsc.frequency.setValueAtTime(2000, startTime)
+      highOsc.frequency.exponentialRampToValueAtTime(500, startTime + 0.15)
+      
+      highGain.gain.setValueAtTime(0.15, startTime)
+      highGain.gain.exponentialRampToValueAtTime(0.01, startTime + 0.15)
+      
+      highOsc.start(startTime)
+      highOsc.stop(startTime + 0.15)
+    } catch (error) {
+      // Silently fail if audio context is not available
+    }
+  }, [])
+  
+  // Render Star Wars proton beam easter egg
+  const renderStarWarsEasterEgg = useCallback((ctx: CanvasRenderingContext2D, colors: ReturnType<typeof getThemeColors>) => {
+    if (!starWarsEasterEggRef.current || !colors) return
+    
+    const { mode: mobileMode } = useMobileModeStore.getState()
+    if (mobileMode === 'lite') return
+    
+    const effect = starWarsEasterEggRef.current
+    const elapsed = Date.now() - effect.startTime
+    
+    ctx.save()
+    
+    const centerX = canvasSize.width / 2
+    const centerY = canvasSize.height / 2
+    
+    if (effect.explosionPhase === 'traveling') {
+      // Phase 1: Beams traveling to center
+      const travelDuration = 800 // 0.8s to reach center
+      const progress = Math.min(elapsed / travelDuration, 1)
+      
+      if (progress >= 1) {
+        // All beams reached center, trigger explosion
+        effect.explosionPhase = 'exploding'
+        effect.explosionProgress = 0
+        effect.startTime = Date.now()
+        playStarWarsExplosionSound()
+      } else {
+        // Draw traveling beams
+        const blueColor = '#2F9BFF'
+        const redColor = '#FF2B2B'
+        
+        effect.beams.forEach((beam) => {
+          const currentX = beam.x + (beam.targetX - beam.x) * progress
+          const currentY = beam.y + (beam.targetY - beam.y) * progress
+          
+          // Beam color: blue for left, red for right
+          const beamColor = beam.side === 'left' ? blueColor : redColor
+          
+          ctx.strokeStyle = beamColor
+          ctx.lineWidth = 4
+          ctx.shadowBlur = 15
+          ctx.shadowColor = beamColor
+          ctx.globalAlpha = 0.9
+          
+          // Draw beam line
+          ctx.beginPath()
+          ctx.moveTo(beam.x, beam.y)
+          ctx.lineTo(currentX, currentY)
+          ctx.stroke()
+          
+          // Draw beam head (glowing circle)
+          ctx.fillStyle = beamColor
+          ctx.shadowBlur = 20
+          ctx.beginPath()
+          ctx.arc(currentX, currentY, 6, 0, Math.PI * 2)
+          ctx.fill()
+        })
+      }
+    } else if (effect.explosionPhase === 'exploding') {
+      // Phase 2: Explosion at center
+      const explosionDuration = 1000 // 1s explosion
+      const progress = Math.min(elapsed / explosionDuration, 1)
+      effect.explosionProgress = progress
+      
+      if (progress >= 1) {
+        effect.explosionPhase = 'done'
+        // Clean up after a short delay
+        setTimeout(() => {
+          starWarsEasterEggRef.current = null
+        }, 200)
+      } else {
+        // Draw explosion
+        const explosionRadius = 50 + progress * 200
+        const alpha = 1 - progress
+        
+        // Outer explosion ring (orange/red)
+        ctx.fillStyle = `rgba(255, 100, 0, ${alpha * 0.6})`
+        ctx.shadowBlur = 30
+        ctx.shadowColor = '#FF2B2B'
+        ctx.beginPath()
+        ctx.arc(centerX, centerY, explosionRadius, 0, Math.PI * 2)
+        ctx.fill()
+        
+        // Inner explosion core (white/yellow)
+        ctx.fillStyle = `rgba(255, 255, 200, ${alpha * 0.8})`
+        ctx.shadowBlur = 40
+        ctx.shadowColor = '#FFC23D'
+        ctx.beginPath()
+        ctx.arc(centerX, centerY, explosionRadius * 0.5, 0, Math.PI * 2)
+        ctx.fill()
+        
+        // Explosion particles (sparks)
+        for (let i = 0; i < 20; i++) {
+          const angle = (i / 20) * Math.PI * 2
+          const distance = explosionRadius * 0.8
+          const sparkX = centerX + Math.cos(angle) * distance
+          const sparkY = centerY + Math.sin(angle) * distance
+          
+          ctx.fillStyle = `rgba(255, ${200 + Math.random() * 55}, 0, ${alpha})`
+          ctx.beginPath()
+          ctx.arc(sparkX, sparkY, 3 + Math.random() * 3, 0, Math.PI * 2)
+          ctx.fill()
+        }
+        
+        // Distant ship explosion (small silhouette in background)
+        const shipX = canvasSize.width * 0.85
+        const shipY = canvasSize.height * 0.2
+        const shipSize = Math.min(canvasSize.width * 0.15, canvasSize.height * 0.15) * 1.2
+        
+        // Ship silhouette with explosion effect
+        ctx.fillStyle = `rgba(255, 100, 0, ${alpha * 0.4})`
+        ctx.shadowBlur = 20
+        ctx.shadowColor = '#FF2B2B'
+        ctx.fillRect(shipX - shipSize / 2, shipY, shipSize, shipSize * 0.3)
+        
+        // Explosion flash on ship
+        if (progress < 0.3) {
+          const flashAlpha = (0.3 - progress) / 0.3
+          ctx.fillStyle = `rgba(255, 255, 200, ${flashAlpha * 0.6})`
+          ctx.beginPath()
+          ctx.arc(shipX, shipY + shipSize * 0.15, shipSize * 0.2, 0, Math.PI * 2)
+          ctx.fill()
+        }
+      }
+    }
+    
+    ctx.restore()
+  }, [canvasSize])
+  
+  // Trigger Neon Assault easter egg
+  const triggerNeonAssault = useCallback(() => {
+    if (themeId !== 'star-wars') return
+    const { mode: currentMobileMode } = useMobileModeStore.getState()
+    if (currentMobileMode === 'lite') return
+    
+    const centerX = canvasSize.width / 2
+    const centerY = canvasSize.height / 2
+    
+    // Create beams from bottom corners
+    const beams: NeonBeam[] = []
+    const beamSpeed = 600 + Math.random() * 300 // 600-900 px/s
+    
+    // Group 1: 2 beams from bottom-left corner
+    for (let i = 0; i < 2; i++) {
+      const startX = 20 + i * 30
+      const startY = canvasSize.height - 20
+      const dx = centerX - startX
+      const dy = centerY - startY
+      const distance = Math.sqrt(dx * dx + dy * dy)
+      const vx = (dx / distance) * beamSpeed / 60 // Convert to px/frame (assuming 60fps)
+      const vy = (dy / distance) * beamSpeed / 60
+      
+      beams.push({
+        x: startX,
+        y: startY,
+        targetX: centerX,
+        targetY: centerY,
+        vx,
+        vy,
+        group: 1,
+        index: i,
+        active: false // Will be activated with delay
+      })
+    }
+    
+    // Group 2: 2 beams from bottom-center
+    for (let i = 0; i < 2; i++) {
+      const startX = centerX - 30 + i * 60
+      const startY = canvasSize.height - 20
+      const dx = centerX - startX
+      const dy = centerY - startY
+      const distance = Math.sqrt(dx * dx + dy * dy)
+      const vx = (dx / distance) * beamSpeed / 60
+      const vy = (dy / distance) * beamSpeed / 60
+      
+      beams.push({
+        x: startX,
+        y: startY,
+        targetX: centerX,
+        targetY: centerY,
+        vx,
+        vy,
+        group: 2,
+        index: i,
+        active: false
+      })
+    }
+    
+    // Group 3: 2 beams from bottom-right corner
+    for (let i = 0; i < 2; i++) {
+      const startX = canvasSize.width - 20 - i * 30
+      const startY = canvasSize.height - 20
+      const dx = centerX - startX
+      const dy = centerY - startY
+      const distance = Math.sqrt(dx * dx + dy * dy)
+      const vx = (dx / distance) * beamSpeed / 60
+      const vy = (dy / distance) * beamSpeed / 60
+      
+      beams.push({
+        x: startX,
+        y: startY,
+        targetX: centerX,
+        targetY: centerY,
+        vx,
+        vy,
+        group: 3,
+        index: i,
+        active: false
+      })
+    }
+    
+    neonAssaultEasterEggRef.current = {
+      state: 'idle',
+      startTime: Date.now(),
+      beams,
+      shipShake: 0,
+      shipAlpha: 0.9, // Ship appears immediately
+      fragments: [],
+      explosionParticles: [],
+      explosionRadius: 0
+    }
+    
+    // Start firing group 1 immediately
+    setTimeout(() => {
+      if (neonAssaultEasterEggRef.current) {
+        neonAssaultEasterEggRef.current.state = 'firing_group_1'
+        neonAssaultEasterEggRef.current.beams.filter(b => b.group === 1).forEach(b => b.active = true)
+      }
+    }, 0)
+    
+    // Start firing group 2 after 150ms
+    setTimeout(() => {
+      if (neonAssaultEasterEggRef.current) {
+        neonAssaultEasterEggRef.current.state = 'firing_group_2'
+        neonAssaultEasterEggRef.current.beams.filter(b => b.group === 2).forEach(b => b.active = true)
+      }
+    }, 150)
+    
+    // Start firing group 3 after 300ms
+    setTimeout(() => {
+      if (neonAssaultEasterEggRef.current) {
+        neonAssaultEasterEggRef.current.state = 'firing_group_3'
+        neonAssaultEasterEggRef.current.beams.filter(b => b.group === 3).forEach(b => b.active = true)
+      }
+    }, 300)
+  }, [themeId, canvasSize])
+  
+  // Render Neon Assault easter egg (simplified for performance)
+  const renderNeonAssault = useCallback((ctx: CanvasRenderingContext2D, colors: ReturnType<typeof getThemeColors>) => {
+    if (!neonAssaultEasterEggRef.current || !colors) return
+    
+    const { mode: mobileMode } = useMobileModeStore.getState()
+    if (mobileMode === 'lite') return
+    
+    const effect = neonAssaultEasterEggRef.current
+    const elapsed = Date.now() - effect.startTime
+    
+    ctx.save()
+    
+    const centerX = canvasSize.width / 2
+    const centerY = canvasSize.height / 2
+    const beamColor = '#4BFF66'
+    const shipColor = '#D0EFFF'
+    
+    // Draw ship (simple circle)
+    if (effect.state !== 'done' && effect.shipAlpha > 0) {
+      const shipX = centerX + (Math.random() - 0.5) * effect.shipShake
+      const shipY = centerY + (Math.random() - 0.5) * effect.shipShake
+      
+      ctx.globalAlpha = effect.shipAlpha
+      ctx.fillStyle = shipColor
+      ctx.shadowBlur = 8 // Reduced from 15
+      ctx.shadowColor = shipColor
+      
+      ctx.beginPath()
+      ctx.arc(shipX, shipY, 25, 0, Math.PI * 2)
+      ctx.fill()
+    }
+    
+    // Update and draw beams (simplified)
+    if (effect.state === 'firing_group_1' || effect.state === 'firing_group_2' || effect.state === 'firing_group_3') {
+      effect.beams.forEach((beam) => {
+        if (!beam.active) return
+        
+        beam.x += beam.vx
+        beam.y += beam.vy
+        
+        // Simple diagonal line
+        ctx.strokeStyle = beamColor
+        ctx.lineWidth = 3 // Reduced from 4
+        ctx.shadowBlur = 10 // Reduced from 20
+        ctx.shadowColor = beamColor
+        ctx.globalAlpha = 0.9
+        
+        const angle = Math.atan2(beam.vy, beam.vx)
+        const beamLength = 60 // Reduced from 90
+        const startX = beam.x - Math.cos(angle) * beamLength / 2
+        const startY = beam.y - Math.sin(angle) * beamLength / 2
+        const endX = beam.x + Math.cos(angle) * beamLength / 2
+        const endY = beam.y + Math.sin(angle) * beamLength / 2
+        
+        ctx.beginPath()
+        ctx.moveTo(startX, startY)
+        ctx.lineTo(endX, endY)
+        ctx.stroke()
+      })
+      
+      // Check collision (only for group 3)
+      if (effect.state === 'firing_group_3') {
+        const group3Beams = effect.beams.filter(b => b.active && b.group === 3)
+        const allReached = group3Beams.every(b => {
+          const dx = b.x - b.targetX
+          const dy = b.y - b.targetY
+          return Math.sqrt(dx * dx + dy * dy) <= 10 // Increased tolerance
+        })
+        
+        if (allReached && group3Beams.length > 0) {
+          effect.state = 'impact'
+          effect.startTime = Date.now()
+          effect.shipShake = 2 // Reduced from 3
+          
+          // Simplified particles (fewer)
+          const particleCount = 8 // Reduced from 12-18
+          effect.explosionParticles = []
+          for (let i = 0; i < particleCount; i++) {
+            const angle = (i / particleCount) * Math.PI * 2
+            const speed = 2 + Math.random() * 2 // Reduced
+            effect.explosionParticles.push({
+              x: centerX,
+              y: centerY,
+              vx: Math.cos(angle) * speed,
+              vy: Math.sin(angle) * speed,
+              life: 0,
+              maxLife: 20 // Reduced from 30-50
+            })
+          }
+          
+          // Fewer fragments
+          effect.fragments = []
+          for (let i = 0; i < 4; i++) { // Reduced from 8
+            const angle = (i / 4) * Math.PI * 2
+            const speed = 1.5 + Math.random() * 1.5 // Reduced
+            effect.fragments.push({
+              x: centerX,
+              y: centerY,
+              vx: Math.cos(angle) * speed,
+              vy: Math.sin(angle) * speed,
+              rotation: Math.random() * Math.PI * 2,
+              rotationSpeed: (Math.random() - 0.5) * 0.1, // Reduced
+              life: 1,
+              maxLife: 30 // Reduced from 50
+            })
+          }
+        }
+      }
+    }
+    
+    // Impact phase
+    if (effect.state === 'impact') {
+      const impactDuration = 150
+      const progress = Math.min(elapsed / impactDuration, 1)
+      
+      if (progress >= 1) {
+        effect.state = 'explosion'
+        effect.startTime = Date.now()
+        effect.explosionRadius = 0
+      } else {
+        effect.shipAlpha = 0.9 * (1 - progress)
+      }
+    }
+    
+    // Explosion phase (simplified)
+    if (effect.state === 'explosion') {
+      const explosionDuration = 200
+      const progress = Math.min(elapsed / explosionDuration, 1)
+      
+      if (progress >= 1) {
+        effect.state = 'done'
+        effect.shipAlpha = 0
+        setTimeout(() => {
+          neonAssaultEasterEggRef.current = null
+        }, 100)
+      } else {
+        const maxRadius = 80 // Reduced from 100
+        effect.explosionRadius = maxRadius * 1.2 * (1 - progress) // Reduced scale from 1.4
+        
+        ctx.fillStyle = beamColor
+        ctx.shadowBlur = 20 // Reduced from 40
+        ctx.shadowColor = beamColor
+        ctx.globalAlpha = 0.6 * (1 - progress) // Reduced from 0.8
+        ctx.beginPath()
+        ctx.arc(centerX, centerY, effect.explosionRadius, 0, Math.PI * 2)
+        ctx.fill()
+      }
+    }
+    
+    // Simplified particles (no shadow blur per particle)
+    effect.explosionParticles = effect.explosionParticles.filter((particle) => {
+      particle.life++
+      particle.x += particle.vx
+      particle.y += particle.vy
+      
+      if (particle.life < particle.maxLife) {
+        const alpha = 1 - (particle.life / particle.maxLife)
+        ctx.fillStyle = beamColor
+        ctx.globalAlpha = alpha
+        ctx.beginPath()
+        ctx.arc(particle.x, particle.y, 2, 0, Math.PI * 2) // Smaller, no shadow
+        ctx.fill()
+        return true
+      }
+      return false
+    })
+    
+    // Simplified fragments (no rotation, simpler shape)
+    effect.fragments = effect.fragments.filter((fragment) => {
+      fragment.life -= 0.03 // Faster fade
+      fragment.x += fragment.vx
+      fragment.y += fragment.vy
+      
+      if (fragment.life > 0) {
+        ctx.fillStyle = shipColor
+        ctx.globalAlpha = fragment.life
+        ctx.beginPath()
+        ctx.arc(fragment.x, fragment.y, 4, 0, Math.PI * 2) // Simple circle, no rotation
+        ctx.fill()
+        return true
+      }
+      return false
+    })
+    
+    ctx.restore()
+  }, [canvasSize, themeId])
+  
+  // Render Chaves character animation (appears from barrel near shake button)
+  // Defined here after sound functions to avoid initialization order issues
+  const renderChavesShakeAnimation = useCallback((ctx: CanvasRenderingContext2D, colors: ReturnType<typeof getThemeColors>) => {
+    if (!chavesShakeEffectRef.current || !colors) return
+    
+    const { mode: mobileMode } = useMobileModeStore.getState()
+    if (mobileMode === 'lite') return
+    
+    const effect = chavesShakeEffectRef.current
+    const elapsed = Date.now() - effect.startTime
+    const progress = Math.min(elapsed / effect.duration, 1)
+    
+    if (progress >= 1) {
+      chavesShakeEffectRef.current = null
+      chavesCryingParticlesRef.current = [] // Clear particles
+      return
+    }
+    
+    ctx.save()
+    
+    // Position matches the barrel drawn on floor in drawFloor function
+    const barrelSize = Math.min(canvasSize.width * 0.15, canvasSize.height * 0.15) // 15% do menor lado
+    const barrelX = canvasSize.width - barrelSize - 20 // Canto direito, com margem
+    const barrelY = canvasSize.height - barrelSize - 10 // Próximo ao chão, com margem
+    const barrelWidth = barrelSize * 0.8
+    const barrelHeight = barrelSize
+    
+    // Head appears from center top of barrel
+    const barrelCenterX = barrelX + barrelWidth / 2
+    const barrelTopY = barrelY
+    
+    // Animation phases:
+    // 0.0 - 0.3: Appearing (rising from barrel)
+    // 0.3 - 0.7: Looking around (head turns left and right)
+    // 0.7 - 1.0: Disappearing (descending into barrel)
+    
+    let headY = barrelTopY
+    let headRotation = 0
+    let headVisible = true
+    
+    if (progress < 0.3) {
+      // Phase 1: Appearing (0% to 30%) - head rises from barrel
+      const phaseProgress = progress / 0.3
+      const maxHeadHeight = 25 // Reduced height to keep close to barrel (immersion)
+      headY = barrelTopY - (phaseProgress * maxHeadHeight) // Start at barrel top, rise up
+      headRotation = 0
+    } else if (progress < 0.7) {
+      // Phase 2: Looking around and crying (30% to 70%)
+      const phaseProgress = (progress - 0.3) / 0.4
+      headY = barrelTopY - 25 // Stay at risen position (close to barrel)
+      // Head turns left (-15deg) then right (+15deg) then back to center
+      const cycle = Math.sin(phaseProgress * Math.PI * 2) // -1 to 1
+      headRotation = cycle * 0.26 // ~15 degrees in radians
+      
+      // Spawn crying particles from eyes
+      // Calculate eye positions considering head rotation
+      if (Math.random() < 0.3) { // 30% chance per frame
+        const eyeOffsetX = 6
+        const eyeOffsetY = -2
+        
+        // Calculate rotated eye positions
+        const cos = Math.cos(headRotation)
+        const sin = Math.sin(headRotation)
+        
+        // Left eye (relative to head center)
+        const leftEyeRelX = -eyeOffsetX
+        const leftEyeRelY = eyeOffsetY
+        const leftEyeX = barrelCenterX + (leftEyeRelX * cos - leftEyeRelY * sin)
+        const leftEyeY = headY + (leftEyeRelX * sin + leftEyeRelY * cos)
+        
+        // Right eye (relative to head center)
+        const rightEyeRelX = eyeOffsetX
+        const rightEyeRelY = eyeOffsetY
+        const rightEyeX = barrelCenterX + (rightEyeRelX * cos - rightEyeRelY * sin)
+        const rightEyeY = headY + (rightEyeRelX * sin + rightEyeRelY * cos)
+        
+        // Left eye particle
+        chavesCryingParticlesRef.current.push({
+          x: leftEyeX,
+          y: leftEyeY,
+          vx: (Math.random() - 0.5) * 2,
+          vy: 1 + Math.random() * 2,
+          life: 0,
+          maxLife: 30 + Math.random() * 20,
+        })
+        
+        // Right eye particle
+        chavesCryingParticlesRef.current.push({
+          x: rightEyeX,
+          y: rightEyeY,
+          vx: (Math.random() - 0.5) * 2,
+          vy: 1 + Math.random() * 2,
+          life: 0,
+          maxLife: 30 + Math.random() * 20,
+        })
+      }
+      
+      // Play crying sound once at the start of this phase
+      if (phaseProgress < 0.05 && !effect.cryingSoundPlayed) {
+        playChavesCryingSound()
+        effect.cryingSoundPlayed = true
+      }
+    } else {
+      // Phase 3: Disappearing (70% to 100%) - head descends into barrel
+      const phaseProgress = (progress - 0.7) / 0.3
+      const maxHeadHeight = 25
+      headY = barrelTopY - (maxHeadHeight * (1 - phaseProgress)) // Descend from risen position to barrel top
+      headRotation = 0
+    }
+    
+    // Update and render crying particles
+    chavesCryingParticlesRef.current = chavesCryingParticlesRef.current.filter(particle => {
+      particle.life++
+      particle.x += particle.vx
+      particle.y += particle.vy
+      particle.vy += 0.1 // Gravity
+      
+      return particle.life < particle.maxLife
+    })
+    
+    // Draw crying particles (teardrops)
+    ctx.fillStyle = '#87CEEB' // Sky blue (tear color)
+    chavesCryingParticlesRef.current.forEach(particle => {
+      const alpha = 1 - (particle.life / particle.maxLife)
+      ctx.globalAlpha = alpha * 0.8
+      ctx.beginPath()
+      ctx.ellipse(particle.x, particle.y, 2, 4, 0, 0, Math.PI * 2)
+      ctx.fill()
+    })
+    ctx.globalAlpha = 1
+    
+    // Don't draw barrel here - it's already drawn in drawFloor function
+    // Just draw the character head appearing from the existing barrel
+    
+    // Draw character head (only if visible)
+    if (headVisible) {
+      ctx.save()
+      ctx.translate(barrelCenterX, headY)
+      ctx.rotate(headRotation)
+      
+      // Head (circle with freckles)
+      ctx.fillStyle = '#FFDBAC' // Skin color
+      ctx.beginPath()
+      ctx.arc(0, 0, 18, 0, Math.PI * 2)
+      ctx.fill()
+      ctx.strokeStyle = '#8B4513'
+      ctx.lineWidth = 2
+      ctx.stroke()
+      
+      // Freckles (pintas no rosto)
+      ctx.fillStyle = '#8B4513'
+      const freckles = [
+        { x: -8, y: 2 }, { x: -5, y: 4 }, { x: -3, y: 1 },
+        { x: 3, y: 2 }, { x: 6, y: 4 }, { x: 8, y: 1 },
+        { x: -4, y: -1 }, { x: 4, y: -1 }
+      ]
+      freckles.forEach(freckle => {
+        ctx.beginPath()
+        ctx.arc(freckle.x, freckle.y, 1.5, 0, Math.PI * 2)
+        ctx.fill()
+      })
+      
+      // Hat (Chaves characteristic hat with checkered pattern and ear flaps)
+      // Hat base (larger circle) - green checkered
+      ctx.fillStyle = '#4A7C59' // Green base (like in the image)
+      ctx.beginPath()
+      ctx.arc(0, -12, 20, 0, Math.PI * 2)
+      ctx.fill()
+      
+      // Checkered pattern (quadriculado verde e escuro) on hat
+      const checkSize = 3.5 // Size of each square in the pattern
+      ctx.fillStyle = '#2D4A35' // Dark green for checkered squares
+      for (let row = 0; row < 4; row++) {
+        for (let col = 0; col < 6; col++) {
+          // Alternate pattern (checkerboard)
+          if ((row + col) % 2 === 0) {
+            const x = -20 + (col * checkSize)
+            const y = -24 + (row * checkSize)
+            ctx.fillRect(x, y, checkSize, checkSize)
+          }
+        }
+      }
+      
+      // Hat top (slightly smaller circle)
+      ctx.fillStyle = '#4A7C59'
+      ctx.beginPath()
+      ctx.arc(0, -18, 15, 0, Math.PI * 2)
+      ctx.fill()
+      
+      // Checkered pattern on hat top
+      for (let row = 0; row < 3; row++) {
+        for (let col = 0; col < 5; col++) {
+          if ((row + col) % 2 === 0) {
+            const x = -15 + (col * checkSize)
+            const y = -22 + (row * checkSize)
+            ctx.fillRect(x, y, checkSize, checkSize)
+          }
+        }
+      }
+      
+      // Ear flaps (orelhas do gorro) - pulled down like in the image
+      ctx.fillStyle = '#4A7C59' // Same green as hat
+      // Left ear flap
+      ctx.beginPath()
+      ctx.ellipse(-18, 2, 8, 12, -0.3, 0, Math.PI * 2)
+      ctx.fill()
+      // Right ear flap
+      ctx.beginPath()
+      ctx.ellipse(18, 2, 8, 12, 0.3, 0, Math.PI * 2)
+      ctx.fill()
+      
+      // Checkered pattern on ear flaps
+      ctx.fillStyle = '#2D4A35'
+      // Left ear flap pattern
+      for (let row = 0; row < 3; row++) {
+        for (let col = 0; col < 2; col++) {
+          if ((row + col) % 2 === 0) {
+            const x = -20 + (col * 3)
+            const y = -2 + (row * 3)
+            ctx.fillRect(x, y, 2.5, 2.5)
+          }
+        }
+      }
+      // Right ear flap pattern
+      for (let row = 0; row < 3; row++) {
+        for (let col = 0; col < 2; col++) {
+          if ((row + col) % 2 === 0) {
+            const x = 18 + (col * 3)
+            const y = -2 + (row * 3)
+            ctx.fillRect(x, y, 2.5, 2.5)
+          }
+        }
+      }
+      
+      // Hat rim (bottom edge)
+      ctx.strokeStyle = '#2D4A35' // Dark green
+      ctx.lineWidth = 2
+      ctx.beginPath()
+      ctx.arc(0, -12, 20, 0, Math.PI * 2)
+      ctx.stroke()
+      
+      // Eyes (simple dots)
+      ctx.fillStyle = '#000000'
+      ctx.beginPath()
+      ctx.arc(-6, -2, 2, 0, Math.PI * 2)
+      ctx.fill()
+      ctx.beginPath()
+      ctx.arc(6, -2, 2, 0, Math.PI * 2)
+      ctx.fill()
+      
+      // Mouth (simple smile)
+      ctx.strokeStyle = '#000000'
+      ctx.lineWidth = 1.5
+      ctx.beginPath()
+      ctx.arc(0, 4, 6, 0, Math.PI)
+      ctx.stroke()
+      
+      ctx.restore()
+    }
+    
+    ctx.restore()
+  }, [canvasSize.width, canvasSize.height, playChavesCryingSound])
+
+  // Create procedural teleport sound
+  const playTeleportSound = useCallback((isGlitch: boolean = false) => {
+    if (typeof window === 'undefined' || (!window.AudioContext && !(window as any).webkitAudioContext)) return
+    
+    try {
+      const AudioContext = window.AudioContext || (window as any).webkitAudioContext
+      if (!audioContextRef.current) {
+        audioContextRef.current = new AudioContext()
+      }
+      
+      const ctx = audioContextRef.current
+      if (ctx.state === 'suspended') {
+        ctx.resume()
+      }
+      
+      const oscillator = ctx.createOscillator()
+      const gainNode = ctx.createGain()
+      
+      oscillator.connect(gainNode)
+      gainNode.connect(ctx.destination)
+      
+      if (isGlitch) {
+        // Glitch sound: distorted + bitcrusher effect
+        oscillator.type = 'sawtooth'
+        oscillator.frequency.setValueAtTime(200, ctx.currentTime)
+        oscillator.frequency.exponentialRampToValueAtTime(50, ctx.currentTime + 0.15)
+        
+        gainNode.gain.setValueAtTime(0.3, ctx.currentTime)
+        gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15)
+        
+        oscillator.start(ctx.currentTime)
+        oscillator.stop(ctx.currentTime + 0.15)
+      } else {
+        // Normal teleport sound: triangle wave, descending pitch
+        oscillator.type = 'triangle'
+        oscillator.frequency.setValueAtTime(400, ctx.currentTime)
+        oscillator.frequency.exponentialRampToValueAtTime(150, ctx.currentTime + 0.18)
+        
+        gainNode.gain.setValueAtTime(0.2, ctx.currentTime)
+        gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.18)
+        
+        oscillator.start(ctx.currentTime)
+        oscillator.stop(ctx.currentTime + 0.18)
+      }
+    } catch (error) {
+      // Silently fail if audio context is not available
+      console.warn('[Portal] Audio context not available:', error)
+    }
+  }, [])
+
+  // Create portal particles
+  const createPortalParticles = useCallback((x: number, y: number, type: 'orange' | 'blue' | 'warp' | 'glitch', count: number = 10) => {
+    const particles: PortalParticle[] = []
+    const isMobile = mobileMode === 'lite'
+    const maxParticles = isFPSLevel2 ? 0 : (isFPSLevel1 ? Math.floor(count / 2) : count)
+    
+    if (isMobile || maxParticles === 0) return particles
+    
+    for (let i = 0; i < maxParticles; i++) {
+      if (type === 'warp') {
+        // Warp particles: curved, blue to white
+        const angle = (Math.PI * 2 * i) / maxParticles
+        const speed = 2 + Math.random() * 3
+        particles.push({
+          x,
+          y,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          life: 0,
+          maxLife: 150 + Math.random() * 50,
+          color: `hsl(${200 + Math.random() * 20}, 100%, ${60 + Math.random() * 40}%)`,
+          size: 2 + Math.random() * 3,
+        })
+      } else if (type === 'glitch') {
+        // Glitch particles: green, square, random offset
+        particles.push({
+          x: x + (Math.random() - 0.5) * 40,
+          y: y + (Math.random() - 0.5) * 40,
+          vx: (Math.random() - 0.5) * 4,
+          vy: (Math.random() - 0.5) * 4,
+          life: 0,
+          maxLife: 200 + Math.random() * 100,
+          color: `hsl(${100 + Math.random() * 20}, 100%, ${40 + Math.random() * 30}%)`,
+          size: 3 + Math.random() * 4,
+          isGlitch: true,
+        })
+      } else if (type === 'orange') {
+        // Orange portal (floor): particles going up
+        particles.push({
+          x: x + (Math.random() - 0.5) * portalOrangeRef.current.width,
+          y: y + (Math.random() - 0.5) * portalOrangeRef.current.height,
+          vx: (Math.random() - 0.5) * 1,
+          vy: -2 - Math.random() * 2,
+          life: 0,
+          maxLife: 300 + Math.random() * 200,
+          color: `hsla(${25 + Math.random() * 10}, 100%, ${45 + Math.random() * 15}%, ${0.6 + Math.random() * 0.4})`,
+          size: 2 + Math.random() * 3,
+        })
+      } else if (type === 'blue') {
+        // Blue portal (ceiling): particles going down (normal gravity)
+        particles.push({
+          x: x + (Math.random() - 0.5) * portalBlueRef.current.width,
+          y: y + (Math.random() - 0.5) * portalBlueRef.current.height,
+          vx: (Math.random() - 0.5) * 1,
+          vy: 2 + Math.random() * 2,
+          life: 0,
+          maxLife: 300 + Math.random() * 200,
+          color: `hsla(${195 + Math.random() * 10}, 100%, ${50 + Math.random() * 20}%, ${0.6 + Math.random() * 0.4})`,
+          size: 2 + Math.random() * 3,
+        })
+      }
+    }
+    
+    portalParticlesRef.current.push(...particles)
+  }, [mobileMode, isFPSLevel1, isFPSLevel2])
+
+  // Create temporal particles (when orb disappears)
+  const createTemporalParticles = useCallback((x: number, y: number, count: number = 10) => {
+    if (mobileMode === 'lite' || isFPSLevel2) return
+    
+    const particles: PortalParticle[] = []
+    const maxCount = isFPSLevel1 ? Math.floor(count / 2) : count
+    
+    for (let i = 0; i < maxCount; i++) {
+      const angle = (Math.PI * 2 * i) / maxCount + Math.random() * 0.5
+      const speed = 1 + Math.random() * 2
+      const curve = Math.sin(angle) * 0.5
+      
+      particles.push({
+        x,
+        y,
+        vx: Math.cos(angle) * speed + curve,
+        vy: Math.sin(angle) * speed,
+        life: 0,
+        maxLife: 200 + Math.random() * 100,
+        color: `hsla(${25 + Math.random() * 10}, 100%, ${45 + Math.random() * 15}%, ${0.7 + Math.random() * 0.3})`,
+        size: 2 + Math.random() * 3,
+      })
+    }
+    
+    portalParticlesRef.current.push(...particles)
+  }, [mobileMode, isFPSLevel1, isFPSLevel2])
+
+  // Update particles
+  const updatePortalParticles = useCallback((deltaTime: number) => {
+    if (mobileMode === 'lite' || isFPSLevel2) {
+      portalParticlesRef.current = []
+      return
+    }
+    
+    portalParticlesRef.current = portalParticlesRef.current.filter((particle) => {
+      particle.life += deltaTime
+      particle.x += particle.vx
+      particle.y += particle.vy
+      
+      // Apply curve for temporal particles
+      if (particle.life < particle.maxLife * 0.5) {
+        particle.vx += Math.sin(particle.life * 0.1) * 0.1
+      }
+      
+      return particle.life < particle.maxLife
+    })
+  }, [mobileMode, isFPSLevel2])
+
+  // Update warp effects
+  const updateWarpEffects = useCallback((currentTime: number) => {
+    if (mobileMode === 'lite' || isFPSLevel2) {
+      warpEffectsRef.current = []
+      return
+    }
+    
+    warpEffectsRef.current = warpEffectsRef.current.filter((effect) => {
+      return currentTime - effect.startTime < effect.duration
+    })
+  }, [mobileMode, isFPSLevel2])
+
+  // Draw portal
+  const drawPortal = useCallback((ctx: CanvasRenderingContext2D, portal: Portal, animationTime: number) => {
+    if (mobileMode === 'lite') return
+    
+    ctx.save()
+    
+    const centerX = portal.x
+    const centerY = portal.y
+    const radiusX = portal.width / 2
+    const radiusY = portal.height / 2
+    
+    // Glow effect
+    const glowIntensity = isFPSLevel1 ? 0.5 : 1
+    ctx.shadowBlur = 20 * glowIntensity
+    ctx.shadowColor = portal.color
+    
+    // Draw portal oval
+    ctx.beginPath()
+    ctx.ellipse(centerX, centerY, radiusX, radiusY, portal.type === 'blue' ? Math.PI / 12 : 0, 0, Math.PI * 2)
+    
+    // Gradient fill
+    const gradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, Math.max(radiusX, radiusY))
+    gradient.addColorStop(0, portal.color)
+    gradient.addColorStop(0.5, portal.color + '80')
+    gradient.addColorStop(1, portal.color + '00')
+    ctx.fillStyle = gradient
+    ctx.fill()
+    
+    // Border
+    ctx.strokeStyle = portal.color
+    ctx.lineWidth = 3
+    ctx.stroke()
+    
+    // Inner glow ring
+    ctx.beginPath()
+    ctx.ellipse(centerX, centerY, radiusX * 0.7, radiusY * 0.7, portal.type === 'blue' ? Math.PI / 12 : 0, 0, Math.PI * 2)
+    ctx.strokeStyle = portal.color + 'CC'
+    ctx.lineWidth = 1
+    ctx.stroke()
+    
+    ctx.restore()
+  }, [mobileMode, isFPSLevel1])
+
+  // Draw portal particles
+  const drawPortalParticles = useCallback((ctx: CanvasRenderingContext2D) => {
+    if (mobileMode === 'lite' || isFPSLevel2) return
+    
+    ctx.save()
+    
+    portalParticlesRef.current.forEach((particle) => {
+      const alpha = 1 - (particle.life / particle.maxLife)
+      
+      if (particle.isGlitch) {
+        // Glitch particles: square
+        ctx.fillStyle = particle.color
+        ctx.globalAlpha = alpha * (0.5 + Math.random() * 0.5) // Irregular opacity
+        ctx.fillRect(particle.x - particle.size / 2, particle.y - particle.size / 2, particle.size, particle.size)
+      } else {
+        // Normal particles: circle
+        ctx.fillStyle = particle.color
+        ctx.globalAlpha = alpha
+        ctx.beginPath()
+        ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2)
+        ctx.fill()
+      }
+    })
+    
+    ctx.restore()
+  }, [mobileMode, isFPSLevel2])
+
+  // Draw warp effect
+  const drawWarpEffect = useCallback((ctx: CanvasRenderingContext2D, effect: WarpEffect, currentTime: number) => {
+    if (mobileMode === 'lite' || isFPSLevel2) return
+    
+    const elapsed = currentTime - effect.startTime
+    const progress = Math.min(elapsed / effect.duration, 1)
+    const alpha = 1 - progress
+    
+    ctx.save()
+    ctx.globalAlpha = alpha
+    
+    // Draw 3-5 concentric arcs
+    const arcCount = 3 + Math.floor(Math.random() * 3)
+    for (let i = 0; i < arcCount; i++) {
+      const radius = 20 + i * 15
+      const arcProgress = progress * (1 + i * 0.2)
+      
+      ctx.beginPath()
+      ctx.arc(effect.x, effect.y, radius, 0, Math.PI * 2 * arcProgress)
+      
+      // Color transition: blue to white
+      const hue = 200 - (progress * 60)
+      const lightness = 50 + (progress * 50)
+      ctx.strokeStyle = `hsla(${hue}, 100%, ${lightness}%, ${alpha * 0.8})`
+      ctx.lineWidth = 2
+      ctx.stroke()
+    }
+    
+    ctx.restore()
+  }, [mobileMode, isFPSLevel2])
+
+  // Draw glitch text
+  const drawGlitchText = useCallback((ctx: CanvasRenderingContext2D, canvasWidth: number, canvasHeight: number) => {
+    if (!glitchTextRef.current.visible || mobileMode === 'lite') return
+    
+    const elapsed = Date.now() - glitchTextRef.current.time
+    if (elapsed > 2000) {
+      glitchTextRef.current.visible = false
+      return
+    }
+    
+    ctx.save()
+    ctx.globalAlpha = 0.7 + Math.sin(elapsed / 100) * 0.3 // Pulsing
+    ctx.fillStyle = '#00ff00'
+    ctx.font = 'bold 16px monospace'
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'middle'
+    ctx.fillText('PORTAL MAL CONFIGURADO', canvasWidth / 2, canvasHeight * 0.1)
+    ctx.restore()
+  }, [mobileMode])
+
+  // Check if point is inside portal
+  const isPointInPortal = useCallback((x: number, y: number, portal: Portal): boolean => {
+    const dx = (x - portal.x) / (portal.width / 2)
+    const dy = (y - portal.y) / (portal.height / 2)
+    const rotation = portal.type === 'blue' ? Math.PI / 12 : 0
+    const cos = Math.cos(-rotation)
+    const sin = Math.sin(-rotation)
+    const rotatedX = dx * cos - dy * sin
+    const rotatedY = dx * sin + dy * cos
+    return (rotatedX * rotatedX + rotatedY * rotatedY) <= 1
+  }, [])
+
+  // Handle portal teleportation (bidirectional)
+  const handlePortalTeleport = useCallback((orb: Orb, portalType: 'orange' | 'blue', isGlitch: boolean = false) => {
+    if (!engineRef.current || !worldRef.current) return
+    
+    const orbBody = orb.body
+    const now = Date.now()
+    
+    // Check cooldown
+    const lastTeleport = orbTeleportCooldownRef.current.get(orb.id) || 0
+    if (now - lastTeleport < 400) return // 400ms cooldown
+    
+    orbTeleportCooldownRef.current.set(orb.id, now)
+    
+    // Play sound
+    playTeleportSound(isGlitch)
+    
+    if (isGlitch) {
+      // Glitch mode: orb appears above canvas
+      const glitchY = -150
+      Matter.Body.setPosition(orbBody, { x: portalOrangeRef.current.x, y: glitchY })
+      Matter.Body.setVelocity(orbBody, { x: 0, y: 0 })
+      
+      // Create glitch particles
+      createPortalParticles(portalOrangeRef.current.x, portalOrangeRef.current.y, 'glitch', 8)
+      
+      // Show glitch text
+      glitchTextRef.current.visible = true
+      glitchTextRef.current.time = now
+    } else {
+      // Bidirectional teleport
+      const sourcePortal = portalType === 'orange' ? portalOrangeRef.current : portalBlueRef.current
+      const targetPortal = portalType === 'orange' ? portalBlueRef.current : portalOrangeRef.current
+      
+      // Create temporal particles at source portal
+      const sourcePos = getBodyPosition(orbBody)
+      createTemporalParticles(sourcePos.x, sourcePos.y, 8 + Math.floor(Math.random() * 5))
+      
+      // Move orb to target portal
+      Matter.Body.setPosition(orbBody, { x: targetPortal.x, y: targetPortal.y })
+      
+      // Maintain velocity but adjust direction based on portal
+      const currentVel = orbBody.velocity
+      if (portalType === 'orange') {
+        // Entered orange (floor) → exit blue (ceiling): boost upward
+        Matter.Body.setVelocity(orbBody, { x: currentVel.x, y: Math.min(currentVel.y, -3) })
+      } else {
+        // Entered blue (ceiling) → exit orange (floor): boost downward
+        Matter.Body.setVelocity(orbBody, { x: currentVel.x, y: Math.max(currentVel.y, 3) })
+      }
+      
+      // Create warp effect at target portal
+      warpEffectsRef.current.push({
+        x: targetPortal.x,
+        y: targetPortal.y,
+        startTime: now,
+        duration: 120,
+      })
+      
+      // Create warp particles
+      createPortalParticles(targetPortal.x, targetPortal.y, 'warp', 3 + Math.floor(Math.random() * 3))
+      
+      // Trigger hoop bend animation (only if exiting to floor)
+      if (portalType === 'blue') {
+        hoopBendProgressRef.current = 1
+        const startTime = now
+        const duration = 180
+        
+        const animateHoop = () => {
+          const elapsed = Date.now() - startTime
+          const progress = Math.min(elapsed / duration, 1)
+          
+          // Cubic bezier easing: (0.22, 1.5, 0.36, 1)
+          const t = progress
+          const bezier = (t: number) => {
+            const t2 = t * t
+            const t3 = t2 * t
+            return 3 * t2 - 2 * t3 + (1.5 - 0.22) * (3 * t2 - 2 * t3) * (1 - t)
+          }
+          const eased = bezier(t)
+          
+          // Scale: 0.7 → 1.1 (overshoot) → 1.0
+          if (progress < 0.6) {
+            hoopBendProgressRef.current = 0.7 + (eased * 0.4) // 0.7 → 1.1
+          } else {
+            const overshootProgress = (progress - 0.6) / 0.4
+            hoopBendProgressRef.current = 1.1 - (overshootProgress * 0.1) // 1.1 → 1.0
+          }
+          
+          if (progress < 1) {
+            requestAnimationFrame(animateHoop)
+          } else {
+            hoopBendProgressRef.current = 0
+          }
+        }
+        animateHoop()
+      }
+    }
+  }, [playTeleportSound, createPortalParticles, createTemporalParticles, getBodyPosition])
 
   // Draw theme-specific decorative objects
   const drawThemeDecorativeObject = useCallback((
@@ -3025,6 +6734,356 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
         ctx.fill()
 
         ctx.restore()
+        break
+      }
+
+      case 'indiana-jones': {
+        // Indiana Jones theme: Multiple decorative objects (5 total)
+        // Render all objects in layer order: background → midground
+        
+        // 1. indianaPillars (background layer) - Two vertical pillars with ancient circuits
+        const pillarX1 = canvasWidth * 0.15
+        const pillarX2 = canvasWidth * 0.85
+        const pillarY = canvasHeight * 0.3
+        const pillarWidth = objectSize * 0.15
+        const pillarHeight = canvasHeight * 0.4
+        
+        // Get bgSoft from CSS variables
+        const root = typeof window !== 'undefined' ? document.documentElement : null
+        const bgSoft = root ? getComputedStyle(root).getPropertyValue('--color-bg-secondary').trim() || '#8A6B45' : '#8A6B45'
+        
+        // Left pillar
+        ctx.fillStyle = bgSoft
+        ctx.fillRect(pillarX1, pillarY, pillarWidth, pillarHeight)
+        // Cracks with ancient circuits (blue glowing)
+        ctx.strokeStyle = '#4AFF8A' // Snake green (circuit color)
+        ctx.lineWidth = 2
+        ctx.shadowBlur = 4
+        ctx.shadowColor = '#4AFF8A'
+        ctx.globalAlpha = 0.6
+        for (let i = 0; i < 3; i++) {
+          const crackY = pillarY + (i * pillarHeight / 3)
+          ctx.beginPath()
+          ctx.moveTo(pillarX1, crackY)
+          ctx.lineTo(pillarX1 + pillarWidth, crackY + 10)
+          ctx.stroke()
+        }
+        
+        // Right pillar
+        ctx.fillStyle = bgSoft
+        ctx.fillRect(pillarX2, pillarY, pillarWidth, pillarHeight)
+        // Cracks with ancient circuits
+        for (let i = 0; i < 3; i++) {
+          const crackY = pillarY + (i * pillarHeight / 3)
+          ctx.beginPath()
+          ctx.moveTo(pillarX2, crackY)
+          ctx.lineTo(pillarX2 + pillarWidth, crackY + 10)
+          ctx.stroke()
+        }
+        ctx.globalAlpha = 1
+        ctx.shadowBlur = 0
+        
+        // 2. indianaBoulder (midground layer) - Large rock with "DEPLOY" text
+        const boulderX = canvasWidth * 0.1
+        const boulderY = canvasHeight * 0.75
+        const boulderSize = objectSize * 0.8
+        
+        // Apply temple shake offset
+        let shakeOffset = 0
+        if (templeShakeRef.current.active) {
+          const elapsed = Date.now() - templeShakeRef.current.startTime
+          const progress = Math.min(elapsed / templeShakeRef.current.duration, 1)
+          const intensity = templeShakeRef.current.intensity
+          shakeOffset = (Math.random() - 0.5) * intensity * (1 - progress) // Fade out
+        }
+        
+        ctx.save()
+        ctx.translate(shakeOffset, 0) // Apply shake when templeShake is active
+        
+        // Boulder shape (irregular circle)
+        ctx.fillStyle = bgSoft
+        ctx.beginPath()
+        ctx.arc(boulderX, boulderY, boulderSize * 0.5, 0, Math.PI * 2)
+        ctx.fill()
+        // Add some irregularity
+        ctx.beginPath()
+        ctx.arc(boulderX + boulderSize * 0.2, boulderY - boulderSize * 0.1, boulderSize * 0.3, 0, Math.PI * 2)
+        ctx.fill()
+        
+        // "DEPLOY" text
+        ctx.fillStyle = colors.primary || '#DAB466'
+        ctx.font = `bold ${boulderSize * 0.2}px sans-serif`
+        ctx.textAlign = 'center'
+        ctx.textBaseline = 'middle'
+        ctx.fillText('DEPLOY', boulderX, boulderY)
+        
+        ctx.restore()
+        
+        // 3. indianaGitTotem (midground layer) - Pillar with T-shape, light glow
+        const totemX = canvasWidth * 0.5
+        const totemY = canvasHeight * 0.7
+        const totemWidth = objectSize * 0.2
+        const totemHeight = objectSize * 0.6
+        
+        // Pillar base
+        ctx.fillStyle = bgSoft
+        ctx.fillRect(totemX - totemWidth / 2, totemY, totemWidth, totemHeight)
+        
+        // T-shape top (Git logo inspired)
+        ctx.fillRect(totemX - totemWidth, totemY, totemWidth * 3, totemWidth)
+        
+        // Get glow color from CSS variables
+        const glowColor = root ? getComputedStyle(root).getPropertyValue('--color-glow').trim() || '#FFB95A' : '#FFB95A'
+        
+        // Light glow
+        ctx.strokeStyle = glowColor
+        ctx.lineWidth = 2
+        ctx.shadowBlur = 8
+        ctx.shadowColor = glowColor
+        ctx.globalAlpha = 0.5 + pulsePhase * 0.3
+        ctx.strokeRect(totemX - totemWidth / 2, totemY, totemWidth, totemHeight)
+        ctx.strokeRect(totemX - totemWidth, totemY, totemWidth * 3, totemWidth)
+        ctx.globalAlpha = 1
+        ctx.shadowBlur = 0
+        
+        // 4. indianaChest (midground layer) - Semi-open chest with red pulsing light
+        const chestX = canvasWidth * 0.9
+        const chestY = canvasHeight * 0.8
+        const chestWidth = objectSize * 0.6
+        const chestHeight = objectSize * 0.4
+        
+        // Get border color from CSS variables
+        const borderColor = root ? getComputedStyle(root).getPropertyValue('--color-border').trim() || '#4A3924' : '#4A3924'
+        
+        // Chest base
+        ctx.fillStyle = borderColor
+        ctx.fillRect(chestX - chestWidth / 2, chestY, chestWidth, chestHeight)
+        
+        // Chest lid (semi-open)
+        ctx.fillRect(chestX - chestWidth / 2, chestY - chestHeight * 0.3, chestWidth, chestHeight * 0.2)
+        
+        // Red pulsing light inside
+        const lightIntensity = pulsePhase
+        ctx.fillStyle = `rgba(255, 0, 0, ${0.3 + lightIntensity * 0.4})`
+        ctx.fillRect(chestX - chestWidth / 4, chestY + chestHeight * 0.2, chestWidth / 2, chestHeight * 0.4)
+        
+        // 5. indianaSnakes (midground layer) - Pixel snake sprites, 4-frame animation, disabled in mobile-lite
+        const { mode: currentMobileMode } = useMobileModeStore.getState()
+        if (currentMobileMode !== 'lite') {
+          const snakeX = canvasWidth * 0.3
+          const snakeY = canvasHeight * 0.6
+          const snakeSize = objectSize * 0.3
+          
+          // 4-frame animation (slow loop)
+          const frameDuration = 2000 // 2 seconds per frame
+          const frameIndex = Math.floor((animationTime % (frameDuration * 4)) / frameDuration)
+          
+          ctx.globalAlpha = 0.4 // Low opacity for subtle effect
+          ctx.fillStyle = colors.accent || '#4AFF8A'
+          
+          // Draw pixel snake (simplified, 4-frame animation)
+          const pixelSize = snakeSize / 4
+          for (let i = 0; i < 4; i++) {
+            const offsetX = (frameIndex * pixelSize * 0.2) % (pixelSize * 2)
+            const x = snakeX + (i * pixelSize) + offsetX
+            const y = snakeY + (i % 2) * pixelSize
+            ctx.fillRect(x, y, pixelSize, pixelSize)
+          }
+          ctx.globalAlpha = 1
+        }
+        
+        break
+      }
+
+      case 'star-wars': {
+        // Star Wars theme: Multiple decorative objects (6 total)
+        // All objects are abstract and geometric (not direct IP copies)
+        // Get additional colors from CSS variables
+        const root = typeof window !== 'undefined' ? document.documentElement : null
+        const bgSoft = root ? getComputedStyle(root).getPropertyValue('--color-bg-secondary').trim() || '#0C0F14' : '#0C0F14'
+        const primary = colors.primary || '#2F9BFF'
+        const accent = colors.accent || '#FF2B2B'
+        const glow = colors.glow || '#59E0FF'
+        const highlight = root ? getComputedStyle(root).getPropertyValue('--color-highlight').trim() || '#FFC23D' : '#FFC23D'
+        const text = colors.text || '#D8F2FF'
+        
+        // 1. Galactic Cockpit HUD (foreground layer) - Lines and markers simulating ship panel
+        ctx.strokeStyle = primary
+        ctx.fillStyle = primary
+        ctx.lineWidth = 1
+        ctx.globalAlpha = 0.3
+        ctx.shadowBlur = 4
+        ctx.shadowColor = primary
+        
+        // HUD lines (top area)
+        const hudY = canvasHeight * 0.1
+        for (let i = 0; i < 5; i++) {
+          const x = canvasWidth * (0.1 + i * 0.2)
+          ctx.beginPath()
+          ctx.moveTo(x, hudY)
+          ctx.lineTo(x + 20, hudY + 10)
+          ctx.stroke()
+        }
+        
+        // HUD markers (targeting circles)
+        for (let i = 0; i < 3; i++) {
+          const x = canvasWidth * (0.2 + i * 0.3)
+          ctx.beginPath()
+          ctx.arc(x, hudY + 15, 8, 0, Math.PI * 2)
+          ctx.stroke()
+        }
+        
+        // Hex numbers (blinking)
+        if (!isSimplifiedMode) {
+          ctx.fillStyle = primary
+          ctx.font = '10px monospace'
+          ctx.textAlign = 'left'
+          ctx.globalAlpha = 0.5 + pulsePhase * 0.3
+          ctx.fillText('0x' + Math.floor(Math.random() * 0xFFFF).toString(16).toUpperCase(), canvasWidth * 0.15, hudY + 30)
+          ctx.globalAlpha = 0.3
+        }
+        ctx.globalAlpha = 1
+        ctx.shadowBlur = 0
+        
+        // 2. Mini Starfighter (midground layer) - Geometric triangles abstract (not X-Wing/TIE)
+        const starfighterX = canvasWidth * 0.1
+        const starfighterY = canvasHeight * 0.15
+        const starfighterSize = objectSize * 0.4
+        
+        // Subtle movement (2px up/down) if not mobile-lite
+        let starfighterOffsetY = 0
+        const { mode: currentMobileMode } = useMobileModeStore.getState()
+        if (!isSimplifiedMode && currentMobileMode !== 'lite') {
+          starfighterOffsetY = Math.sin(animationTime * 0.002) * 2
+        }
+        
+        ctx.fillStyle = primary
+        ctx.globalAlpha = 0.6
+        // Geometric triangle shape (abstract, not direct copy)
+        ctx.beginPath()
+        ctx.moveTo(starfighterX, starfighterY + starfighterOffsetY)
+        ctx.lineTo(starfighterX - starfighterSize * 0.3, starfighterY + starfighterOffsetY + starfighterSize * 0.5)
+        ctx.lineTo(starfighterX + starfighterSize * 0.3, starfighterY + starfighterOffsetY + starfighterSize * 0.5)
+        ctx.closePath()
+        ctx.fill()
+        ctx.globalAlpha = 1
+        
+        // 3. Battle Cruiser Silhouette (background layer) - Elongated rectangles + minimal lights
+        const cruiserX = canvasWidth * 0.85
+        const cruiserY = canvasHeight * 0.2
+        const cruiserWidth = objectSize * 1.2
+        const cruiserHeight = objectSize * 0.3
+        
+        ctx.fillStyle = bgSoft
+        ctx.globalAlpha = 0.15 // Low opacity, just presence
+        ctx.fillRect(cruiserX - cruiserWidth / 2, cruiserY, cruiserWidth, cruiserHeight)
+        
+        // Minimal red lights
+        ctx.fillStyle = accent
+        ctx.globalAlpha = 0.3
+        for (let i = 0; i < 3; i++) {
+          const lightX = cruiserX - cruiserWidth / 2 + (i + 1) * (cruiserWidth / 4)
+          ctx.beginPath()
+          ctx.arc(lightX, cruiserY + cruiserHeight / 2, 2, 0, Math.PI * 2)
+          ctx.fill()
+        }
+        ctx.globalAlpha = 1
+        
+        // 4. Crossed Energy Blades (foreground layer) - Two light beams crossing (blue + red), abstract "energy" not sabers
+        const bladeCenterX = canvasWidth * 0.5
+        const bladeCenterY = canvasHeight * 0.15
+        const bladeLength = objectSize * 0.8
+        const bladeWidth = 3
+        
+        // Light vibration effect if not mobile-lite
+        let bladeVibration = 0
+        if (!isSimplifiedMode && currentMobileMode !== 'lite') {
+          bladeVibration = (Math.random() - 0.5) * 1
+        }
+        
+        // Blue energy blade (diagonal from top-left to bottom-right)
+        ctx.strokeStyle = primary
+        ctx.lineWidth = bladeWidth
+        ctx.shadowBlur = 8
+        ctx.shadowColor = primary
+        ctx.globalAlpha = 0.7
+        ctx.beginPath()
+        ctx.moveTo(bladeCenterX - bladeLength / 2 + bladeVibration, bladeCenterY - bladeLength / 2 + bladeVibration)
+        ctx.lineTo(bladeCenterX + bladeLength / 2 + bladeVibration, bladeCenterY + bladeLength / 2 + bladeVibration)
+        ctx.stroke()
+        
+        // Red energy blade (diagonal from top-right to bottom-left)
+        ctx.strokeStyle = accent
+        ctx.shadowColor = accent
+        ctx.beginPath()
+        ctx.moveTo(bladeCenterX + bladeLength / 2 - bladeVibration, bladeCenterY - bladeLength / 2 - bladeVibration)
+        ctx.lineTo(bladeCenterX - bladeLength / 2 - bladeVibration, bladeCenterY + bladeLength / 2 - bladeVibration)
+        ctx.stroke()
+        ctx.globalAlpha = 1
+        ctx.shadowBlur = 0
+        
+        // 5. Rebel Console Abstract (midground layer) - Sci-fi panels with squares and bars
+        const consoleX = canvasWidth * 0.9
+        const consoleY = canvasHeight * 0.85
+        const consoleWidth = objectSize * 0.6
+        const consoleHeight = objectSize * 0.4
+        
+        // Console base
+        ctx.fillStyle = bgSoft
+        ctx.globalAlpha = 0.7
+        ctx.fillRect(consoleX - consoleWidth / 2, consoleY, consoleWidth, consoleHeight)
+        
+        // Animated bars (holographic screen)
+        if (!isSimplifiedMode) {
+          ctx.fillStyle = glow
+          ctx.globalAlpha = 0.5 + pulsePhase * 0.3
+          for (let i = 0; i < 4; i++) {
+            const barHeight = (0.3 + Math.random() * 0.4) * consoleHeight
+            const barX = consoleX - consoleWidth / 2 + (i + 1) * (consoleWidth / 5)
+            ctx.fillRect(barX, consoleY + consoleHeight - barHeight, 3, barHeight)
+          }
+        }
+        ctx.globalAlpha = 1
+        
+        // 6. Animated Starfield (background layer) - Stars with 2 speeds (parallax), random spawn, disabled in mobile-lite
+        if (currentMobileMode !== 'lite') {
+          // Initialize starfield if empty
+          if (starfieldRef.current.length === 0) {
+            // Spawn initial stars
+            const starCount = isFPSLevel1 ? 20 : (isSimplifiedMode ? 30 : 50)
+            for (let i = 0; i < starCount; i++) {
+              starfieldRef.current.push({
+                x: Math.random() * canvasWidth,
+                y: Math.random() * canvasHeight,
+                speed: Math.random() < 0.5 ? 0.5 : 1.5, // Two speeds for parallax
+                size: Math.random() * 1.5 + 0.5,
+                opacity: Math.random() * 0.5 + 0.3,
+              })
+            }
+          }
+          
+          // Update and draw stars (simplified - no flash effect to avoid performance issues)
+          ctx.fillStyle = text
+          const stars = starfieldRef.current
+          for (let i = stars.length - 1; i >= 0; i--) {
+            const star = stars[i]
+            star.y += star.speed
+            
+            // Remove stars that go off screen
+            if (star.y > canvasHeight) {
+              star.y = 0
+              star.x = Math.random() * canvasWidth
+            }
+            
+            // Simple star drawing (no flash, no shadow)
+            ctx.globalAlpha = star.opacity
+            ctx.beginPath()
+            ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2)
+            ctx.fill()
+          }
+          ctx.globalAlpha = 1
+        }
+        
         break
       }
 
@@ -3556,6 +7615,10 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
       borderColor = colors.accent // Roxo para Dracula
       borderWidth = 3
       glowIntensity = 7
+    } else if (themeId === "indiana-jones") {
+      borderColor = colors.primary || "#DAB466" // Gold for Indiana Jones
+      borderWidth = 2
+      glowIntensity = 5
     }
 
     // PT: Pomemin theme: desenha orbs com orelhinhas (estilo Pokémon) | EN: Pomemin theme: draws orbs with ears (Pokémon style) | ES: Tema Pomemin: dibuja orbs con orejitas (estilo Pokémon) | FR: Thème Pomemin: dessine orbs avec oreilles (style Pokémon) | DE: Pomemin-Theme: zeichnet Orbs mit Ohren (Pokémon-Stil)
@@ -3862,6 +7925,9 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
       ctx.shadowBlur = 0
     } else {
       // Draw orb circle (other themes)
+      // Skip default border for Star Wars and Indiana Jones themes (they have custom rings)
+      const skipDefaultBorder = themeId === "star-wars" || themeId === "indiana-jones"
+      
       ctx.beginPath()
       ctx.arc(pos.x, pos.y, radius, 0, Math.PI * 2)
       
@@ -3869,9 +7935,9 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
       if (orb.imageLoaded && orb.image) {
         ctx.save()
         ctx.beginPath()
-        ctx.arc(pos.x, pos.y, radius - borderWidth, 0, Math.PI * 2)
+        ctx.arc(pos.x, pos.y, radius - (skipDefaultBorder ? 0 : borderWidth), 0, Math.PI * 2)
         ctx.clip()
-        ctx.drawImage(orb.image, pos.x - radius + borderWidth, pos.y - radius + borderWidth, (radius - borderWidth) * 2, (radius - borderWidth) * 2)
+        ctx.drawImage(orb.image, pos.x - radius + (skipDefaultBorder ? 0 : borderWidth), pos.y - radius + (skipDefaultBorder ? 0 : borderWidth), (radius - (skipDefaultBorder ? 0 : borderWidth)) * 2, (radius - (skipDefaultBorder ? 0 : borderWidth)) * 2)
         ctx.restore()
       } else {
         // Fallback: draw colored circle
@@ -3879,13 +7945,15 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
         ctx.fill()
       }
 
-      // Draw border with reduced glow (consistent with rim)
-      ctx.strokeStyle = borderColor
-      ctx.lineWidth = borderWidth
-      ctx.shadowBlur = 12 // Reduced glow for orbs
-      ctx.shadowColor = colors.accent // Use same neon color as rim for consistency
-      ctx.stroke()
-      ctx.shadowBlur = 0
+      // Draw border with reduced glow (consistent with rim) - skip for Star Wars and Indiana Jones
+      if (!skipDefaultBorder) {
+        ctx.strokeStyle = borderColor
+        ctx.lineWidth = borderWidth
+        ctx.shadowBlur = 12 // Reduced glow for orbs
+        ctx.shadowColor = colors.accent // Use same neon color as rim for consistency
+        ctx.stroke()
+        ctx.shadowBlur = 0
+      }
 
       // Terminal theme: ASCII representation
       if (themeId === "terminal" && !orb.image) {
@@ -3899,6 +7967,19 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
 
     // PT: Desenha elementos decorativos temáticos ao redor da orb (não tapa a foto) | EN: Draws theme-specific decorative elements around orb (doesn't cover photo) | ES: Dibuja elementos decorativos temáticos alrededor de orb (no tapa la foto) | FR: Dessine éléments décoratifs thématiques autour de orb (ne couvre pas la photo) | DE: Zeichnet themenspezifische dekorative Elemente um Orb (deckt Foto nicht ab)
     drawThemeDecorations(ctx, themeId, pos, radius, colors)
+
+    // PT: Indiana Jones theme: desenha anel temático com variação específica | EN: Indiana Jones theme: draws thematic ring with specific variation | ES: Tema Indiana Jones: dibuja anillo temático con variación específica | FR: Thème Indiana Jones: dessine anneau thématique avec variation spécifique | DE: Indiana Jones-Theme: zeichnet thematischen Ring mit spezifischer Variation
+    if (themeId === "indiana-jones" && orb.meta?.indyVariant) {
+      drawIndianaJonesOrbRing(ctx, orb, orb.meta.indyVariant, colors, pos, radius)
+    }
+
+    // PT: Star Wars theme: desenha anel temático com variação específica | EN: Star Wars theme: draws thematic ring with specific variation | ES: Tema Star Wars: dibuja anillo temático con variación específica | FR: Thème Star Wars: dessine anneau thématique avec variation spécifique | DE: Star Wars-Theme: zeichnet thematischen Ring mit spezifischer Variation
+    if (themeId === "star-wars" && orb.meta?.starWarsVariant) {
+      // Ensure we draw the Star Wars ring AFTER everything else, on top
+      ctx.save()
+      drawStarWarsOrb(ctx, orb, orb.meta.starWarsVariant, colors, pos, radius)
+      ctx.restore()
+    }
 
     // PT: Desenha elementos festivos se houver festividade ativa e efeitos estiverem habilitados | EN: Draws festive elements if there's an active holiday and effects are enabled | ES: Dibuja elementos festivos si hay festividad activa y efectos están habilitados | FR: Dessine éléments festifs s'il y a une fête active et effets activés | DE: Zeichnet festliche Elemente, wenn ein Feiertag aktiv ist und Effekte aktiviert sind
     if (festiveEffectsEnabled) {
@@ -4090,6 +8171,64 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
           
           // Draw theme decorative objects (after background, before orbs)
           drawThemeDecorativeObject(ctx, themeId, colors, canvas.width, canvas.height, currentTime)
+          
+          // Portal system (only when theme is "portal")
+          if (themeId === "portal" && mobileMode !== 'lite') {
+            // Check for orbs entering portals (continuous check, bidirectional)
+            orbsRef.current.forEach((orb) => {
+              const orbPos = getBodyPosition(orb.body)
+              
+              // Check if orb is entering orange portal (floor)
+              if (isPointInPortal(orbPos.x, orbPos.y, portalOrangeRef.current)) {
+                // 2% chance of glitch mode
+                const isGlitch = Math.random() < 0.02
+                handlePortalTeleport(orb, 'orange', isGlitch)
+              }
+              // Check if orb is entering blue portal (ceiling)
+              else if (isPointInPortal(orbPos.x, orbPos.y, portalBlueRef.current)) {
+                // 2% chance of glitch mode
+                const isGlitch = Math.random() < 0.02
+                handlePortalTeleport(orb, 'blue', isGlitch)
+              }
+            })
+            
+            // Update portal particles
+            updatePortalParticles(deltaTime)
+            
+            // Update warp effects
+            updateWarpEffects(currentTime)
+            
+            // Generate portal particles (continuous)
+            const orangeParticleCount = portalParticlesRef.current.filter(p => !p.isGlitch && p.color.includes('25')).length
+            const blueParticleCount = portalParticlesRef.current.filter(p => !p.isGlitch && p.color.includes('195')).length
+            const maxParticles = mobileMode === 'full' ? 6 : (isFPSLevel1 ? 5 : 10)
+            
+            if (orangeParticleCount < maxParticles) {
+              createPortalParticles(portalOrangeRef.current.x, portalOrangeRef.current.y, 'orange', 1)
+            }
+            if (blueParticleCount < maxParticles) {
+              createPortalParticles(portalBlueRef.current.x, portalBlueRef.current.y, 'blue', 1)
+            }
+            
+            // Draw portals
+            drawPortal(ctx, portalOrangeRef.current, currentTime)
+            drawPortal(ctx, portalBlueRef.current, currentTime)
+            
+            // Draw portal particles
+            drawPortalParticles(ctx)
+            
+            // Draw warp effects (only if not mobile-full or FPS level 2)
+            if (mobileMode !== 'full' && !isFPSLevel2) {
+              warpEffectsRef.current.forEach((effect) => {
+                drawWarpEffect(ctx, effect, currentTime)
+              })
+            }
+            
+            // Draw glitch text (only if not mobile-full or FPS level 2)
+            if (mobileMode !== 'full' && !isFPSLevel2) {
+              drawGlitchText(ctx, canvas.width, canvas.height)
+            }
+          }
           
           // Render orbs
           orbsRef.current.forEach((orb) => {
@@ -4303,6 +8442,44 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
           
           // Render fireworks (on top of everything)
           renderFireworks(ctx)
+          
+          // Indiana Jones theme: Render visual effects
+          if (themeId === "indiana-jones") {
+            const colors = getThemeColors()
+            if (colors) {
+              renderDustParticles(ctx, colors)
+              renderDivineLight(ctx, colors)
+              renderTempleCollapse(ctx, colors)
+            }
+          }
+          
+          // Star Wars theme: Render visual effects
+          if (themeId === "star-wars") {
+            const colors = getThemeColors()
+            if (colors) {
+              renderSaberFlash(ctx, colors)
+              renderDarkShock(ctx, colors)
+              renderHyperspaceBurst(ctx, colors)
+              renderAstromechPing(ctx, colors)
+            }
+          }
+          
+          // Render theme-specific shake visual effects (all themes)
+          if (colors) {
+            // Chaves theme: Special character animation near shake button
+            if (themeId === 'chaves') {
+              renderChavesShakeAnimation(ctx, colors)
+            } else {
+              // Other themes: Standard center screen effect
+              renderShakeEffect(ctx, colors)
+            }
+            
+            // Render Star Wars easter eggs
+            if (themeId === 'star-wars') {
+              renderStarWarsEasterEgg(ctx, colors)
+              renderNeonAssault(ctx, colors)
+            }
+          }
         }
       }
 

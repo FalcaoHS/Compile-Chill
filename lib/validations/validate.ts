@@ -1,5 +1,5 @@
 import { ZodSchema, ZodError } from "zod"
-import { ApiError, ApiErrors } from "@/lib/api-errors"
+import { ApiError, ApiErrors } from "@/lib/utils/api-errors"
 
 /**
  * Validation helper that throws standardized API errors on validation failure

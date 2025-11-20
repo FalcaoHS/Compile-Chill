@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { getGame } from "@/lib/games"
-import { withAuth } from "@/lib/api-auth"
-import { handleApiError, ApiErrors } from "@/lib/api-errors"
+import { withAuth } from "@/lib/utils/api-auth"
+import { handleApiError, ApiErrors } from "@/lib/utils/api-errors"
 
 /**
  * GET /api/scores/me

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { withAuth } from "@/lib/api-auth"
-import { handleApiError } from "@/lib/api-errors"
+import { withAuth } from "@/lib/utils/api-auth"
+import { handleApiError } from "@/lib/utils/api-errors"
 
 /**
  * DELETE /api/admin/cleanup-crypto-miner

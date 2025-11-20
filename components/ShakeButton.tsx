@@ -45,6 +45,12 @@ export function ShakeButton({ onShake }: ShakeButtonProps) {
       terminal: "shake-button--terminal",
       blueprint: "shake-button--blueprint",
       'bruno-csharp': "shake-button--bruno-csharp",
+      chaves: "shake-button--chaves",
+      pomemin: "shake-button--pomemin",
+      dracula: "shake-button--dracula",
+      portal: "shake-button--portal",
+      'indiana-jones': "shake-button--indiana-jones",
+      'star-wars': "shake-button--star-wars",
     }
     return themeMap[themeId] || "shake-button--cyber"
   }

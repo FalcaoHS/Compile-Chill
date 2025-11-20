@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { Ratelimit } from "@upstash/ratelimit"
-import { handleApiError, ApiErrors } from "@/lib/api-errors"
-import { getAuthenticatedUser } from "@/lib/api-auth"
+import { handleApiError, ApiErrors } from "@/lib/utils/api-errors"
+import { getAuthenticatedUser } from "@/lib/utils/api-auth"
 
 /**
  * Rate limit configuration for route handlers
@@ -179,7 +179,7 @@ export function withAuthAndRateLimit(
   return withRateLimit(
     async (request: NextRequest) => {
       // Import here to avoid circular dependency
-      const { withAuth } = await import("@/lib/api-auth")
+      const { withAuth } = await import("@/lib/utils/api-auth")
       const authHandler = withAuth(handler)
       return authHandler(request)
     },

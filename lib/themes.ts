@@ -1,11 +1,11 @@
 /**
  * Theme configuration for Compile & Chill
  * 
- * Defines 9 unique visual themes with comprehensive design tokens.
+ * Defines unique visual themes with comprehensive design tokens.
  * Each theme includes colors, typography, and effect variables.
  */
 
-export type ThemeId = 'analista-jr' | 'analista-sr' | 'lofi-code' | 'cyber' | 'pixel' | 'neon' | 'terminal' | 'blueprint' | 'bruno-csharp' | 'chaves' | 'pomemin' | 'dracula'
+export type ThemeId = 'analista-jr' | 'analista-sr' | 'lofi-code' | 'cyber' | 'pixel' | 'neon' | 'terminal' | 'blueprint' | 'bruno-csharp' | 'chaves' | 'pomemin' | 'dracula' | 'portal' | 'indiana-jones' | 'star-wars'
 
 export interface Theme {
   name: string
@@ -594,6 +594,204 @@ export const THEMES: Record<ThemeId, Theme> = {
       // EXCLUSIVO: Tema Dracula
       '--dracula-mystery': '1.1', // Mistério gótico
       '--dracula-elegance': '0.9', // Elegância sombria
+    },
+  },
+  portal: {
+    name: 'Portal 2',
+    vars: {
+      // Colors - Portal 2 Aperture Science (laranja e azul)
+      '--color-bg': '#0a0e1a', // Azul escuro profundo (laboratório)
+      '--color-bg-secondary': '#1a2332', // Azul acinzentado
+      '--color-primary': '#ff7a00', // Laranja Portal (exato)
+      '--color-primary-hover': '#ff8a20',
+      '--color-accent': '#24b0ff', // Azul Portal (exato)
+      '--color-accent-hover': '#3ac0ff',
+      '--color-muted': '#5a7a9a', // Azul médio
+      '--color-text': '#e8f4ff', // Branco azulado claro
+      '--color-text-secondary': '#b8d4e8',
+      '--color-glow': 'rgba(255, 122, 0, 0.6)', // Glow laranja
+      '--color-border': 'rgba(36, 176, 255, 0.4)',
+      '--color-error': '#ff4444',
+      
+      // Typography - Fonte técnica/futurista
+      '--font': "'Roboto Mono', 'Consolas', monospace",
+      '--font-size-base': '15px',
+      
+      // Effects - Portal tech aesthetic
+      '--glow-sm': '0 0 10px rgba(255, 122, 0, 0.5)',
+      '--glow-md': '0 0 18px rgba(36, 176, 255, 0.6)',
+      '--glow-lg': '0 0 28px rgba(255, 122, 0, 0.7)',
+      '--glow-xl': '0 0 40px rgba(36, 176, 255, 0.8)',
+      '--glow-intensity': '1.3', // Glow moderado
+      '--anim-duration': '300ms', // Animação suave
+      '--anim-easing': 'cubic-bezier(0.4, 0, 0.2, 1)',
+      '--border-radius': '8px', // Cantos arredondados
+      '--pulse-speed': '2000ms', // Pulsação suave
+      '--drift-speed': '5000ms',
+      '--scanline-opacity': '0.04',
+      '--noise-opacity': '0.03',
+      '--blur-intensity': '0px',
+      '--cursor-blink': 'blink',
+      '--minimal-opacity': '1',
+      
+      // Canvas/Game - Cores Portal
+      '--orb-fill': '#ff7a00', // Laranja
+      '--orb-stroke': '#24b0ff', // Azul
+      '--orb-glow': 'rgba(255, 122, 0, 0.5)',
+      '--orb-trail-opacity': '0.2',
+      '--orb-gravity': '1.0',
+      '--basket-fill': '#1a2332',
+      '--basket-stroke': '#24b0ff',
+      '--basket-stroke-width': '3px',
+      '--particle-color-1': '#ff7a00', // Laranja
+      '--particle-color-2': '#24b0ff', // Azul
+      '--particle-color-3': '#ffaa44', // Laranja claro
+      '--particle-lifetime': '1800ms',
+      '--particle-fade-delay': '400ms',
+      '--firework-color-1': '#ff7a00', // Laranja
+      '--firework-color-2': '#24b0ff', // Azul
+      '--firework-color-3': '#ffaa44', // Laranja claro
+      '--firework-speed': '1.1',
+      '--firework-gravity': '1.0',
+      
+      // EXCLUSIVO: Tema Portal
+      '--portal-energy': '1.2', // Energia dos portais
+      '--portal-tech': '0.9', // Estética tecnológica
+    },
+  },
+  'indiana-jones': {
+    name: 'Indiana Jones - Dev Edition',
+    vars: {
+      // Colors - Paleta arqueológica tecnológica (areia, pedra, ouro)
+      '--color-bg': '#C2A878', // Sand (areia antiga)
+      '--color-bg-secondary': '#8A6B45', // Stone (pedra/dourado queimado)
+      '--color-primary': '#DAB466', // Gold (ouro antigo)
+      '--color-primary-hover': '#E5C177',
+      '--color-accent': '#4AFF8A', // Snake Green (verde cobra)
+      '--color-accent-hover': '#5AFF9A',
+      '--color-muted': '#8A6B45', // Stone
+      '--color-text': '#FFF4D0', // Divine Light (luz divina)
+      '--color-text-secondary': '#DAB466', // Gold
+      '--color-glow': '#FFB95A', // Amber (âmbar brilhante)
+      '--color-border': '#4A3924', // Shadow (sombra rochosa)
+      '--color-error': '#FF6B6B',
+      
+      // Typography - Fonte aventura/arqueologia
+      '--font': "'Cinzel', 'Garamond', 'Times New Roman', serif",
+      '--font-size-base': '16px',
+      '--font-weight-normal': '400',
+      '--line-height': '1.6',
+      
+      // Effects - Aventura e exploração
+      '--glow-sm': '0 0 8px rgba(255, 185, 90, 0.4)', // Amber glow
+      '--glow-md': '0 0 16px rgba(255, 185, 90, 0.5)',
+      '--glow-lg': '0 0 24px rgba(218, 180, 102, 0.6)', // Gold glow
+      '--glow-xl': '0 0 32px rgba(255, 185, 90, 0.7)',
+      '--glow-intensity': '1.0', // Glow moderado
+      '--anim-duration': '400ms', // Animação suave
+      '--anim-easing': 'cubic-bezier(0.4, 0, 0.2, 1)',
+      '--border-radius': '6px', // Cantos suaves
+      '--pulse-speed': '3000ms', // Pulsação lenta (templo)
+      '--drift-speed': '6000ms',
+      '--scanline-opacity': '0.02',
+      '--noise-opacity': '0.03',
+      '--blur-intensity': '0px',
+      '--cursor-blink': 'blink',
+      '--minimal-opacity': '1',
+      
+      // Canvas/Game - Cores temáticas Indiana Jones
+      '--orb-fill': '#DAB466', // Gold (ouro antigo)
+      '--orb-stroke': '#4AFF8A', // Snake Green
+      '--orb-glow': 'rgba(255, 185, 90, 0.5)', // Amber glow
+      '--orb-trail-opacity': '0.2',
+      '--orb-gravity': '1.0',
+      '--basket-fill': '#8A6B45', // Stone
+      '--basket-stroke': '#DAB466', // Gold
+      '--basket-stroke-width': '3px',
+      '--particle-color-1': '#DAB466', // Gold
+      '--particle-color-2': '#FFB95A', // Amber
+      '--particle-color-3': '#4AFF8A', // Snake Green
+      '--particle-lifetime': '2000ms',
+      '--particle-fade-delay': '500ms',
+      '--firework-color-1': '#DAB466', // Gold
+      '--firework-color-2': '#FFB95A', // Amber
+      '--firework-color-3': '#FFF4D0', // Divine Light
+      '--firework-speed': '1.0',
+      '--firework-gravity': '1.0',
+      
+      // EXCLUSIVO: Tema Indiana Jones
+      '--indiana-adventure': '1.1', // Vibe aventura
+      '--indiana-temple': '0.9', // Estética templo
+    },
+  },
+  'star-wars': {
+    name: 'Galactic Force (Star-Inspired)',
+    vars: {
+      // Colors - Paleta espacial (energia azul/vermelha, hyperspace)
+      '--color-bg': '#050508', // Space Black
+      '--color-bg-secondary': '#0C0F14', // BG Soft
+      '--color-primary': '#2F9BFF', // Blue Energy
+      '--color-primary-hover': '#174B7A', // Primary Soft
+      '--color-accent': '#FF2B2B', // Red Energy
+      '--color-accent-hover': '#7A1212', // Accent Soft
+      '--color-muted': '#3E4A56', // Imperial Gray
+      '--color-text': '#D8F2FF', // Holographic White
+      '--color-text-secondary': '#7F8FA6', // Rebel Gray
+      '--color-glow': '#59E0FF', // Cyan Glow
+      '--color-highlight': '#FFC23D', // Force Amber
+      '--color-border': 'rgba(0, 0, 0, 0.45)',
+      '--color-error': '#FF2B2B',
+      
+      // Typography - Fonte futurista/espacial
+      '--font': "'Roboto Mono', 'Consolas', monospace",
+      '--font-size-base': '16px',
+      '--font-weight-normal': '400',
+      '--line-height': '1.5',
+      
+      // Effects - Energia e hyperspace
+      '--glow-sm': '0 0 6px rgba(47, 155, 255, 0.25)', // Blue glow
+      '--glow-md': '0 0 12px rgba(47, 155, 255, 0.35)',
+      '--glow-lg': '0 0 22px rgba(47, 155, 255, 0.45)', // Blue energy glow
+      '--glow-xl': '0 0 32px rgba(89, 224, 255, 0.5)', // Cyan glow
+      '--glow-intensity': '1.2', // Glow moderado-energético
+      '--anim-duration': '300ms', // Animação rápida (energia)
+      '--anim-easing': 'cubic-bezier(0.4, 0, 0.2, 1)',
+      '--border-radius': '4px', // Cantos mais angulares
+      '--pulse-speed': '2000ms', // Pulsação energética
+      '--drift-speed': '4000ms',
+      '--scanline-opacity': '0.05',
+      '--noise-opacity': '0.04',
+      '--blur-intensity': '0px',
+      '--cursor-blink': 'blink',
+      '--minimal-opacity': '1',
+      
+      // Shadow variables
+      '--shadow-lg': '0px 0px 22px rgba(47, 155, 255, 0.45)',
+      '--shadow-sm': '0px 0px 6px rgba(47, 155, 255, 0.25)',
+      
+      // Canvas/Game - Cores temáticas Star Wars
+      '--orb-fill': '#2F9BFF', // Blue Energy
+      '--orb-stroke': '#59E0FF', // Cyan Glow
+      '--orb-glow': 'rgba(47, 155, 255, 0.5)', // Blue energy glow
+      '--orb-trail-opacity': '0.3',
+      '--orb-gravity': '1.0',
+      '--basket-fill': '#0C0F14', // BG Soft
+      '--basket-stroke': '#2F9BFF', // Blue Energy
+      '--basket-stroke-width': '3px',
+      '--particle-color-1': '#2F9BFF', // Blue Energy
+      '--particle-color-2': '#FF2B2B', // Red Energy
+      '--particle-color-3': '#59E0FF', // Cyan Glow
+      '--particle-lifetime': '1500ms',
+      '--particle-fade-delay': '300ms',
+      '--firework-color-1': '#2F9BFF', // Blue Energy
+      '--firework-color-2': '#FF2B2B', // Red Energy
+      '--firework-color-3': '#FFC23D', // Force Amber
+      '--firework-speed': '1.2',
+      '--firework-gravity': '1.0',
+      
+      // EXCLUSIVO: Tema Star Wars (Galactic Force)
+      '--galactic-energy': '1.2', // Energia galáctica
+      '--hyperspace-effect': '0.9', // Efeito hyperspace
     },
   },
 }

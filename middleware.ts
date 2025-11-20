@@ -4,7 +4,7 @@ import {
   requireAuthMiddleware,
   isProtectedRoute,
   isPublicRoute,
-} from "@/lib/middleware-auth"
+} from "@/lib/auth/middleware"
 import { applySecurityHeaders } from "@/lib/security-headers"
 
 export async function middleware(request: NextRequest) {

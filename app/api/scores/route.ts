@@ -3,10 +3,10 @@ import { prisma } from "@/lib/prisma"
 import { scoreSubmissionSchema } from "@/lib/validations/score"
 import { scoresQuerySchema } from "@/lib/validations/query"
 import { validate, validateQuery } from "@/lib/validations/validate"
-import { withAuthAndRateLimit } from "@/lib/api-rate-limit"
+import { withAuthAndRateLimit } from "@/lib/utils/api-rate-limit"
 import { getScoreSubmissionLimiter } from "@/lib/rate-limit"
-import { getAuthenticatedUser } from "@/lib/api-auth"
-import { handleApiError, ApiErrors } from "@/lib/api-errors"
+import { getAuthenticatedUser } from "@/lib/utils/api-auth"
+import { handleApiError, ApiErrors } from "@/lib/utils/api-errors"
 
 // Force Node.js runtime to avoid Prisma Edge Runtime issues
 export const runtime = 'nodejs'

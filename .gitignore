@@ -78,3 +78,4 @@ Thumbs.db
 *.tmp
 *.temp
 .cache/
+agent-os/

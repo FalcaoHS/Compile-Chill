@@ -6,7 +6,7 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach } from '@jest/globals'
-import { validateAuthEnvironment } from '@/lib/auth-env-validation'
+import { validateAuthEnvironment } from '@/lib/auth/env-validation'
 
 describe('Auth Environment Validation', () => {
   const originalEnv = process.env

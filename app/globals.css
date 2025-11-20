@@ -574,6 +574,332 @@ body {
   opacity: 0.3;
 }
 
+/* ============================================
+   SHAKE BUTTON - Chaves Theme
+   ============================================ */
+.shake-button--chaves {
+  background: linear-gradient(135deg, #8B4513 0%, #654321 100%);
+  color: #FF8C00;
+  border: 3px solid #FF8C00;
+  border-radius: 0;
+  box-shadow: 
+    4px 4px 0px #CD6600,
+    0 0 15px rgba(255, 140, 0, 0.5),
+    inset 0 0 20px rgba(255, 140, 0, 0.1),
+    0 2px 8px rgba(0, 0, 0, 0.5);
+  text-shadow: 
+    2px 2px 0px #CD6600,
+    0 0 10px rgba(255, 140, 0, 0.9);
+  font-weight: 900;
+  letter-spacing: 1px;
+}
+
+.shake-button--chaves:hover {
+  transform: translate(2px, 2px) scale(1.05);
+  box-shadow: 
+    2px 2px 0px #CD6600,
+    0 0 25px rgba(255, 140, 0, 0.7),
+    inset 0 0 30px rgba(255, 140, 0, 0.15),
+    0 4px 12px rgba(0, 0, 0, 0.6);
+}
+
+.shake-button--chaves::before {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border: 2px solid #8B4513;
+  border-radius: 0;
+  background: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 4px,
+    rgba(255, 140, 0, 0.1) 4px,
+    rgba(255, 140, 0, 0.1) 8px
+  );
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* ============================================
+   SHAKE BUTTON - Pomemin Theme
+   ============================================ */
+.shake-button--pomemin {
+  background: radial-gradient(circle at 30% 30%, rgba(255, 215, 0, 0.3) 0%, rgba(255, 20, 147, 0.2) 50%, rgba(138, 43, 226, 0.3) 100%);
+  color: #FF1493;
+  border: 2px solid #FFD700;
+  box-shadow: 
+    0 0 20px rgba(255, 215, 0, 0.6),
+    0 0 30px rgba(255, 20, 147, 0.4),
+    0 0 40px rgba(138, 43, 226, 0.3),
+    inset 0 0 25px rgba(255, 215, 0, 0.2),
+    0 2px 8px rgba(0, 0, 0, 0.5);
+  text-shadow: 
+    0 0 10px rgba(255, 20, 147, 0.9),
+    0 0 20px rgba(255, 215, 0, 0.6);
+  animation: pokemon-sparkle 2s ease-in-out infinite;
+}
+
+.shake-button--pomemin:hover {
+  box-shadow: 
+    0 0 30px rgba(255, 215, 0, 0.8),
+    0 0 50px rgba(255, 20, 147, 0.6),
+    0 0 70px rgba(138, 43, 226, 0.5),
+    inset 0 0 35px rgba(255, 215, 0, 0.3),
+    0 4px 12px rgba(0, 0, 0, 0.6);
+  animation: pokemon-sparkle-fast 1s ease-in-out infinite;
+}
+
+@keyframes pokemon-sparkle {
+  0%, 100% {
+    filter: brightness(1);
+  }
+  50% {
+    filter: brightness(1.3);
+  }
+}
+
+@keyframes pokemon-sparkle-fast {
+  0%, 100% {
+    filter: brightness(1.2);
+  }
+  50% {
+    filter: brightness(1.5);
+  }
+}
+
+/* ============================================
+   SHAKE BUTTON - Dracula Theme
+   ============================================ */
+.shake-button--dracula {
+  background: radial-gradient(circle at center, rgba(139, 0, 0, 0.4) 0%, rgba(25, 25, 112, 0.9) 100%);
+  color: #8B0000;
+  border: 2px solid #8B0000;
+  box-shadow: 
+    0 0 15px rgba(139, 0, 0, 0.6),
+    0 0 25px rgba(75, 0, 130, 0.4),
+    inset 0 0 20px rgba(139, 0, 0, 0.2),
+    0 2px 8px rgba(0, 0, 0, 0.7);
+  text-shadow: 
+    0 0 10px rgba(139, 0, 0, 0.9),
+    0 0 20px rgba(75, 0, 130, 0.6);
+  font-weight: 900;
+  letter-spacing: 1.5px;
+}
+
+.shake-button--dracula:hover {
+  box-shadow: 
+    0 0 25px rgba(139, 0, 0, 0.8),
+    0 0 40px rgba(75, 0, 130, 0.6),
+    inset 0 0 30px rgba(139, 0, 0, 0.3),
+    0 4px 12px rgba(0, 0, 0, 0.8);
+  transform: scale(1.08);
+}
+
+.shake-button--dracula::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 50%;
+  background: 
+    radial-gradient(circle at 20% 20%, rgba(139, 0, 0, 0.3) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(75, 0, 130, 0.3) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: -1;
+  animation: dracula-pulse 3s ease-in-out infinite;
+}
+
+@keyframes dracula-pulse {
+  0%, 100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+/* ============================================
+   SHAKE BUTTON - Portal Theme
+   ============================================ */
+.shake-button--portal {
+  background: conic-gradient(from 0deg, #ff7a00 0%, #24b0ff 25%, #ff7a00 50%, #24b0ff 75%, #ff7a00 100%);
+  color: #ffffff;
+  border: 3px solid #ffffff;
+  box-shadow: 
+    0 0 20px rgba(255, 122, 0, 0.6),
+    0 0 30px rgba(36, 176, 255, 0.5),
+    inset 0 0 25px rgba(255, 255, 255, 0.2),
+    0 2px 8px rgba(0, 0, 0, 0.5);
+  text-shadow: 
+    0 0 10px rgba(255, 255, 255, 0.9),
+    0 0 20px rgba(255, 122, 0, 0.6),
+    0 0 30px rgba(36, 176, 255, 0.5);
+  font-weight: 900;
+  animation: portal-rotate 3s linear infinite;
+}
+
+.shake-button--portal:hover {
+  animation: portal-rotate-fast 1.5s linear infinite;
+  box-shadow: 
+    0 0 30px rgba(255, 122, 0, 0.8),
+    0 0 50px rgba(36, 176, 255, 0.7),
+    inset 0 0 35px rgba(255, 255, 255, 0.3),
+    0 4px 12px rgba(0, 0, 0, 0.6);
+}
+
+@keyframes portal-rotate {
+  from {
+    background: conic-gradient(from 0deg, #ff7a00 0%, #24b0ff 25%, #ff7a00 50%, #24b0ff 75%, #ff7a00 100%);
+  }
+  to {
+    background: conic-gradient(from 360deg, #ff7a00 0%, #24b0ff 25%, #ff7a00 50%, #24b0ff 75%, #ff7a00 100%);
+  }
+}
+
+@keyframes portal-rotate-fast {
+  from {
+    background: conic-gradient(from 0deg, #ff7a00 0%, #24b0ff 25%, #ff7a00 50%, #24b0ff 75%, #ff7a00 100%);
+  }
+  to {
+    background: conic-gradient(from 360deg, #ff7a00 0%, #24b0ff 25%, #ff7a00 50%, #24b0ff 75%, #ff7a00 100%);
+  }
+}
+
+/* ============================================
+   SHAKE BUTTON - Indiana Jones Theme
+   ============================================ */
+.shake-button--indiana-jones {
+  background: linear-gradient(135deg, #8A6B45 0%, #C2A878 50%, #DAB466 100%);
+  color: #FFF4D0;
+  border: 3px solid #DAB466;
+  border-radius: 0;
+  box-shadow: 
+    4px 4px 0px #4A3924,
+    0 0 20px rgba(218, 180, 102, 0.6),
+    inset 0 0 25px rgba(255, 244, 208, 0.2),
+    0 2px 8px rgba(0, 0, 0, 0.5);
+  text-shadow: 
+    2px 2px 0px #4A3924,
+    0 0 10px rgba(255, 244, 208, 0.9);
+  font-weight: 900;
+  letter-spacing: 1.5px;
+  font-family: 'Cinzel', 'Garamond', serif;
+}
+
+.shake-button--indiana-jones:hover {
+  transform: translate(2px, 2px) scale(1.05);
+  box-shadow: 
+    2px 2px 0px #4A3924,
+    0 0 30px rgba(218, 180, 102, 0.8),
+    inset 0 0 35px rgba(255, 244, 208, 0.3),
+    0 4px 12px rgba(0, 0, 0, 0.6);
+}
+
+.shake-button--indiana-jones::before {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border: 2px solid #4A3924;
+  border-radius: 0;
+  background: 
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 3px,
+      rgba(218, 180, 102, 0.1) 3px,
+      rgba(218, 180, 102, 0.1) 6px
+    );
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* ============================================
+   SHAKE BUTTON - Star Wars Theme
+   ============================================ */
+.shake-button--star-wars {
+  background: radial-gradient(circle at center, rgba(47, 155, 255, 0.3) 0%, rgba(5, 5, 8, 0.95) 100%);
+  color: #2F9BFF;
+  border: 2px solid #59E0FF;
+  box-shadow: 
+    0 0 20px rgba(47, 155, 255, 0.6),
+    0 0 40px rgba(89, 224, 255, 0.4),
+    0 0 60px rgba(47, 155, 255, 0.2),
+    inset 0 0 25px rgba(89, 224, 255, 0.2),
+    0 2px 8px rgba(0, 0, 0, 0.7);
+  text-shadow: 
+    0 0 10px rgba(47, 155, 255, 0.9),
+    0 0 20px rgba(89, 224, 255, 0.7),
+    0 0 30px rgba(47, 155, 255, 0.5);
+  font-weight: 900;
+  letter-spacing: 2px;
+  animation: hyperspace-pulse 2s ease-in-out infinite;
+}
+
+.shake-button--star-wars:hover {
+  box-shadow: 
+    0 0 30px rgba(47, 155, 255, 0.8),
+    0 0 60px rgba(89, 224, 255, 0.6),
+    0 0 90px rgba(47, 155, 255, 0.4),
+    inset 0 0 35px rgba(89, 224, 255, 0.3),
+    0 4px 12px rgba(0, 0, 0, 0.8);
+  animation: hyperspace-pulse-fast 1s ease-in-out infinite;
+}
+
+.shake-button--star-wars::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 50%;
+  background: 
+    repeating-conic-gradient(
+      from 0deg at 50% 50%,
+      transparent 0deg,
+      rgba(89, 224, 255, 0.1) 10deg,
+      transparent 20deg
+    );
+  pointer-events: none;
+  z-index: -1;
+  animation: hyperspace-rotate 4s linear infinite;
+}
+
+@keyframes hyperspace-pulse {
+  0%, 100% {
+    filter: brightness(1);
+    box-shadow: 
+      0 0 20px rgba(47, 155, 255, 0.6),
+      0 0 40px rgba(89, 224, 255, 0.4),
+      0 0 60px rgba(47, 155, 255, 0.2),
+      inset 0 0 25px rgba(89, 224, 255, 0.2),
+      0 2px 8px rgba(0, 0, 0, 0.7);
+  }
+  50% {
+    filter: brightness(1.3);
+    box-shadow: 
+      0 0 30px rgba(47, 155, 255, 0.8),
+      0 0 50px rgba(89, 224, 255, 0.6),
+      0 0 70px rgba(47, 155, 255, 0.4),
+      inset 0 0 30px rgba(89, 224, 255, 0.3),
+      0 2px 8px rgba(0, 0, 0, 0.7);
+  }
+}
+
+@keyframes hyperspace-pulse-fast {
+  0%, 100% {
+    filter: brightness(1.2);
+  }
+  50% {
+    filter: brightness(1.5);
+  }
+}
+
+@keyframes hyperspace-rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 /* Light Animations for Mobile Lite Mode */
 /* These animations use opacity/transform with will-change for optimal performance */
 

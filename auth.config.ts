@@ -1,8 +1,8 @@
 import Twitter from "next-auth/providers/twitter"
-import { authAdapter, updateUserFromOAuth } from "@/lib/auth-adapter"
+import { authAdapter, updateUserFromOAuth } from "@/lib/auth/adapter"
 import { prisma } from "@/lib/prisma"
 import type { NextAuthConfig } from "next-auth"
-import { validateAndLogAuthEnvironment } from "@/lib/auth-env-validation"
+import { validateAndLogAuthEnvironment } from "@/lib/auth/env-validation"
 import { logSessionUserMismatch } from "@/lib/session-monitor"
 
 // 🔐 SECURITY: Validate authentication environment variables on server startup
