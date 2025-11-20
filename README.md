@@ -495,6 +495,8 @@ Este projeto está licenciado sob a Licença MIT - veja o arquivo [LICENSE](LICE
 
 **Hudson Falcão Silva**
 
+📧 **Email:** [falcaoh@gmail.com](mailto:falcaoh@gmail.com)
+
 ## 🙏 Agradecimentos
 
 - Todos os contribuidores que ajudam a melhorar este projeto

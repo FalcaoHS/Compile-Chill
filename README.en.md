@@ -400,6 +400,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **Hudson Falcão Silva**
 
+📧 **Email:** [falcaoh@gmail.com](mailto:falcaoh@gmail.com)
+
 ## 🙏 Acknowledgments
 
 - All contributors who help improve this project

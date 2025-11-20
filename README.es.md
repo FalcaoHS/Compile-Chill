@@ -400,6 +400,8 @@ Este proyecto está licenciado bajo la Licencia MIT - ver el archivo [LICENSE](L
 
 **Hudson Falcão Silva**
 
+📧 **Email:** [falcaoh@gmail.com](mailto:falcaoh@gmail.com)
+
 ## 🙏 Agradecimientos
 
 - Todos los contribuidores que ayudan a mejorar este proyecto
