@@ -543,8 +543,19 @@ git add .
 # Verificar novamente antes de commitar
 git status
 
-# Commit
-git commit -m "<commit message>"
+# Commit (com UTF-8 correto)
+# No PowerShell, usar uma das opções:
+# Opção 1: Usar arquivo temporário (RECOMENDADO)
+$msg = "<commit message>"
+$msg | Out-File -Encoding utf8 commit-msg.txt
+git commit -F commit-msg.txt
+Remove-Item commit-msg.txt
+
+# Opção 2: Forçar encoding diretamente
+git -c i18n.commitencoding=utf-8 commit -m "<commit message>"
+
+# Opção 3: Usar helper script (se disponível)
+.\.git-commit-utf8.ps1 "<commit message>"
 
 # Push
 git push origin <nome-da-branch>
