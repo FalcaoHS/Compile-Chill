@@ -1,6 +1,25 @@
-# Compile & Chill
+# 🎮 Compile & Chill
 
-Portal de descompressão para desenvolvedores.
+> Portal de descompressão para desenvolvedores com jogos temáticos, sistema de rankings e autenticação via X (Twitter).
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Next.js](https://img.shields.io/badge/Next.js-14-black)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.5-blue)](https://www.typescriptlang.org/)
+[![Prisma](https://img.shields.io/badge/Prisma-6.19-2D3748?logo=prisma)](https://www.prisma.io/)
+
+## ✨ Sobre o Projeto
+
+Compile & Chill é um portal criado especialmente para desenvolvedores que desejam alguns minutos de relaxamento sem sair do "clima dev". O projeto une jogos leves, estética hacker/cyber, personalização de temas, ranking global, login simplificado via X (Twitter) e compartilhamento social.
+
+### 🎯 Características Principais
+
+- 🎮 **10 Jogos Temáticos**: Terminal 2048, Crypto Miner, Dev Pong, Stack Overflow Dodge e mais
+- 🎨 **5 Temas Visuais**: Cyber Hacker, Pixel Lab, Neon Future, Terminal Minimal, Blueprint Dev
+- 🏆 **Sistema de Rankings**: Rankings globais e por jogo com validação anti-cheat
+- 🔐 **Autenticação OAuth**: Login único via X (Twitter) com NextAuth.js v5
+- 📊 **Perfis de Usuário**: Histórico de jogos, melhores scores e estatísticas
+- 🎯 **Validação de Scores**: Sistema robusto de validação server-side para prevenir trapaças
+- ⚡ **Performance**: Otimizado com Next.js 14 App Router e TypeScript
 
 ## 📋 Pré-requisitos
 
@@ -281,20 +300,75 @@ O Prisma está configurado para logar queries em desenvolvimento. Verifique o co
 
 ## 🛠️ Tech Stack
 
-- **Next.js 14** (App Router)
-- **TypeScript**
-- **TailwindCSS**
-- **Prisma** (PostgreSQL)
-- **NextAuth.js v5** (beta)
+### Frontend
+- **Next.js 14** - Framework React com App Router
+- **TypeScript** - Tipagem estática
+- **TailwindCSS** - Estilização utilitária
+- **Framer Motion** - Animações
+- **Zustand** - Gerenciamento de estado
+- **Matter.js** - Física para jogos
+
+### Backend
+- **Next.js API Routes** - API serverless
+- **Prisma** - ORM para PostgreSQL
+- **NextAuth.js v5** - Autenticação OAuth
+- **Zod** - Validação de schemas
+
+### Infraestrutura
+- **PostgreSQL** - Banco de dados
+- **Upstash Redis** - Rate limiting
+- **Vercel** - Deploy (recomendado)
+
+## 📁 Estrutura do Projeto
+
+```
+compile-and-chill/
+├── app/                    # Next.js App Router
+│   ├── api/               # API routes
+│   ├── jogos/             # Páginas dos jogos
+│   └── ...
+├── components/             # Componentes React
+│   ├── games/             # Componentes específicos de jogos
+│   └── ...
+├── lib/                    # Utilitários e lógica
+│   ├── games/             # Lógica dos jogos
+│   ├── game-validators/   # Validação de scores
+│   └── ...
+├── hooks/                  # React hooks customizados
+├── prisma/                 # Schema e migrations
+├── public/                 # Arquivos estáticos
+└── types/                  # Definições TypeScript
+```
 
 ## 📝 Scripts Disponíveis
 
 ```bash
-npm run dev      # Inicia servidor de desenvolvimento
-npm run build    # Cria build de produção
-npm run start    # Inicia servidor de produção
-npm run lint     # Executa linter
+# Desenvolvimento
+npm run dev              # Inicia servidor de desenvolvimento
+npm run build            # Cria build de produção
+npm run start            # Inicia servidor de produção
+
+# Qualidade de Código
+npm run lint             # Executa ESLint
+npm run lint:fix         # Corrige problemas do ESLint
+npm run type-check       # Verifica tipos TypeScript
+npm run format           # Formata código com Prettier
+npm run format:check     # Verifica formatação
+
+# Banco de Dados
+npm run db:generate      # Gera Prisma Client
+npm run db:push          # Aplica mudanças no schema
+npm run db:migrate       # Executa migrations
+npm run db:studio        # Abre Prisma Studio
 ```
+
+## 🤝 Contribuindo
+
+Contribuições são bem-vindas! Por favor, leia o [CONTRIBUTING.md](CONTRIBUTING.md) para diretrizes sobre como contribuir para o projeto.
+
+## 📄 Licença
+
+Este projeto está licenciado sob a Licença MIT - veja o arquivo [LICENSE](LICENSE) para detalhes.
 
 ## 🔐 Segurança
 
@@ -302,4 +376,14 @@ npm run lint     # Executa linter
 - ⚠️ Use variáveis de ambiente diferentes para dev/prod
 - ⚠️ Mantenha o `NEXTAUTH_SECRET` seguro e único
 - ⚠️ Configure HTTPS em produção
+- ⚠️ Revise o [SECURITY.md](SECURITY.md) para mais informações sobre segurança
+
+## 👤 Autor
+
+**Hudson Falcão Silva**
+
+## 🙏 Agradecimentos
+
+- Todos os contribuidores que ajudam a melhorar este projeto
+- A comunidade open-source por todas as ferramentas incríveis utilizadas
 

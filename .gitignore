@@ -4,29 +4,48 @@
 /node_modules
 /.pnp
 .pnp.js
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state
+.yarn/install-state.gz
 
 # testing
 /coverage
+/.nyc_output
+*.lcov
 
 # next.js
 /.next/
 /out/
+/.swc/
 
 # production
 /build
+/dist
 
 # misc
 .DS_Store
 *.pem
+*.log
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
 
 # debug
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
 
 # local env files
 .env*.local
 .env
+.env.development.local
+.env.test.local
+.env.production.local
 
 # vercel
 .vercel
@@ -37,6 +56,25 @@ next-env.d.ts
 
 # prisma
 /prisma/migrations
-
-
 /app/generated/prisma
+
+# OS
+Thumbs.db
+.DS_Store
+
+# IDE
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
