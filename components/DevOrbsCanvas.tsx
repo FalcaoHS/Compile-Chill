@@ -467,6 +467,38 @@ function drawThemeDecorations(
       ctx.shadowBlur = 0
       break
     }
+    
+    case 'dracula': {
+      // Morcegos voando ao redor (símbolo vampiro)
+      const batCount = 3
+      ctx.fillStyle = '#1a0a0a' // Preto
+      ctx.strokeStyle = colors.accent // Roxo
+      ctx.lineWidth = 1.5
+      for (let i = 0; i < batCount; i++) {
+        const angle = (i / batCount) * Math.PI * 2
+        const batX = pos.x + Math.cos(angle) * outerRadius
+        const batY = pos.y + Math.sin(angle) * outerRadius
+        const batSize = radius * 0.12
+        
+        // Desenha morcego (silhueta simples)
+        ctx.beginPath()
+        // Corpo
+        ctx.ellipse(batX, batY, batSize * 0.3, batSize * 0.5, 0, 0, Math.PI * 2)
+        // Asa esquerda
+        ctx.moveTo(batX - batSize * 0.3, batY)
+        ctx.lineTo(batX - batSize, batY - batSize * 0.6)
+        ctx.lineTo(batX - batSize * 0.6, batY - batSize * 0.3)
+        ctx.closePath()
+        // Asa direita
+        ctx.moveTo(batX + batSize * 0.3, batY)
+        ctx.lineTo(batX + batSize, batY - batSize * 0.6)
+        ctx.lineTo(batX + batSize * 0.6, batY - batSize * 0.3)
+        ctx.closePath()
+        ctx.fill()
+        ctx.stroke()
+      }
+      break
+    }
   }
   
   ctx.restore()
@@ -2253,8 +2285,144 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
 
     // Reset shadow
     ctx.shadowBlur = 0
+    
+    // Draw barrel in corner for Chaves theme
+    if (themeId === "chaves") {
+      const barrelSize = Math.min(canvasSize.width * 0.15, canvasSize.height * 0.15) // 15% do menor lado
+      const barrelX = canvasSize.width - barrelSize - 20 // Canto direito, com margem
+      const barrelY = canvasSize.height - barrelSize - 10 // Próximo ao chão, com margem
+      
+      ctx.save()
+      
+      // Corpo do barril (cilindro visto de lado)
+      const barrelWidth = barrelSize * 0.8
+      const barrelHeight = barrelSize
+      
+      // Desenha o barril como um retângulo arredondado com faixas
+      ctx.fillStyle = '#8B4513' // Marrom madeira
+      const borderRadius = barrelHeight * 0.2
+      
+      // Desenha retângulo arredondado manualmente (compatibilidade)
+      ctx.beginPath()
+      ctx.moveTo(barrelX + borderRadius, barrelY)
+      ctx.lineTo(barrelX + barrelWidth - borderRadius, barrelY)
+      ctx.quadraticCurveTo(barrelX + barrelWidth, barrelY, barrelX + barrelWidth, barrelY + borderRadius)
+      ctx.lineTo(barrelX + barrelWidth, barrelY + barrelHeight - borderRadius)
+      ctx.quadraticCurveTo(barrelX + barrelWidth, barrelY + barrelHeight, barrelX + barrelWidth - borderRadius, barrelY + barrelHeight)
+      ctx.lineTo(barrelX + borderRadius, barrelY + barrelHeight)
+      ctx.quadraticCurveTo(barrelX, barrelY + barrelHeight, barrelX, barrelY + barrelHeight - borderRadius)
+      ctx.lineTo(barrelX, barrelY + borderRadius)
+      ctx.quadraticCurveTo(barrelX, barrelY, barrelX + borderRadius, barrelY)
+      ctx.closePath()
+      ctx.fill()
+      
+      // Faixas metálicas do barril (3 faixas)
+      ctx.strokeStyle = '#654321' // Marrom escuro
+      ctx.lineWidth = 3
+      for (let i = 1; i <= 3; i++) {
+        const y = barrelY + (barrelHeight / 4) * i
+        ctx.beginPath()
+        ctx.moveTo(barrelX, y)
+        ctx.lineTo(barrelX + barrelWidth, y)
+        ctx.stroke()
+      }
+      
+      // Borda do barril
+      ctx.strokeStyle = '#5C4033' // Marrom muito escuro
+      ctx.lineWidth = 2
+      ctx.beginPath()
+      ctx.moveTo(barrelX + borderRadius, barrelY)
+      ctx.lineTo(barrelX + barrelWidth - borderRadius, barrelY)
+      ctx.quadraticCurveTo(barrelX + barrelWidth, barrelY, barrelX + barrelWidth, barrelY + borderRadius)
+      ctx.lineTo(barrelX + barrelWidth, barrelY + barrelHeight - borderRadius)
+      ctx.quadraticCurveTo(barrelX + barrelWidth, barrelY + barrelHeight, barrelX + barrelWidth - borderRadius, barrelY + barrelHeight)
+      ctx.lineTo(barrelX + borderRadius, barrelY + barrelHeight)
+      ctx.quadraticCurveTo(barrelX, barrelY + barrelHeight, barrelX, barrelY + barrelHeight - borderRadius)
+      ctx.lineTo(barrelX, barrelY + borderRadius)
+      ctx.quadraticCurveTo(barrelX, barrelY, barrelX + borderRadius, barrelY)
+      ctx.closePath()
+      ctx.stroke()
+      
+      // Sombra do barril
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.3)'
+      ctx.beginPath()
+      ctx.ellipse(barrelX + barrelWidth / 2, barrelY + barrelHeight + 5, barrelWidth * 0.6, 8, 0, 0, Math.PI * 2)
+      ctx.fill()
+      
+      ctx.restore()
+    }
+    
+    // Draw castle in corner for Dracula theme
+    if (themeId === "dracula") {
+      const castleSize = Math.min(canvasSize.width * 0.2, canvasSize.height * 0.2) // 20% do menor lado
+      const castleX = 20 // Canto esquerdo, com margem
+      const castleY = canvasSize.height - castleSize - 10 // Próximo ao chão, com margem
+      
+      ctx.save()
+      
+      // Torre principal do castelo
+      const towerWidth = castleSize * 0.4
+      const towerHeight = castleSize * 0.9
+      const towerX = castleX
+      const towerY = castleY + (castleSize - towerHeight)
+      
+      // Corpo da torre
+      ctx.fillStyle = '#2d1b3d' // Roxo escuro
+      ctx.strokeStyle = '#1a0a0a' // Preto
+      ctx.lineWidth = 2
+      ctx.fillRect(towerX, towerY, towerWidth, towerHeight)
+      ctx.strokeRect(towerX, towerY, towerWidth, towerHeight)
+      
+      // Topo da torre (merlões/guelras)
+      const merlonHeight = towerWidth * 0.15
+      const merlonWidth = towerWidth / 4
+      ctx.fillStyle = '#4b0082' // Roxo mais claro
+      for (let i = 0; i < 4; i++) {
+        ctx.fillRect(towerX + i * merlonWidth, towerY, merlonWidth, merlonHeight)
+      }
+      
+      // Janela da torre (com cruz)
+      const windowSize = towerWidth * 0.3
+      const windowX = towerX + (towerWidth - windowSize) / 2
+      const windowY = towerY + towerHeight * 0.4
+      ctx.fillStyle = '#8b0000' // Vermelho escuro (luz)
+      ctx.fillRect(windowX, windowY, windowSize, windowSize)
+      ctx.strokeStyle = '#1a0a0a'
+      ctx.lineWidth = 2
+      ctx.beginPath()
+      ctx.moveTo(windowX + windowSize / 2, windowY)
+      ctx.lineTo(windowX + windowSize / 2, windowY + windowSize)
+      ctx.moveTo(windowX, windowY + windowSize / 2)
+      ctx.lineTo(windowX + windowSize, windowY + windowSize / 2)
+      ctx.stroke()
+      
+      // Torre menor (lateral)
+      const smallTowerWidth = castleSize * 0.25
+      const smallTowerHeight = castleSize * 0.6
+      const smallTowerX = castleX + towerWidth + 5
+      const smallTowerY = castleY + (castleSize - smallTowerHeight)
+      
+      ctx.fillStyle = '#2d1b3d'
+      ctx.fillRect(smallTowerX, smallTowerY, smallTowerWidth, smallTowerHeight)
+      ctx.strokeRect(smallTowerX, smallTowerY, smallTowerWidth, smallTowerHeight)
+      
+      // Topo da torre menor
+      ctx.fillStyle = '#4b0082'
+      for (let i = 0; i < 3; i++) {
+        ctx.fillRect(smallTowerX + i * (smallTowerWidth / 3), smallTowerY, smallTowerWidth / 3, merlonHeight)
+      }
+      
+      // Sombra do castelo
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.4)'
+      ctx.beginPath()
+      ctx.ellipse(castleX + castleSize / 2, castleY + castleSize + 5, castleSize * 0.7, 10, 0, 0, Math.PI * 2)
+      ctx.fill()
+      
+      ctx.restore()
+    }
+    
     ctx.restore()
-  }, [canvasSize.width, canvasSize.height, isFPSLevel1, isFPSLevel2])
+  }, [canvasSize.width, canvasSize.height, isFPSLevel1, isFPSLevel2, themeId])
 
   // Draw backboard side supports (two vertical neon poles behind backboard)
   const drawBackboardSideSupports = useCallback((ctx: CanvasRenderingContext2D, colors: ReturnType<typeof getThemeColors>) => {
@@ -2582,6 +2750,10 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
       borderColor = colors.accent // Vermelho para Pomemin
       borderWidth = 3
       glowIntensity = 6
+    } else if (themeId === "dracula") {
+      borderColor = colors.accent // Roxo para Dracula
+      borderWidth = 3
+      glowIntensity = 7
     }
 
     // PT: Pomemin theme: desenha orbs com orelhinhas e rabinho (estilo Pokémon) | EN: Pomemin theme: draws orbs with ears and tail (Pokémon style) | ES: Tema Pomemin: dibuja orbs con orejitas y colita (estilo Pokémon) | FR: Thème Pomemin: dessine orbs avec oreilles et queue (style Pokémon) | DE: Pomemin-Theme: zeichnet Orbs mit Ohren und Schwanz (Pokémon-Stil)
@@ -2677,6 +2849,220 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
         ctx.fillStyle = colors.primary
         ctx.fill()
       }
+
+      // Draw suspenders (tiras laranja) - NA FRENTE da foto
+      // Partem do topo direito do quadrado
+      const suspenderWidth = radius * 0.08
+      const suspenderColor = '#FF8C00' // Laranja
+      ctx.strokeStyle = suspenderColor
+      ctx.lineWidth = suspenderWidth
+      ctx.lineCap = 'round'
+      
+      // Tira de cima: do topo direito até a quina debaixo da esquerda
+      ctx.beginPath()
+      ctx.moveTo(pos.x + radius, pos.y - radius) // Topo direito do quadrado
+      ctx.lineTo(pos.x - radius, pos.y + radius) // Quina debaixo da esquerda
+      ctx.stroke()
+      
+      // Tira debaixo: do topo direito até mais ou menos a parte do meio do quadrado embaixo
+      ctx.beginPath()
+      ctx.moveTo(pos.x + radius, pos.y - radius) // Topo direito do quadrado
+      ctx.lineTo(pos.x - radius * 0.3, pos.y + radius) // Parte do meio embaixo (mais à direita)
+      ctx.stroke()
+
+      // Draw hat/gorro (chapéu xadrez com abas) - sobrepondo parcialmente no topo
+      const hatHeight = radius * 0.35
+      const hatWidth = radius * 1.6
+      const hatY = pos.y - radius * 0.85
+      
+      // Corpo do gorro (xadrez)
+      ctx.save()
+      ctx.fillStyle = '#8B4513' // Marrom base
+      ctx.fillRect(pos.x - hatWidth / 2, hatY, hatWidth, hatHeight)
+      
+      // Padrão xadrez (verde, marrom, branco)
+      const squareSize = hatWidth / 4
+      const colors_hat = ['#228B22', '#8B4513', '#FFFFFF'] // Verde, marrom, branco
+      for (let i = 0; i < 4; i++) {
+        for (let j = 0; j < 2; j++) {
+          ctx.fillStyle = colors_hat[(i + j) % 3]
+          ctx.fillRect(
+            pos.x - hatWidth / 2 + i * squareSize,
+            hatY + j * (hatHeight / 2),
+            squareSize,
+            hatHeight / 2
+          )
+        }
+      }
+      
+      // Abas laterais do gorro
+      const earFlapSize = radius * 0.25
+      // Aba esquerda
+      ctx.fillStyle = '#8B4513'
+      ctx.beginPath()
+      ctx.arc(pos.x - hatWidth / 2 - earFlapSize * 0.3, hatY + hatHeight / 2, earFlapSize, 0, Math.PI * 2)
+      ctx.fill()
+      // Padrão xadrez na aba esquerda
+      ctx.fillStyle = '#228B22'
+      ctx.fillRect(pos.x - hatWidth / 2 - earFlapSize * 0.5, hatY + hatHeight / 3, earFlapSize * 0.6, hatHeight / 3)
+      
+      // Aba direita
+      ctx.fillStyle = '#8B4513'
+      ctx.beginPath()
+      ctx.arc(pos.x + hatWidth / 2 + earFlapSize * 0.3, hatY + hatHeight / 2, earFlapSize, 0, Math.PI * 2)
+      ctx.fill()
+      // Padrão xadrez na aba direita
+      ctx.fillStyle = '#228B22'
+      ctx.fillRect(pos.x + hatWidth / 2 - earFlapSize * 0.1, hatY + hatHeight / 3, earFlapSize * 0.6, hatHeight / 3)
+      
+      ctx.restore()
+
+      // Draw border with glow
+      ctx.strokeStyle = borderColor
+      ctx.lineWidth = borderWidth
+      ctx.shadowBlur = 12
+      ctx.shadowColor = colors.accent
+      ctx.stroke()
+      ctx.shadowBlur = 0
+    } else if (themeId === "pixel") {
+      // PT: Pixel theme: desenha orb em estilo pixelado/8-bit | EN: Pixel theme: draws orb in pixelated/8-bit style | ES: Tema Pixel: dibuja orb en estilo pixelado/8-bit | FR: Thème Pixel: dessine orb en style pixelisé/8-bit | DE: Pixel-Theme: zeichnet Orb im pixelierten/8-bit-Stil
+      // Draw pixelated orb (8-bit style)
+      const pixelSize = Math.max(4, Math.floor(radius / 8)) // Tamanho do pixel (mínimo 4px)
+      const pixelRadius = Math.floor(radius / pixelSize) * pixelSize // Raio ajustado para múltiplos de pixelSize
+      
+      // Desenha a orb como uma grade de pixels
+      ctx.imageSmoothingEnabled = false // Desabilita suavização para efeito pixelado
+      
+      // Desenha avatar se carregado (pixelado)
+      if (orb.imageLoaded && orb.image && orb.image.complete && orb.image.naturalWidth > 0) {
+        ctx.save()
+        // Cria um canvas temporário para pixelizar a imagem
+        const tempCanvas = document.createElement('canvas')
+        const tempCtx = tempCanvas.getContext('2d')
+        if (tempCtx) {
+          const size = (radius - borderWidth) * 2
+          const pixelatedSize = Math.floor(size / pixelSize)
+          tempCanvas.width = pixelatedSize
+          tempCanvas.height = pixelatedSize
+          tempCtx.imageSmoothingEnabled = false
+          tempCtx.drawImage(orb.image, 0, 0, pixelatedSize, pixelatedSize)
+          
+          // Desenha a imagem pixelizada no canvas principal
+          ctx.beginPath()
+          ctx.arc(pos.x, pos.y, radius - borderWidth, 0, Math.PI * 2)
+          ctx.clip()
+          ctx.imageSmoothingEnabled = false
+          ctx.drawImage(tempCanvas, pos.x - radius + borderWidth, pos.y - radius + borderWidth, size, size)
+        }
+        ctx.restore()
+      } else {
+        // Fallback: desenha círculo pixelado
+        for (let y = -pixelRadius; y <= pixelRadius; y += pixelSize) {
+          for (let x = -pixelRadius; x <= pixelRadius; x += pixelSize) {
+            const distance = Math.sqrt(x * x + y * y)
+            if (distance <= pixelRadius) {
+              ctx.fillStyle = colors.primary
+              ctx.fillRect(pos.x + x - pixelSize / 2, pos.y + y - pixelSize / 2, pixelSize, pixelSize)
+            }
+          }
+        }
+      }
+      
+      // Borda pixelada
+      ctx.strokeStyle = borderColor
+      ctx.lineWidth = borderWidth
+      ctx.shadowBlur = 0 // Sem glow para estilo pixelado
+      // Desenha borda como pixels
+      for (let angle = 0; angle < Math.PI * 2; angle += Math.PI / 16) {
+        const x = pos.x + Math.cos(angle) * pixelRadius
+        const y = pos.y + Math.sin(angle) * pixelRadius
+        ctx.fillStyle = borderColor
+        ctx.fillRect(Math.floor(x / pixelSize) * pixelSize, Math.floor(y / pixelSize) * pixelSize, pixelSize, pixelSize)
+      }
+      
+      ctx.imageSmoothingEnabled = true // Reabilita suavização
+    } else if (themeId === "dracula") {
+      // PT: Dracula theme: desenha orb com capa e dentes de vampiro | EN: Dracula theme: draws orb with vampire cape and fangs | ES: Tema Dracula: dibuja orb con capa y colmillos de vampiro | FR: Thème Dracula: dessine orb avec cape et crocs de vampire | DE: Dracula-Theme: zeichnet Orb mit Vampir-Umhang und Reißzähnen
+      // Draw orb with cape and fangs (Dracula style)
+      ctx.beginPath()
+      ctx.arc(pos.x, pos.y, radius, 0, Math.PI * 2)
+      
+      // Draw avatar if loaded
+      if (orb.imageLoaded && orb.image) {
+        ctx.save()
+        ctx.beginPath()
+        ctx.arc(pos.x, pos.y, radius - borderWidth, 0, Math.PI * 2)
+        ctx.clip()
+        ctx.drawImage(orb.image, pos.x - radius + borderWidth, pos.y - radius + borderWidth, (radius - borderWidth) * 2, (radius - borderWidth) * 2)
+        ctx.restore()
+      } else {
+        // Fallback: draw colored circle
+        ctx.fillStyle = colors.primary
+        ctx.fill()
+      }
+
+      // Draw cape (capa de vampiro) - sobrepondo parcialmente nas laterais
+      const capeWidth = radius * 1.4
+      const capeHeight = radius * 1.2
+      const capeY = pos.y - radius * 0.3
+      
+      ctx.save()
+      ctx.fillStyle = '#1a0a0a' // Preto profundo
+      ctx.strokeStyle = colors.accent // Roxo
+      ctx.lineWidth = 2
+      
+      // Capa esquerda
+      ctx.beginPath()
+      ctx.moveTo(pos.x - radius * 0.8, pos.y - radius * 0.5)
+      ctx.lineTo(pos.x - capeWidth / 2, capeY)
+      ctx.lineTo(pos.x - capeWidth / 2, capeY + capeHeight)
+      ctx.lineTo(pos.x - radius * 0.6, pos.y + radius * 0.3)
+      ctx.closePath()
+      ctx.fill()
+      ctx.stroke()
+      
+      // Capa direita
+      ctx.beginPath()
+      ctx.moveTo(pos.x + radius * 0.8, pos.y - radius * 0.5)
+      ctx.lineTo(pos.x + capeWidth / 2, capeY)
+      ctx.lineTo(pos.x + capeWidth / 2, capeY + capeHeight)
+      ctx.lineTo(pos.x + radius * 0.6, pos.y + radius * 0.3)
+      ctx.closePath()
+      ctx.fill()
+      ctx.stroke()
+      
+      // Gola alta (collar)
+      ctx.fillStyle = '#2d1b3d' // Roxo escuro
+      ctx.beginPath()
+      ctx.arc(pos.x, pos.y - radius * 0.4, radius * 0.5, 0, Math.PI * 2)
+      ctx.fill()
+      ctx.stroke()
+      
+      // Dentes (presas) - NA FRENTE da foto
+      const fangSize = radius * 0.15
+      ctx.fillStyle = '#ffffff' // Branco
+      ctx.strokeStyle = '#8b0000' // Vermelho escuro
+      ctx.lineWidth = 1.5
+      
+      // Dente esquerdo
+      ctx.beginPath()
+      ctx.moveTo(pos.x - radius * 0.2, pos.y - radius * 0.1)
+      ctx.lineTo(pos.x - radius * 0.3, pos.y - radius * 0.3)
+      ctx.lineTo(pos.x - radius * 0.15, pos.y - radius * 0.2)
+      ctx.closePath()
+      ctx.fill()
+      ctx.stroke()
+      
+      // Dente direito
+      ctx.beginPath()
+      ctx.moveTo(pos.x + radius * 0.2, pos.y - radius * 0.1)
+      ctx.lineTo(pos.x + radius * 0.3, pos.y - radius * 0.3)
+      ctx.lineTo(pos.x + radius * 0.15, pos.y - radius * 0.2)
+      ctx.closePath()
+      ctx.fill()
+      ctx.stroke()
+      
+      ctx.restore()
 
       // Draw border with glow
       ctx.strokeStyle = borderColor
@@ -2833,6 +3219,10 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
       borderColor = colors.accent // Vermelho para Pomemin
       borderWidth = 3
       glowIntensity = 6
+    } else if (themeId === "dracula") {
+      borderColor = colors.accent // Roxo para Dracula
+      borderWidth = 3
+      glowIntensity = 7
     }
 
     // PT: Pomemin theme: desenha orbs com orelhinhas (estilo Pokémon) | EN: Pomemin theme: draws orbs with ears (Pokémon style) | ES: Tema Pomemin: dibuja orbs con orejitas (estilo Pokémon) | FR: Thème Pomemin: dessine orbs avec oreilles (style Pokémon) | DE: Pomemin-Theme: zeichnet Orbs mit Ohren (Pokémon-Stil)
@@ -2915,6 +3305,220 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
         ctx.fillStyle = colors.primary
         ctx.fill()
       }
+
+      // Draw suspenders (tiras laranja) - NA FRENTE da foto
+      // Partem do topo direito do quadrado
+      const suspenderWidth = radius * 0.08
+      const suspenderColor = '#FF8C00' // Laranja
+      ctx.strokeStyle = suspenderColor
+      ctx.lineWidth = suspenderWidth
+      ctx.lineCap = 'round'
+      
+      // Tira de cima: do topo direito até a quina debaixo da esquerda
+      ctx.beginPath()
+      ctx.moveTo(pos.x + radius, pos.y - radius) // Topo direito do quadrado
+      ctx.lineTo(pos.x - radius, pos.y + radius) // Quina debaixo da esquerda
+      ctx.stroke()
+      
+      // Tira debaixo: do topo direito até mais ou menos a parte do meio do quadrado embaixo
+      ctx.beginPath()
+      ctx.moveTo(pos.x + radius, pos.y - radius) // Topo direito do quadrado
+      ctx.lineTo(pos.x - radius * 0.3, pos.y + radius) // Parte do meio embaixo (mais à direita)
+      ctx.stroke()
+
+      // Draw hat/gorro (chapéu xadrez com abas) - sobrepondo parcialmente no topo
+      const hatHeight = radius * 0.35
+      const hatWidth = radius * 1.6
+      const hatY = pos.y - radius * 0.85
+      
+      // Corpo do gorro (xadrez)
+      ctx.save()
+      ctx.fillStyle = '#8B4513' // Marrom base
+      ctx.fillRect(pos.x - hatWidth / 2, hatY, hatWidth, hatHeight)
+      
+      // Padrão xadrez (verde, marrom, branco)
+      const squareSize = hatWidth / 4
+      const colors_hat = ['#228B22', '#8B4513', '#FFFFFF'] // Verde, marrom, branco
+      for (let i = 0; i < 4; i++) {
+        for (let j = 0; j < 2; j++) {
+          ctx.fillStyle = colors_hat[(i + j) % 3]
+          ctx.fillRect(
+            pos.x - hatWidth / 2 + i * squareSize,
+            hatY + j * (hatHeight / 2),
+            squareSize,
+            hatHeight / 2
+          )
+        }
+      }
+      
+      // Abas laterais do gorro
+      const earFlapSize = radius * 0.25
+      // Aba esquerda
+      ctx.fillStyle = '#8B4513'
+      ctx.beginPath()
+      ctx.arc(pos.x - hatWidth / 2 - earFlapSize * 0.3, hatY + hatHeight / 2, earFlapSize, 0, Math.PI * 2)
+      ctx.fill()
+      // Padrão xadrez na aba esquerda
+      ctx.fillStyle = '#228B22'
+      ctx.fillRect(pos.x - hatWidth / 2 - earFlapSize * 0.5, hatY + hatHeight / 3, earFlapSize * 0.6, hatHeight / 3)
+      
+      // Aba direita
+      ctx.fillStyle = '#8B4513'
+      ctx.beginPath()
+      ctx.arc(pos.x + hatWidth / 2 + earFlapSize * 0.3, hatY + hatHeight / 2, earFlapSize, 0, Math.PI * 2)
+      ctx.fill()
+      // Padrão xadrez na aba direita
+      ctx.fillStyle = '#228B22'
+      ctx.fillRect(pos.x + hatWidth / 2 - earFlapSize * 0.1, hatY + hatHeight / 3, earFlapSize * 0.6, hatHeight / 3)
+      
+      ctx.restore()
+
+      // Draw border with glow
+      ctx.strokeStyle = borderColor
+      ctx.lineWidth = borderWidth
+      ctx.shadowBlur = 12
+      ctx.shadowColor = colors.accent
+      ctx.stroke()
+      ctx.shadowBlur = 0
+    } else if (themeId === "pixel") {
+      // PT: Pixel theme: desenha orb em estilo pixelado/8-bit | EN: Pixel theme: draws orb in pixelated/8-bit style | ES: Tema Pixel: dibuja orb en estilo pixelado/8-bit | FR: Thème Pixel: dessine orb en style pixelisé/8-bit | DE: Pixel-Theme: zeichnet Orb im pixelierten/8-bit-Stil
+      // Draw pixelated orb (8-bit style)
+      const pixelSize = Math.max(4, Math.floor(radius / 8)) // Tamanho do pixel (mínimo 4px)
+      const pixelRadius = Math.floor(radius / pixelSize) * pixelSize // Raio ajustado para múltiplos de pixelSize
+      
+      // Desenha a orb como uma grade de pixels
+      ctx.imageSmoothingEnabled = false // Desabilita suavização para efeito pixelado
+      
+      // Desenha avatar se carregado (pixelado)
+      if (orb.imageLoaded && orb.image && orb.image.complete && orb.image.naturalWidth > 0) {
+        ctx.save()
+        // Cria um canvas temporário para pixelizar a imagem
+        const tempCanvas = document.createElement('canvas')
+        const tempCtx = tempCanvas.getContext('2d')
+        if (tempCtx) {
+          const size = (radius - borderWidth) * 2
+          const pixelatedSize = Math.floor(size / pixelSize)
+          tempCanvas.width = pixelatedSize
+          tempCanvas.height = pixelatedSize
+          tempCtx.imageSmoothingEnabled = false
+          tempCtx.drawImage(orb.image, 0, 0, pixelatedSize, pixelatedSize)
+          
+          // Desenha a imagem pixelizada no canvas principal
+          ctx.beginPath()
+          ctx.arc(pos.x, pos.y, radius - borderWidth, 0, Math.PI * 2)
+          ctx.clip()
+          ctx.imageSmoothingEnabled = false
+          ctx.drawImage(tempCanvas, pos.x - radius + borderWidth, pos.y - radius + borderWidth, size, size)
+        }
+        ctx.restore()
+      } else {
+        // Fallback: desenha círculo pixelado
+        for (let y = -pixelRadius; y <= pixelRadius; y += pixelSize) {
+          for (let x = -pixelRadius; x <= pixelRadius; x += pixelSize) {
+            const distance = Math.sqrt(x * x + y * y)
+            if (distance <= pixelRadius) {
+              ctx.fillStyle = colors.primary
+              ctx.fillRect(pos.x + x - pixelSize / 2, pos.y + y - pixelSize / 2, pixelSize, pixelSize)
+            }
+          }
+        }
+      }
+      
+      // Borda pixelada
+      ctx.strokeStyle = borderColor
+      ctx.lineWidth = borderWidth
+      ctx.shadowBlur = 0 // Sem glow para estilo pixelado
+      // Desenha borda como pixels
+      for (let angle = 0; angle < Math.PI * 2; angle += Math.PI / 16) {
+        const x = pos.x + Math.cos(angle) * pixelRadius
+        const y = pos.y + Math.sin(angle) * pixelRadius
+        ctx.fillStyle = borderColor
+        ctx.fillRect(Math.floor(x / pixelSize) * pixelSize, Math.floor(y / pixelSize) * pixelSize, pixelSize, pixelSize)
+      }
+      
+      ctx.imageSmoothingEnabled = true // Reabilita suavização
+    } else if (themeId === "dracula") {
+      // PT: Dracula theme: desenha orb com capa e dentes de vampiro | EN: Dracula theme: draws orb with vampire cape and fangs | ES: Tema Dracula: dibuja orb con capa y colmillos de vampiro | FR: Thème Dracula: dessine orb avec cape et crocs de vampire | DE: Dracula-Theme: zeichnet Orb mit Vampir-Umhang und Reißzähnen
+      // Draw orb with cape and fangs (Dracula style)
+      ctx.beginPath()
+      ctx.arc(pos.x, pos.y, radius, 0, Math.PI * 2)
+      
+      // Draw avatar if loaded
+      if (orb.imageLoaded && orb.image) {
+        ctx.save()
+        ctx.beginPath()
+        ctx.arc(pos.x, pos.y, radius - borderWidth, 0, Math.PI * 2)
+        ctx.clip()
+        ctx.drawImage(orb.image, pos.x - radius + borderWidth, pos.y - radius + borderWidth, (radius - borderWidth) * 2, (radius - borderWidth) * 2)
+        ctx.restore()
+      } else {
+        // Fallback: draw colored circle
+        ctx.fillStyle = colors.primary
+        ctx.fill()
+      }
+
+      // Draw cape (capa de vampiro) - sobrepondo parcialmente nas laterais
+      const capeWidth = radius * 1.4
+      const capeHeight = radius * 1.2
+      const capeY = pos.y - radius * 0.3
+      
+      ctx.save()
+      ctx.fillStyle = '#1a0a0a' // Preto profundo
+      ctx.strokeStyle = colors.accent // Roxo
+      ctx.lineWidth = 2
+      
+      // Capa esquerda
+      ctx.beginPath()
+      ctx.moveTo(pos.x - radius * 0.8, pos.y - radius * 0.5)
+      ctx.lineTo(pos.x - capeWidth / 2, capeY)
+      ctx.lineTo(pos.x - capeWidth / 2, capeY + capeHeight)
+      ctx.lineTo(pos.x - radius * 0.6, pos.y + radius * 0.3)
+      ctx.closePath()
+      ctx.fill()
+      ctx.stroke()
+      
+      // Capa direita
+      ctx.beginPath()
+      ctx.moveTo(pos.x + radius * 0.8, pos.y - radius * 0.5)
+      ctx.lineTo(pos.x + capeWidth / 2, capeY)
+      ctx.lineTo(pos.x + capeWidth / 2, capeY + capeHeight)
+      ctx.lineTo(pos.x + radius * 0.6, pos.y + radius * 0.3)
+      ctx.closePath()
+      ctx.fill()
+      ctx.stroke()
+      
+      // Gola alta (collar)
+      ctx.fillStyle = '#2d1b3d' // Roxo escuro
+      ctx.beginPath()
+      ctx.arc(pos.x, pos.y - radius * 0.4, radius * 0.5, 0, Math.PI * 2)
+      ctx.fill()
+      ctx.stroke()
+      
+      // Dentes (presas) - NA FRENTE da foto
+      const fangSize = radius * 0.15
+      ctx.fillStyle = '#ffffff' // Branco
+      ctx.strokeStyle = '#8b0000' // Vermelho escuro
+      ctx.lineWidth = 1.5
+      
+      // Dente esquerdo
+      ctx.beginPath()
+      ctx.moveTo(pos.x - radius * 0.2, pos.y - radius * 0.1)
+      ctx.lineTo(pos.x - radius * 0.3, pos.y - radius * 0.3)
+      ctx.lineTo(pos.x - radius * 0.15, pos.y - radius * 0.2)
+      ctx.closePath()
+      ctx.fill()
+      ctx.stroke()
+      
+      // Dente direito
+      ctx.beginPath()
+      ctx.moveTo(pos.x + radius * 0.2, pos.y - radius * 0.1)
+      ctx.lineTo(pos.x + radius * 0.3, pos.y - radius * 0.3)
+      ctx.lineTo(pos.x + radius * 0.15, pos.y - radius * 0.2)
+      ctx.closePath()
+      ctx.fill()
+      ctx.stroke()
+      
+      ctx.restore()
 
       // Draw border with glow
       ctx.strokeStyle = borderColor
@@ -3245,6 +3849,91 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
                   ctx.fillStyle = colors.primary
                   ctx.fill()
                 }
+                ctx.restore()
+              } else if (themeId === "dracula") {
+                // PT: Dracula theme: desenha reflexo com capa e dentes | EN: Dracula theme: draws reflection with cape and fangs | ES: Tema Dracula: dibuja reflejo con capa y colmillos | FR: Thème Dracula: dessine réflexion avec cape et crocs | DE: Dracula-Theme: zeichnet Reflexion mit Umhang und Reißzähnen
+                // Draw Dracula reflection - inverted vertically
+                ctx.save()
+                ctx.translate(pos.x, reflectionY)
+                ctx.scale(1, -1) // Invert vertically
+                ctx.translate(-pos.x, -reflectionY)
+                
+                ctx.beginPath()
+                ctx.arc(pos.x, reflectionY, radius, 0, Math.PI * 2)
+                
+                // Draw avatar if loaded
+                if (orb.imageLoaded && orb.image) {
+                  ctx.save()
+                  ctx.beginPath()
+                  ctx.arc(pos.x, reflectionY, radius - 2, 0, Math.PI * 2)
+                  ctx.clip()
+                  ctx.drawImage(orb.image, pos.x - radius + 2, reflectionY - radius + 2, (radius - 2) * 2, (radius - 2) * 2)
+                  ctx.restore()
+                } else {
+                  ctx.fillStyle = colors.primary
+                  ctx.fill()
+                }
+                
+                // Draw cape reflection
+                const capeWidth = radius * 1.4
+                const capeHeight = radius * 1.2
+                const capeY = reflectionY - radius * 0.3
+                
+                ctx.fillStyle = '#1a0a0a'
+                ctx.strokeStyle = colors.accent
+                ctx.lineWidth = 2
+                
+                // Capa esquerda
+                ctx.beginPath()
+                ctx.moveTo(pos.x - radius * 0.8, reflectionY - radius * 0.5)
+                ctx.lineTo(pos.x - capeWidth / 2, capeY)
+                ctx.lineTo(pos.x - capeWidth / 2, capeY + capeHeight)
+                ctx.lineTo(pos.x - radius * 0.6, reflectionY + radius * 0.3)
+                ctx.closePath()
+                ctx.fill()
+                ctx.stroke()
+                
+                // Capa direita
+                ctx.beginPath()
+                ctx.moveTo(pos.x + radius * 0.8, reflectionY - radius * 0.5)
+                ctx.lineTo(pos.x + capeWidth / 2, capeY)
+                ctx.lineTo(pos.x + capeWidth / 2, capeY + capeHeight)
+                ctx.lineTo(pos.x + radius * 0.6, reflectionY + radius * 0.3)
+                ctx.closePath()
+                ctx.fill()
+                ctx.stroke()
+                
+                // Gola alta
+                ctx.fillStyle = '#2d1b3d'
+                ctx.beginPath()
+                ctx.arc(pos.x, reflectionY - radius * 0.4, radius * 0.5, 0, Math.PI * 2)
+                ctx.fill()
+                ctx.stroke()
+                
+                // Dentes
+                const fangSize = radius * 0.15
+                ctx.fillStyle = '#ffffff'
+                ctx.strokeStyle = '#8b0000'
+                ctx.lineWidth = 1.5
+                
+                // Dente esquerdo
+                ctx.beginPath()
+                ctx.moveTo(pos.x - radius * 0.2, reflectionY - radius * 0.1)
+                ctx.lineTo(pos.x - radius * 0.3, reflectionY - radius * 0.3)
+                ctx.lineTo(pos.x - radius * 0.15, reflectionY - radius * 0.2)
+                ctx.closePath()
+                ctx.fill()
+                ctx.stroke()
+                
+                // Dente direito
+                ctx.beginPath()
+                ctx.moveTo(pos.x + radius * 0.2, reflectionY - radius * 0.1)
+                ctx.lineTo(pos.x + radius * 0.3, reflectionY - radius * 0.3)
+                ctx.lineTo(pos.x + radius * 0.15, reflectionY - radius * 0.2)
+                ctx.closePath()
+                ctx.fill()
+                ctx.stroke()
+                
                 ctx.restore()
               } else {
                 // Draw orb circle (reflection) - inverted vertically

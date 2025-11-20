@@ -5,7 +5,7 @@
  * Each theme includes colors, typography, and effect variables.
  */
 
-export type ThemeId = 'analista-jr' | 'analista-sr' | 'lofi-code' | 'cyber' | 'pixel' | 'neon' | 'terminal' | 'blueprint' | 'bruno-csharp' | 'chaves' | 'pomemin'
+export type ThemeId = 'analista-jr' | 'analista-sr' | 'lofi-code' | 'cyber' | 'pixel' | 'neon' | 'terminal' | 'blueprint' | 'bruno-csharp' | 'chaves' | 'pomemin' | 'dracula'
 
 export interface Theme {
   name: string
@@ -527,6 +527,73 @@ export const THEMES: Record<ThemeId, Theme> = {
       // EXCLUSIVO: Tema Pomemin
       '--pokemon-energy': '1.2', // Energia Pokémon
       '--pokemon-bounce': '0.9', // Bounce mais alto
+    },
+  },
+  dracula: {
+    name: 'Dracula',
+    vars: {
+      // Colors - Cores góticas/vampiro (preto, vermelho escuro, roxo)
+      '--color-bg': '#0d0d0d', // Preto profundo (noite eterna)
+      '--color-bg-secondary': '#1a0a0a', // Vermelho muito escuro
+      '--color-primary': '#8b0000', // Vermelho escuro (sangue)
+      '--color-primary-hover': '#a00000',
+      '--color-accent': '#4b0082', // Índigo/roxo escuro (mistério)
+      '--color-accent-hover': '#5a0099',
+      '--color-secondary': '#2d1b3d', // Roxo muito escuro
+      '--color-highlight': '#c41e3a', // Vermelho carmesim
+      '--color-muted': '#4a4a4a', // Cinza escuro
+      '--color-text': '#f5f5f5', // Branco fantasmagórico
+      '--color-text-secondary': '#d4af37', // Dourado (antigo)
+      '--color-glow': 'rgba(139, 0, 0, 0.6)', // Glow vermelho escuro
+      '--color-border': 'rgba(75, 0, 130, 0.4)',
+      '--color-error': '#dc143c', // Vermelho sangue
+      
+      // Typography - Fonte gótica/elegante
+      '--font': "'Cinzel', 'Garamond', 'Times New Roman', serif",
+      '--font-size-base': '16px',
+      '--font-weight-normal': '400',
+      '--line-height': '1.7',
+      
+      // Effects - Sombrio e misterioso
+      '--glow-sm': '0 0 8px rgba(139, 0, 0, 0.5)',
+      '--glow-md': '0 0 16px rgba(139, 0, 0, 0.6)',
+      '--glow-lg': '0 0 24px rgba(75, 0, 130, 0.7)',
+      '--glow-xl': '0 0 32px rgba(139, 0, 0, 0.8)',
+      '--glow-intensity': '1.3', // Glow moderado
+      '--anim-duration': '400ms', // Animação suave
+      '--anim-easing': 'cubic-bezier(0.4, 0, 0.2, 1)',
+      '--border-radius': '4px', // Cantos mais retos (gótico)
+      '--pulse-speed': '3000ms', // Pulsação lenta (batimento)
+      '--drift-speed': '6000ms',
+      '--scanline-opacity': '0.04',
+      '--noise-opacity': '0.04',
+      '--blur-intensity': '0px',
+      '--cursor-blink': 'blink',
+      '--minimal-opacity': '1',
+      
+      // Canvas/Game - Cores góticas
+      '--orb-fill': '#8b0000', // Vermelho escuro
+      '--orb-stroke': '#4b0082', // Roxo escuro
+      '--orb-glow': 'rgba(139, 0, 0, 0.5)',
+      '--orb-trail-opacity': '0.2',
+      '--orb-gravity': '1.0',
+      '--basket-fill': '#1a0a0a',
+      '--basket-stroke': '#8b0000',
+      '--basket-stroke-width': '3px',
+      '--particle-color-1': '#8b0000', // Vermelho escuro
+      '--particle-color-2': '#4b0082', // Roxo
+      '--particle-color-3': '#c41e3a', // Carmesim
+      '--particle-lifetime': '2000ms',
+      '--particle-fade-delay': '500ms',
+      '--firework-color-1': '#8b0000', // Vermelho escuro
+      '--firework-color-2': '#4b0082', // Roxo
+      '--firework-color-3': '#c41e3a', // Carmesim
+      '--firework-speed': '1.0',
+      '--firework-gravity': '1.0',
+      
+      // EXCLUSIVO: Tema Dracula
+      '--dracula-mystery': '1.1', // Mistério gótico
+      '--dracula-elegance': '0.9', // Elegância sombria
     },
   },
 }
