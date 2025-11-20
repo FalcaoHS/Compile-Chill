@@ -23,16 +23,24 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
   }
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
-      onClick={onClose}
-      aria-modal="true"
-      role="dialog"
-    >
+    <>
+      {/* Backdrop */}
       <div
-        className="bg-page-secondary border border-border rounded-lg p-8 w-full max-w-md shadow-lg"
-        onClick={(e) => e.stopPropagation()}
+        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60]"
+        onClick={onClose}
+        aria-hidden="true"
+      />
+      
+      {/* Modal */}
+      <div
+        className="fixed inset-0 z-[60] flex items-center justify-center p-4 pointer-events-none"
+        aria-modal="true"
+        role="dialog"
       >
+        <div
+          className="bg-page-secondary border border-border rounded-lg p-8 w-full max-w-md shadow-lg max-h-[90vh] overflow-y-auto pointer-events-auto"
+          onClick={(e) => e.stopPropagation()}
+        >
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold text-text">Entrar</h2>
           <button
@@ -129,8 +137,9 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
             <EmailLoginForm onSuccess={handleEmailLoginSuccess} />
           </>
         )}
+        </div>
       </div>
-    </div>
+    </>
   )
 }
 

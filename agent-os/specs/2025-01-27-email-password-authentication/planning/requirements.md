@@ -34,6 +34,69 @@
 
 ---
 
+## 🔗 Validação e Vinculação de Conta X (Twitter)
+
+### Requisito: Validação Opcional do X para Usuários Não-X
+
+**Contexto:**
+- Usuários que autenticam com X já entram direto no sistema (ranking, etc)
+- Usuários que se cadastram por Email/Password ou Google podem não ter conta X inicialmente
+- Esses usuários devem poder validar/vincular sua conta X posteriormente nas configurações
+
+**Fluxo de Validação do X:**
+
+1. **Acesso às Configurações:**
+   - Usuário acessa `/profile` (página de perfil próprio)
+   - Seção "Configurações" ou "Contas Conectadas"
+   - Mostrar status atual: "X não validado" ou "X validado"
+
+2. **Botão de Validar X:**
+   - Se usuário não tem `xId` vinculado, mostrar botão "Validar Conta X"
+   - Botão abre popup de autenticação X (mesmo fluxo do login, mas apenas para validação)
+   - Após autenticação bem-sucedida no popup:
+     - Buscar informações do X (xId, xUsername, avatar se disponível)
+     - Atualizar registro do usuário com essas informações
+     - Vincular Account do X ao User existente
+     - Não criar novo usuário, apenas atualizar o existente
+
+3. **Validação Bem-Sucedida:**
+   - Atualizar perfil do usuário com:
+     - `xId` (obrigatório após validação)
+     - `xUsername` (se disponível)
+     - Avatar do X (se disponível e usuário não tiver avatar customizado)
+   - Usuário agora aparece no ranking e em todas as funcionalidades que requerem X
+   - Mostrar mensagem de sucesso: "Conta X validada com sucesso!"
+
+4. **Comportamento Após Validação:**
+   - Usuário pode usar qualquer método de login (Email, Google, ou X)
+   - Todas as contas ficam vinculadas ao mesmo User
+   - Ranking e funcionalidades sociais passam a funcionar normalmente
+
+**Implementação Técnica:**
+
+- Criar endpoint `/api/users/validate-x` (POST) que:
+  - Requer autenticação
+  - Recebe `xId` e `xUsername` do callback do OAuth
+  - Atualiza User atual (não cria novo)
+  - Cria/atualiza Account do X vinculado ao User
+  - Retorna sucesso/erro
+
+- Modificar callback do X OAuth para:
+  - Verificar se usuário já está autenticado (sessão ativa)
+  - Se sim, tratar como validação (não criar novo usuário)
+  - Se não, tratar como login normal
+
+- Adicionar componente `XValidationButton` na página de perfil:
+  - Mostrar apenas se usuário não tem `xId`
+  - Abrir popup de autenticação X
+  - Após callback, chamar endpoint de validação
+  - Atualizar UI para mostrar status atualizado
+
+**Casos de Uso:**
+- Usuário cria conta com Email/Password → depois valida X → aparece no ranking
+- Usuário cria conta com Google → depois valida X → pode usar qualquer método de login
+- Usuário já tem X validado → não mostra opção de validar novamente
+
 ## 🎨 Requisitos de UI/UX
 
 ### 1. Fluxo de Autenticação Google

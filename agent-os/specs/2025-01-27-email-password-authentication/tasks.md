@@ -303,11 +303,65 @@ Total Tasks: 6 groups, 40+ sub-tasks
 - All components are theme-aware and responsive
 - Remember Me checkbox affects session duration
 
+### X Account Validation
+
+#### Task Group 6: X Account Validation for Non-X Users
+**Dependencies:** Task Groups 1-5
+
+- [ ] 6.0 Implement X account validation feature
+  - [ ] 6.1 Create `/api/users/validate-x` endpoint
+    - POST endpoint that requires authentication
+    - Receives X account data (xId, xUsername, avatar) from request body
+    - Updates existing User record (does not create new user)
+    - Creates/updates Account record linking X provider to existing User
+    - Validates that user doesn't already have xId (prevent duplicate validation)
+    - Returns success/error response with appropriate status codes
+    - Handles errors gracefully (duplicate xId, invalid data, etc.)
+  - [ ] 6.2 Modify X OAuth callback in auth.config.ts
+    - Detect if user is already authenticated (session exists)
+    - If authenticated: treat as validation flow
+      - Get current user from session
+      - Update User with X data (xId, xUsername, avatar)
+      - Create/update Account record for X provider
+      - Return success without creating new user
+    - If not authenticated: treat as normal login (existing behavior)
+    - Ensure callback works for both login and validation scenarios
+  - [ ] 6.3 Create XValidationButton component
+    - Component to be used in profile settings page
+    - Shows "Validar Conta X" button only if user doesn't have xId
+    - Opens X OAuth popup using existing popup flow
+    - Handles validation callback
+    - Calls `/api/users/validate-x` endpoint after successful OAuth
+    - Shows loading state during validation
+    - Displays success/error messages
+    - Updates UI to reflect validation status
+  - [ ] 6.4 Add validation section to `/profile` page
+    - Add "Contas Conectadas" or "Configurações" section
+    - Show current validation status:
+      - "X validado" if user has xId
+      - "X não validado" if user doesn't have xId
+    - Include XValidationButton component
+    - Display success message after validation: "Conta X validada com sucesso!"
+    - Make section theme-aware and responsive
+  - [ ] 6.5 Update auth adapter for validation flow
+    - Ensure `updateUserFromOAuth` can handle updating existing users
+    - Support linking new Account to existing User
+    - Prevent duplicate Account records
+    - Maintain backward compatibility with existing login flow
+
+**Acceptance Criteria:**
+- Users without X can validate their X account from profile settings
+- Validation updates existing user record (does not create new user)
+- After validation, user can use any authentication method (X, Google, Email)
+- User appears in rankings and social features after validation
+- Validation status is clearly displayed in profile settings
+- All accounts are properly linked to the same User record
+
 ### Testing
 
 IMPORTANTE - Não pergunte, apenas ignore os Testes por enquanto neste projeto.
 
-#### Task Group 6: Test Review & Gap Analysis
+#### Task Group 7: Test Review & Gap Analysis
 **Dependencies:** Task Groups 1-5
 
 - [ ] 6.0 Review existing tests and fill critical gaps only
@@ -352,5 +406,6 @@ Recommended implementation sequence:
 3. NextAuth Configuration (Task Group 3) - Authentication logic: add Google and Credentials providers
 4. API Routes (Task Group 4) - Data layer: update APIs to handle encrypted data and multiple providers
 5. Frontend Components (Task Group 5) - User interface: create login/signup forms and pages
-6. Test Review & Gap Analysis (Task Group 6) - Quality assurance: ensure comprehensive coverage
+6. X Account Validation (Task Group 6) - Allow non-X users to validate X account later
+7. Test Review & Gap Analysis (Task Group 7) - Quality assurance: ensure comprehensive coverage
 

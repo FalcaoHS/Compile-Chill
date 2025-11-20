@@ -7,6 +7,8 @@ Implement alternative authentication methods (Email/Password and Google OAuth) a
 - As a user experiencing X login issues, I want to sign up with email and password so that I can access the platform without depending on X authentication
 - As a new user, I want to sign in with Google OAuth so that I can quickly create an account using my existing Google credentials
 - As an authenticated user, I want my name to be securely encrypted and my password hashed so that my personal data is protected
+- As a user who signed up with email/password or Google, I want to validate my X account later so that I can participate in rankings and social features
+- As a user with a validated X account, I want to use any authentication method (X, Google, or Email) to access my account
 
 ## Specific Requirements
 
@@ -92,6 +94,30 @@ Implement alternative authentication methods (Email/Password and Google OAuth) a
 - Convert chosen avatar to base64 format (max 2MB) before storing
 - After submission, create User record and redirect to home page
 - Store flag to prevent showing setup page on subsequent Google logins
+
+**X Account Validation for Non-X Users**
+- Users who authenticate with X enter directly into the system (ranking, social features enabled)
+- Users who sign up with Email/Password or Google can validate their X account later from profile settings
+- Create `/api/users/validate-x` endpoint (POST) that:
+  - Requires authentication (user must be logged in)
+  - Receives X account data (xId, xUsername, avatar) from OAuth callback
+  - Updates existing User record (does not create new user)
+  - Creates/updates Account record linking X to existing User
+  - Returns success/error response
+- Modify X OAuth callback to detect if user is already authenticated:
+  - If authenticated: treat as validation (update existing user, link X account)
+  - If not authenticated: treat as normal login (create or find user)
+- Add X validation UI component in `/profile` page:
+  - Show "Validar Conta X" button only if user doesn't have xId
+  - Open X OAuth popup for validation
+  - After successful validation, call `/api/users/validate-x` endpoint
+  - Update UI to show validation status
+  - Display success message: "Conta X validada com sucesso!"
+- After X validation:
+  - User can use any authentication method (X, Google, Email) to access account
+  - All accounts are linked to the same User record
+  - User appears in rankings and social features
+  - User can participate in all X-integrated functionality
 
 ## Visual Design
 No visual assets provided. Design will follow existing authentication component patterns (LoginButton, ProfileButton) with theme-aware TailwindCSS styling, maintaining consistency with current UI/UX.
