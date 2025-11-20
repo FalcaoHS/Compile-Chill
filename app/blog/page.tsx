@@ -24,6 +24,13 @@ const posts = [
     category: 'História',
   },
   {
+    slug: 'drivers-auto-conscientes-sistema-inteligente',
+    title: 'Drivers Auto-Conscientes: Sistema de Inteligência Aplicada',
+    excerpt: 'Como criamos um sistema onde a IA não apenas segue instruções, mas aprende e se melhora continuamente através de drivers auto-conscientes.',
+    date: '2025-11-20',
+    category: 'Arquitetura',
+  },
+  {
     slug: 'por-que-open-source',
     title: 'Por que coloquei o Compile & Chill como open-source?',
     excerpt: 'Explicação clara sobre os motivos de tornar o projeto open-source: aprendizado, transparência e acesso.',
