@@ -23,8 +23,8 @@ export const POST = withAuthAndRateLimit(
       // Parse and validate request body
       const body = await request.json()
       
-      // Log suspicious score attempts before validation
-      // Note: Idle games like crypto-miner can legitimately reach billions
+      // PT: Log de tentativas suspeitas antes da validação | EN: Log suspicious attempts before validation | ES: Registro de intentos sospechosos antes de validación | FR: Journalisation tentatives suspectes avant validation | DE: Protokollierung verdächtiger Versuche vor Validierung
+      // PT: Nota: Jogos idle como crypto-miner podem legitimamente chegar a bilhões | EN: Note: Idle games like crypto-miner can legitimately reach billions | ES: Nota: Juegos idle como crypto-miner pueden legítimamente llegar a billones | FR: Note: Jeux idle comme crypto-miner peuvent légitimement atteindre milliards | DE: Hinweis: Idle-Spiele wie crypto-miner können legitimerweise Milliarden erreichen
       if (body.score > 100_000_000_000) {
         console.warn('🚨 [ANTI-CHEAT] Score manipulation attempt detected:', {
           userId: user.id,
@@ -43,9 +43,9 @@ export const POST = withAuthAndRateLimit(
 
       const userId = parseInt(user.id)
 
-      // Use Prisma transaction to handle isBestScore flag atomically
+      // PT: Transação Prisma garante atomicidade ao atualizar isBestScore | EN: Prisma transaction ensures atomicity when updating isBestScore | ES: Transacción Prisma garantiza atomicidad al actualizar isBestScore | FR: Transaction Prisma garantit l'atomicité lors de la mise à jour isBestScore | DE: Prisma-Transaktion gewährleistet Atomarität beim Aktualisieren von isBestScore
       const result = await prisma.$transaction(async (tx) => {
-        // Check if user has a previous best score for this game
+        // PT: Verifica se usuário já tem melhor score para este jogo | EN: Check if user has previous best score for this game | ES: Verifica si usuario ya tiene mejor puntuación para este juego | FR: Vérifie si l'utilisateur a déjà un meilleur score pour ce jeu | DE: Prüft, ob Benutzer bereits beste Punktzahl für dieses Spiel hat
         const previousBest = await tx.score.findFirst({
           where: {
             userId,
@@ -54,10 +54,10 @@ export const POST = withAuthAndRateLimit(
           },
         })
 
-        // Determine if this is a new best score
+        // PT: Determina se é novo recorde (primeiro score ou maior que anterior) | EN: Determine if this is new best (first score or higher than previous) | ES: Determina si es nuevo récord (primer score o mayor que anterior) | FR: Détermine si c'est un nouveau record (premier score ou supérieur) | DE: Bestimmt, ob dies neuer Rekord ist (erster Score oder höher)
         const isNewBest = !previousBest || score > previousBest.score
 
-        // Create new score
+        // PT: Cria novo score com flag isBestScore | EN: Create new score with isBestScore flag | ES: Crea nuevo score con flag isBestScore | FR: Crée nouveau score avec flag isBestScore | DE: Erstellt neuen Score mit isBestScore-Flag
         const newScore = await tx.score.create({
           data: {
             userId,
@@ -71,7 +71,7 @@ export const POST = withAuthAndRateLimit(
           },
         })
 
-        // If this is a new best, update the previous best
+        // PT: Se é novo recorde, remove flag do anterior (garante apenas 1 isBestScore por jogo) | EN: If new best, remove flag from previous (ensures only 1 isBestScore per game) | ES: Si es nuevo récord, quita flag del anterior (garantiza solo 1 isBestScore por juego) | FR: Si nouveau record, retire flag du précédent (garantit 1 seul isBestScore par jeu) | DE: Wenn neuer Rekord, entfernt Flag vom vorherigen (stellt sicher, dass nur 1 isBestScore pro Spiel)
         if (isNewBest && previousBest) {
           await tx.score.update({
             where: { id: previousBest.id },

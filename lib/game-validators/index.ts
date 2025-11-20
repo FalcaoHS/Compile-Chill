@@ -8,10 +8,13 @@ import { devFifteenHexValidator } from "./dev-fifteen-hex"
  * 
  * Maps gameId to its validator implementation.
  * Validators are imported and registered here as they are implemented.
+ * 
+ * PT: Registro de validadores - mapeia gameId para implementação do validador | EN: Validators registry - maps gameId to validator implementation | ES: Registro de validadores - mapea gameId a implementación del validador | FR: Registre des validateurs - mappe gameId vers implémentation validateur | DE: Validatoren-Register - ordnet gameId Validator-Implementierung zu
  */
 const validators: Record<string, GameValidator> = {
   "terminal-2048": terminal2048Validator,
   "dev-fifteen-hex": devFifteenHexValidator,
+  // PT: Adicione novos validadores aqui conforme implementados | EN: Add new validators here as implemented | ES: Agregue nuevos validadores aquí según se implementen | FR: Ajoutez nouveaux validateurs ici au fur et à mesure | DE: Neue Validatoren hier hinzufügen, wenn implementiert
 }
 
 /**

@@ -2,6 +2,18 @@
 @tailwind components;
 @tailwind utilities;
 
+/* PT: Animação de confetes para efeitos festivos | EN: Confetti animation for festive effects | ES: Animación de confeti para efectos festivos | FR: Animation de confettis pour effets festifs | DE: Konfetti-Animation für festliche Effekte */
+@keyframes confetti-fall {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) rotate(720deg);
+    opacity: 0;
+  }
+}
+
 /* Theme CSS Variables - Fallback (default: cyber) */
 :root {
   --color-bg: #070912;

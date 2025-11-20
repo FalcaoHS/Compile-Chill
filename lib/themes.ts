@@ -5,7 +5,7 @@
  * Each theme includes colors, typography, and effect variables.
  */
 
-export type ThemeId = 'analista-jr' | 'analista-sr' | 'lofi-code' | 'cyber' | 'pixel' | 'neon' | 'terminal' | 'blueprint' | 'bruno-csharp'
+export type ThemeId = 'analista-jr' | 'analista-sr' | 'lofi-code' | 'cyber' | 'pixel' | 'neon' | 'terminal' | 'blueprint' | 'bruno-csharp' | 'chaves' | 'pomemin'
 
 export interface Theme {
   name: string
@@ -393,6 +393,140 @@ export const THEMES: Record<ThemeId, Theme> = {
       '--professional-mode': 'true', // Flag para componentes
       '--serif-accent': "'Merriweather', 'Georgia', serif", // Para títulos
       '--system-font': 'system-ui', // Fallback system
+    },
+  },
+  chaves: {
+    name: 'Chaves',
+    vars: {
+      // Colors - Cores vibrantes do Chaves (amarelo, vermelho, verde)
+      '--color-bg': '#2a1f0f', // Marrom escuro (barracos)
+      '--color-bg-secondary': '#3d2e14',
+      '--color-primary': '#ffd700', // Amarelo vibrante (camisa do Chaves)
+      '--color-primary-hover': '#ffed4e',
+      '--color-accent': '#dc143c', // Vermelho coral (shorts)
+      '--color-accent-hover': '#ff1744',
+      '--color-secondary': '#32cd32', // Verde limão (detalhes)
+      '--color-highlight': '#ffeb3b', // Amarelo claro
+      '--color-muted': '#8b7355', // Marrom médio
+      '--color-text': '#fff8dc', // Bege claro (papel envelhecido)
+      '--color-text-secondary': '#d4af37', // Dourado
+      '--color-glow': 'rgba(255, 215, 0, 0.5)', // Glow amarelo
+      '--color-border': 'rgba(220, 20, 60, 0.4)',
+      '--color-error': '#ff4444',
+      
+      // Typography - Fonte alegre e descontraída
+      '--font': "'Comic Sans MS', 'Chalkboard', 'Marker Felt', cursive",
+      '--font-size-base': '16px',
+      '--font-weight-normal': '400',
+      '--line-height': '1.6',
+      
+      // Effects - Alegre e vibrante
+      '--glow-sm': '0 0 8px rgba(255, 215, 0, 0.4)',
+      '--glow-md': '0 0 16px rgba(255, 215, 0, 0.5)',
+      '--glow-lg': '0 0 24px rgba(220, 20, 60, 0.6)',
+      '--glow-xl': '0 0 32px rgba(255, 215, 0, 0.7)',
+      '--glow-intensity': '1.2', // Glow moderado
+      '--anim-duration': '300ms', // Animação suave
+      '--anim-easing': 'cubic-bezier(0.68, -0.55, 0.265, 1.55)', // Bounce alegre
+      '--border-radius': '8px', // Cantos arredondados
+      '--pulse-speed': '2000ms', // Pulsação suave
+      '--drift-speed': '5000ms',
+      '--scanline-opacity': '0.02',
+      '--noise-opacity': '0.03',
+      '--blur-intensity': '0px',
+      '--cursor-blink': 'blink',
+      '--minimal-opacity': '1',
+      
+      // Canvas/Game - Cores vibrantes do Chaves
+      '--orb-fill': '#ffd700', // Amarelo (orbs quadradas)
+      '--orb-stroke': '#dc143c', // Vermelho (borda)
+      '--orb-glow': 'rgba(255, 215, 0, 0.4)',
+      '--orb-trail-opacity': '0.2',
+      '--orb-gravity': '1.0',
+      '--basket-fill': '#3d2e14',
+      '--basket-stroke': '#ffd700',
+      '--basket-stroke-width': '3px',
+      '--particle-color-1': '#ffd700', // Amarelo
+      '--particle-color-2': '#dc143c', // Vermelho
+      '--particle-color-3': '#32cd32', // Verde
+      '--particle-lifetime': '1500ms',
+      '--particle-fade-delay': '300ms',
+      '--firework-color-1': '#ffd700', // Amarelo
+      '--firework-color-2': '#dc143c', // Vermelho
+      '--firework-color-3': '#32cd32', // Verde
+      '--firework-speed': '1.0',
+      '--firework-gravity': '1.0',
+      
+      // EXCLUSIVO: Tema Chaves
+      '--chaves-vibrancy': '1.1', // Cores mais vibrantes
+      '--chaves-bounce': '0.8', // Bounce mais alegre
+    },
+  },
+  pomemin: {
+    name: 'Pomemin',
+    vars: {
+      // Colors - Cores vibrantes de Pokémon (vermelho, azul, amarelo)
+      '--color-bg': '#1a1a2e', // Azul escuro (céu noturno)
+      '--color-bg-secondary': '#16213e',
+      '--color-primary': '#ffd700', // Amarelo Pikachu
+      '--color-primary-hover': '#ffed4e',
+      '--color-accent': '#ff0000', // Vermelho Pokébola
+      '--color-accent-hover': '#ff3333',
+      '--color-secondary': '#3b82f6', // Azul Pokémon
+      '--color-highlight': '#fbbf24', // Amarelo claro
+      '--color-muted': '#64748b', // Cinza azulado
+      '--color-text': '#f1f5f9', // Branco gelo
+      '--color-text-secondary': '#cbd5e1',
+      '--color-glow': 'rgba(255, 215, 0, 0.6)', // Glow amarelo
+      '--color-border': 'rgba(255, 0, 0, 0.4)',
+      '--color-error': '#ef4444',
+      
+      // Typography - Fonte moderna e amigável
+      '--font': "'Nunito', 'Inter', 'Segoe UI', sans-serif",
+      '--font-size-base': '16px',
+      '--font-weight-normal': '500',
+      '--line-height': '1.6',
+      
+      // Effects - Vibrante e energético
+      '--glow-sm': '0 0 10px rgba(255, 215, 0, 0.5)',
+      '--glow-md': '0 0 18px rgba(255, 215, 0, 0.6)',
+      '--glow-lg': '0 0 28px rgba(255, 0, 0, 0.7)',
+      '--glow-xl': '0 0 40px rgba(255, 215, 0, 0.8)',
+      '--glow-intensity': '1.4', // Glow forte
+      '--anim-duration': '250ms', // Animação rápida
+      '--anim-easing': 'cubic-bezier(0.34, 1.56, 0.64, 1)', // Bounce energético
+      '--border-radius': '12px', // Cantos bem arredondados
+      '--pulse-speed': '1500ms', // Pulsação rápida
+      '--drift-speed': '4000ms',
+      '--scanline-opacity': '0.03',
+      '--noise-opacity': '0.02',
+      '--blur-intensity': '0px',
+      '--cursor-blink': 'blink',
+      '--minimal-opacity': '1',
+      
+      // Canvas/Game - Cores Pokémon
+      '--orb-fill': '#ffd700', // Amarelo (orbs com orelhinhas)
+      '--orb-stroke': '#ff0000', // Vermelho (borda)
+      '--orb-glow': 'rgba(255, 215, 0, 0.5)',
+      '--orb-trail-opacity': '0.25',
+      '--orb-gravity': '1.0',
+      '--basket-fill': '#16213e',
+      '--basket-stroke': '#ffd700',
+      '--basket-stroke-width': '3px',
+      '--particle-color-1': '#ffd700', // Amarelo
+      '--particle-color-2': '#ff0000', // Vermelho
+      '--particle-color-3': '#3b82f6', // Azul
+      '--particle-lifetime': '1800ms',
+      '--particle-fade-delay': '400ms',
+      '--firework-color-1': '#ffd700', // Amarelo
+      '--firework-color-2': '#ff0000', // Vermelho
+      '--firework-color-3': '#3b82f6', // Azul
+      '--firework-speed': '1.1',
+      '--firework-gravity': '1.0',
+      
+      // EXCLUSIVO: Tema Pomemin
+      '--pokemon-energy': '1.2', // Energia Pokémon
+      '--pokemon-bounce': '0.9', // Bounce mais alto
     },
   },
 }

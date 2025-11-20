@@ -25,10 +25,10 @@ export interface PendingScore {
 }
 
 const STORAGE_KEY = 'pendingScores'
-const MAX_ATTEMPTS = 5
-const EXPIRATION_DAYS = 30
-const MAX_QUEUE_SIZE = 5
-const BACKOFF_DELAYS = [1000, 2000, 4000, 8000, 16000] // 1s, 2s, 4s, 8s, 16s
+const MAX_ATTEMPTS = 5 // PT: Máximo de tentativas antes de desistir | EN: Max attempts before giving up | ES: Máximo de intentos antes de rendirse | FR: Max tentatives avant abandon | DE: Max Versuche vor Aufgabe
+const EXPIRATION_DAYS = 30 // PT: Scores expiram após 30 dias | EN: Scores expire after 30 days | ES: Scores expiran después de 30 días | FR: Scores expirent après 30 jours | DE: Scores laufen nach 30 Tagen ab
+const MAX_QUEUE_SIZE = 5 // PT: Avisa quando fila > 5 itens | EN: Warns when queue > 5 items | ES: Advierte cuando cola > 5 items | FR: Avertit quand file > 5 items | DE: Warnt wenn Warteschlange > 5 Elemente
+const BACKOFF_DELAYS = [1000, 2000, 4000, 8000, 16000] // PT: Backoff exponencial: 1s, 2s, 4s, 8s, 16s | EN: Exponential backoff: 1s, 2s, 4s, 8s, 16s | ES: Backoff exponencial: 1s, 2s, 4s, 8s, 16s | FR: Backoff exponentiel: 1s, 2s, 4s, 8s, 16s | DE: Exponentielles Backoff: 1s, 2s, 4s, 8s, 16s
 
 /**
  * Get all pending scores from localStorage
@@ -42,7 +42,7 @@ export function getPendingScores(): PendingScore[] {
     
     const scores: PendingScore[] = JSON.parse(stored)
     
-    // Filter out expired scores
+    // PT: Remove scores expirados (mais de 30 dias) | EN: Remove expired scores (older than 30 days) | ES: Elimina scores expirados (más de 30 días) | FR: Supprime scores expirés (plus de 30 jours) | DE: Entfernt abgelaufene Scores (älter als 30 Tage)
     const now = Date.now()
     const expirationMs = EXPIRATION_DAYS * 24 * 60 * 60 * 1000
     const validScores = scores.filter(score => {
@@ -50,7 +50,7 @@ export function getPendingScores(): PendingScore[] {
       return age < expirationMs
     })
     
-    // Update localStorage if expired scores were removed
+    // PT: Atualiza localStorage se scores expirados foram removidos | EN: Update localStorage if expired scores were removed | ES: Actualiza localStorage si scores expirados fueron eliminados | FR: Met à jour localStorage si scores expirés supprimés | DE: Aktualisiert localStorage wenn abgelaufene Scores entfernt wurden
     if (validScores.length !== scores.length) {
       savePendingScores(validScores)
     }

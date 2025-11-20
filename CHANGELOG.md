@@ -17,7 +17,7 @@ e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 - Guias de contribuição em múltiplos idiomas (CONTRIBUTING.en.md, CONTRIBUTING.es.md)
 - Código de Conduta (CODE_OF_CONDUCT.md)
 - Template para Pull Requests (.github/PULL_REQUEST_TEMPLATE.md)
-- Guia de configuração do GitHub (docs/GITHUB_SETUP.md)
+- Guia de configuração do GitHub (docs/setup/GITHUB_SETUP.md)
 - Scripts adicionais no package.json (format, type-check, db:studio, etc.)
 - Configuração do Prettier (.prettierrc, .prettierignore)
 - EditorConfig (.editorconfig)

@@ -3,6 +3,12 @@
  * 
  * Defines all available games with their metadata.
  * This file serves as the single source of truth for game information.
+ * 
+ * PT: Configuração de jogos - fonte única de verdade para informações dos jogos
+ * EN: Games configuration - single source of truth for game information
+ * ES: Configuración de juegos - fuente única de verdad para información de juegos
+ * FR: Configuration des jeux - source unique de vérité pour informations des jeux
+ * DE: Spielekonfiguration - einzige Quelle der Wahrheit für Spielinformationen
  */
 
 export interface Game {
@@ -11,7 +17,7 @@ export interface Game {
   description: string
   route: string
   icon: string
-  category?: string
+  category?: string // PT: Categoria opcional (puzzle, arcade, memory, etc.) | EN: Optional category | ES: Categoría opcional | FR: Catégorie optionnelle | DE: Optionale Kategorie
 }
 
 export const GAMES: Game[] = [

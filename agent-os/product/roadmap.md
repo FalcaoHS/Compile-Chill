@@ -2,7 +2,9 @@
 
 1. [x] X OAuth Authentication — Implement NextAuth with X OAuth provider, allowing users to sign in with a single button and retrieve name, avatar, and ID from X account `S` ✅
 
-2. [x] Theme System Foundation — Create theme switching infrastructure with 5 visual themes (Cyber Hacker, Pixel Lab, Neon Future, Terminal Minimal, Blueprint Dev), theme persistence, and global theme context using Zustand/Jotai `M` ✅
+2. [x] Theme System Foundation — Create theme switching infrastructure with 11 visual themes (Cyber Hacker, Pixel Lab, Neon Future, Terminal Minimal, Blueprint Dev, Analista Jr, Analista Sr, Lofi Code, Bruno C#, Chaves, Pomemin), theme persistence, and global theme context using Zustand/Jotai `M` ✅
+
+2a. [x] Festive Elements System — Implement automatic festive elements on orbs based on dates and cultural region (Christmas, New Year, Easter, Halloween, Carnival, São João, Children's Day) with geolocation support and user controls `M` ✅
 
 3. [x] Home Page with Game List — Build home page displaying all 10 games in a grid layout with theme-aware styling, game cards with descriptions, and navigation to individual game pages `S` ✅
 
@@ -32,15 +34,15 @@
 
 14. [ ] X Sharing with Image Generation — Implement automatic image generation using html-to-image/canvas based on game results and current theme, with @vercel/og for social sharing, including automatic hashtags (#devtime, #jogosdev, #devdescompressao, #codingbreak) `M`
 
-15. [ ] Sixth Game: Hack Grid — Build logic puzzle game where players connect network nodes by illuminating paths, with neon animations, theme integration, and score tracking `M`
+15. [x] Sixth Game: Hack Grid — Build logic puzzle game where players connect network nodes by illuminating paths, with neon animations, theme integration, and score tracking `M` ✅
 
-16. [ ] Seventh Game: Debug Maze — Create maze game where players guide a "bug" to the patch, with retro pixel theme, score tracking, and theme-aware styling `M`
+16. [x] Seventh Game: Debug Maze — Create maze game where players guide a "bug" to the patch, with retro pixel theme, score tracking, and theme-aware styling `M` ✅
 
-17. [ ] Eighth Game: Refactor Rush — Implement puzzle game where players reorganize "code blocks" to clean files, with particle effects on moves, theme integration, and score tracking `M`
+17. [x] Eighth Game: Refactor Rush — Implement puzzle game where players reorganize "code blocks" to clean files, with particle effects on moves, theme integration, and score tracking `M` ✅
 
-18. [ ] Ninth Game: Crypto Miner Game — Build idle clicker game where players mine blocks, with simple scaling, light gamification, theme-aware UI, and score tracking `M`
+18. [x] Ninth Game: Crypto Miner Game — Build idle clicker game where players mine blocks, with simple scaling, light gamification, theme-aware UI, and score tracking `M` ✅
 
-19. [ ] Tenth Game: Packet Switch — Create routing logic game where players direct packets, with network particle animations, theme integration, and score tracking `M`
+19. [x] Tenth Game: Packet Switch — Create routing logic game where players direct packets, with network particle animations, theme integration, and score tracking `M` ✅
 
 20. [ ] Achievement System — Implement achievement/medal system with unlockable achievements based on gameplay milestones, display on user profiles, and notification system `M`
 

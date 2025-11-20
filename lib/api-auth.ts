@@ -46,11 +46,11 @@ export type AuthenticatedHandler = (
 export function withAuth(handler: AuthenticatedHandler) {
   return async (request: NextRequest): Promise<NextResponse> => {
     try {
-      // Get authenticated session
-      // In NextAuth v5, auth() automatically reads cookies from the current request context
+      // PT: Obtém sessão autenticada | EN: Get authenticated session | ES: Obtiene sesión autenticada | FR: Obtient la session authentifiée | DE: Ruft authentifizierte Sitzung ab
+      // PT: NextAuth v5 lê cookies automaticamente do contexto da requisição | EN: NextAuth v5 auto-reads cookies from request context | ES: NextAuth v5 lee cookies automáticamente del contexto | FR: NextAuth v5 lit automatiquement les cookies du contexte | DE: NextAuth v5 liest Cookies automatisch aus dem Kontext
       const session = await auth()
 
-      // Check if session exists and has user ID
+      // PT: Verifica se sessão existe e tem ID de usuário | EN: Check if session exists and has user ID | ES: Verifica si sesión existe y tiene ID de usuario | FR: Vérifie si session existe et a un ID utilisateur | DE: Prüft, ob Sitzung existiert und Benutzer-ID hat
       if (!session?.user?.id) {
         return NextResponse.json(
           {
@@ -63,7 +63,7 @@ export function withAuth(handler: AuthenticatedHandler) {
         )
       }
 
-      // Extract user from session
+      // PT: Extrai dados do usuário da sessão | EN: Extract user data from session | ES: Extrae datos del usuario de la sesión | FR: Extrait les données utilisateur de la session | DE: Extrahiert Benutzerdaten aus der Sitzung
       const user: AuthenticatedUser = {
         id: session.user.id,
         name: session.user.name ?? null,

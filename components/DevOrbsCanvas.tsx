@@ -63,6 +63,474 @@ const ORB_RADIUS_DESKTOP = 32 // 64px diameter (reduced from 96px)
 const ORB_RADIUS_MOBILE = 24 // 48px diameter (reduced from 64px)
 const SPAWN_INTERVAL_MS = 1000 // 1 second
 
+// PT: Sistema de elementos festivos nas orbs | EN: Festive elements system for orbs | ES: Sistema de elementos festivos en orbs | FR: Système d'éléments festifs pour orbs | DE: Festliches Elementesystem für Orbs
+type FestiveType = 'christmas' | 'newyear' | 'easter' | 'halloween' | 'carnival' | 'saojoao' | 'childrensday' | null
+
+/**
+ * PT: Detecta a região cultural baseada no timezone | EN: Detects cultural region based on timezone | ES: Detecta región cultural basada en zona horaria | FR: Détecte la région culturelle basée sur le fuseau horaire | DE: Erkennt kulturelle Region basierend auf Zeitzone
+ */
+function detectCulturalRegion(): 'latin-america' | 'north-america' | 'europe' | 'asia' | 'other' {
+  if (typeof window === 'undefined') return 'other'
+  
+  try {
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
+    
+    // América Latina (Brasil, México, Argentina, etc.)
+    if (
+      timezone.includes('America/Sao_Paulo') ||
+      timezone.includes('America/Argentina') ||
+      timezone.includes('America/Mexico') ||
+      timezone.includes('America/Bogota') ||
+      timezone.includes('America/Lima') ||
+      timezone.includes('America/Santiago') ||
+      timezone.includes('America/Caracas') ||
+      timezone.includes('America/Montevideo') ||
+      timezone.includes('America/La_Paz')
+    ) {
+      return 'latin-america'
+    }
+    
+    // América do Norte (EUA, Canadá)
+    if (
+      timezone.includes('America/New_York') ||
+      timezone.includes('America/Chicago') ||
+      timezone.includes('America/Denver') ||
+      timezone.includes('America/Los_Angeles') ||
+      timezone.includes('America/Toronto') ||
+      timezone.includes('America/Vancouver')
+    ) {
+      return 'north-america'
+    }
+    
+    // Europa
+    if (
+      timezone.includes('Europe/') ||
+      timezone.includes('Atlantic/') ||
+      timezone.includes('Africa/Casablanca')
+    ) {
+      return 'europe'
+    }
+    
+    // Ásia
+    if (
+      timezone.includes('Asia/') ||
+      timezone.includes('Pacific/')
+    ) {
+      return 'asia'
+    }
+    
+    return 'other'
+  } catch {
+    return 'other'
+  }
+}
+
+/**
+ * PT: Verifica se uma festividade é relevante para a região | EN: Checks if a holiday is relevant for the region | ES: Verifica si una festividad es relevante para la región | FR: Vérifie si une fête est pertinente pour la région | DE: Prüft, ob ein Feiertag für die Region relevant ist
+ */
+function isFestivityRelevant(festivity: FestiveType, region: ReturnType<typeof detectCulturalRegion>): boolean {
+  if (!festivity) return false
+  
+  // Festividades universais (todas as regiões)
+  if (festivity === 'christmas' || festivity === 'newyear' || festivity === 'easter') {
+    return true
+  }
+  
+  // Festividades específicas por região
+  switch (region) {
+    case 'latin-america':
+      // Carnaval, São João e Dia das Crianças são comuns na América Latina
+      return festivity === 'carnival' || festivity === 'saojoao' || festivity === 'childrensday'
+    
+    case 'north-america':
+      // Halloween é muito popular nos EUA/Canadá
+      return festivity === 'halloween'
+    
+    case 'europe':
+      // Halloween também é comum na Europa, mas menos que nos EUA
+      return festivity === 'halloween'
+    
+    case 'asia':
+    case 'other':
+      // Regiões onde essas festividades não são tradicionais
+      return false
+    
+    default:
+      return false
+  }
+}
+
+/**
+ * PT: Detecta qual festividade está ativa baseado na data atual e região cultural | EN: Detects which holiday is active based on current date and cultural region | ES: Detecta qué festividad está activa según la fecha actual y región cultural | FR: Détecte quelle fête est active selon la date actuelle et la région culturelle | DE: Erkennt, welcher Feiertag basierend auf dem aktuellen Datum und der kulturellen Region aktiv ist
+ * @param forceFestivity - Força uma festividade específica para teste (opcional)
+ */
+function getActiveFestivity(forceFestivity?: FestiveType): FestiveType {
+  // PT: Modo de teste - força festividade | EN: Test mode - force festivity | ES: Modo de prueba - fuerza festividad | FR: Mode test - force fête | DE: Testmodus - Feiertag erzwingen
+  if (forceFestivity) return forceFestivity
+  
+  const now = new Date()
+  const month = now.getMonth() + 1 // 1-12
+  const day = now.getDate() // 1-31
+  const region = detectCulturalRegion()
+  
+  // Natal: 1-25 de dezembro (universal)
+  if (month === 12 && day >= 1 && day <= 25) {
+    const festive: FestiveType = 'christmas'
+    if (isFestivityRelevant(festive, region)) return festive
+  }
+  
+  // Ano Novo: 31 dez - 2 jan (universal)
+  if ((month === 12 && day === 31) || (month === 1 && day <= 2)) {
+    const festive: FestiveType = 'newyear'
+    if (isFestivityRelevant(festive, region)) return festive
+  }
+  
+  // Páscoa: cálculo aproximado (domingo entre 22 mar - 25 abr) (universal)
+  const easterDate = calculateEaster(now.getFullYear())
+  const easterMonth = easterDate.getMonth() + 1
+  const easterDay = easterDate.getDate()
+  if (month === easterMonth && day >= easterDay - 2 && day <= easterDay + 2) {
+    const festive: FestiveType = 'easter'
+    if (isFestivityRelevant(festive, region)) return festive
+  }
+  
+  // Halloween: 28-31 de outubro (principalmente América do Norte e Europa)
+  if (month === 10 && day >= 28 && day <= 31) {
+    const festive: FestiveType = 'halloween'
+    if (isFestivityRelevant(festive, region)) return festive
+  }
+  
+  // Carnaval: fevereiro (aproximado: 1-15 fev) - América Latina
+  if (month === 2 && day >= 1 && day <= 15) {
+    const festive: FestiveType = 'carnival'
+    if (isFestivityRelevant(festive, region)) return festive
+  }
+  
+  // São João: 20-24 de junho - América Latina (especialmente Brasil)
+  if (month === 6 && day >= 20 && day <= 24) {
+    const festive: FestiveType = 'saojoao'
+    if (isFestivityRelevant(festive, region)) return festive
+  }
+  
+  // Dia das Crianças: 10-14 de outubro - América Latina (Brasil)
+  if (month === 10 && day >= 10 && day <= 14) {
+    const festive: FestiveType = 'childrensday'
+    if (isFestivityRelevant(festive, region)) return festive
+  }
+  
+  return null
+}
+
+/**
+ * PT: Calcula a data da Páscoa (algoritmo de Meeus/Jones/Butcher) | EN: Calculates Easter date (Meeus/Jones/Butcher algorithm) | ES: Calcula la fecha de Pascua (algoritmo de Meeus/Jones/Butcher) | FR: Calcule la date de Pâques (algorithme de Meeus/Jones/Butcher) | DE: Berechnet das Osterdatum (Meeus/Jones/Butcher-Algorithmus)
+ */
+function calculateEaster(year: number): Date {
+  const a = year % 19
+  const b = Math.floor(year / 100)
+  const c = year % 100
+  const d = Math.floor(b / 4)
+  const e = b % 4
+  const f = Math.floor((b + 8) / 25)
+  const g = Math.floor((b - f + 1) / 3)
+  const h = (19 * a + b - d - g + 15) % 30
+  const i = Math.floor(c / 4)
+  const k = c % 4
+  const l = (32 + 2 * e + 2 * i - h - k) % 7
+  const m = Math.floor((a + 11 * h + 22 * l) / 451)
+  const month = Math.floor((h + l - 7 * m + 114) / 31)
+  const day = ((h + l - 7 * m + 114) % 31) + 1
+  return new Date(year, month - 1, day)
+}
+
+/**
+ * PT: Desenha elementos festivos na orb | EN: Draws festive elements on orb | ES: Dibuja elementos festivos en orb | FR: Dessine éléments festifs sur orb | DE: Zeichnet festliche Elemente auf Orb
+ */
+function drawFestiveElement(
+  ctx: CanvasRenderingContext2D,
+  festiveType: FestiveType,
+  pos: { x: number; y: number },
+  radius: number,
+  colors: { primary: string; accent: string; text: string }
+) {
+  if (!festiveType) return
+  
+  ctx.save()
+  
+  switch (festiveType) {
+    case 'christmas': {
+      // PT: Gorro de Natal (vermelho com pompom branco) | EN: Christmas hat (red with white pom-pom) | ES: Gorro de Navidad (rojo con pompón blanco) | FR: Bonnet de Noël (rouge avec pompon blanc) | DE: Weihnachtsmütze (rot mit weißem Pompon)
+      const hatHeight = radius * 0.8
+      const hatWidth = radius * 1.2
+      
+      // Corpo do gorro (triângulo vermelho)
+      ctx.fillStyle = '#dc2626' // Vermelho
+      ctx.beginPath()
+      ctx.moveTo(pos.x, pos.y - radius - hatHeight)
+      ctx.lineTo(pos.x - hatWidth / 2, pos.y - radius)
+      ctx.lineTo(pos.x + hatWidth / 2, pos.y - radius)
+      ctx.closePath()
+      ctx.fill()
+      
+      // Borda branca
+      ctx.strokeStyle = '#ffffff'
+      ctx.lineWidth = 2
+      ctx.stroke()
+      
+      // Pompom branco
+      ctx.fillStyle = '#ffffff'
+      ctx.beginPath()
+      ctx.arc(pos.x, pos.y - radius - hatHeight - 3, radius * 0.25, 0, Math.PI * 2)
+      ctx.fill()
+      break
+    }
+    
+    case 'newyear': {
+      // PT: Chapéu de festa (cone com confete) | EN: Party hat (cone with confetti) | ES: Sombrero de fiesta (cono con confeti) | FR: Chapeau de fête (cône avec confettis) | DE: Partymütze (Kegel mit Konfetti)
+      const hatHeight = radius * 0.7
+      const hatWidth = radius * 1.1
+      
+      // Chapéu colorido
+      ctx.fillStyle = colors.accent
+      ctx.beginPath()
+      ctx.moveTo(pos.x, pos.y - radius - hatHeight)
+      ctx.lineTo(pos.x - hatWidth / 2, pos.y - radius)
+      ctx.lineTo(pos.x + hatWidth / 2, pos.y - radius)
+      ctx.closePath()
+      ctx.fill()
+      
+      // Confete (pequenos círculos coloridos)
+      const confettiColors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff']
+      for (let i = 0; i < 5; i++) {
+        ctx.fillStyle = confettiColors[i]
+        ctx.beginPath()
+        ctx.arc(
+          pos.x + (Math.random() - 0.5) * radius * 1.5,
+          pos.y - radius - hatHeight - 5 + Math.random() * 10,
+          radius * 0.1,
+          0,
+          Math.PI * 2
+        )
+        ctx.fill()
+      }
+      break
+    }
+    
+    case 'easter': {
+      // PT: Orelhas de coelho (rosa) | EN: Bunny ears (pink) | ES: Orejas de conejo (rosa) | FR: Oreilles de lapin (rose) | DE: Hasenohren (rosa)
+      const earSize = radius * 0.5
+      const earOffset = radius * 0.4
+      
+      // Orelha esquerda
+      ctx.fillStyle = '#ffb6c1' // Rosa claro
+      ctx.beginPath()
+      ctx.ellipse(pos.x - earOffset, pos.y - radius - earSize * 0.3, earSize * 0.4, earSize * 0.7, -0.3, 0, Math.PI * 2)
+      ctx.fill()
+      
+      // Orelha direita
+      ctx.beginPath()
+      ctx.ellipse(pos.x + earOffset, pos.y - radius - earSize * 0.3, earSize * 0.4, earSize * 0.7, 0.3, 0, Math.PI * 2)
+      ctx.fill()
+      
+      // Interior rosa escuro
+      ctx.fillStyle = '#ff69b4'
+      ctx.beginPath()
+      ctx.ellipse(pos.x - earOffset, pos.y - radius - earSize * 0.3, earSize * 0.2, earSize * 0.4, -0.3, 0, Math.PI * 2)
+      ctx.fill()
+      ctx.beginPath()
+      ctx.ellipse(pos.x + earOffset, pos.y - radius - earSize * 0.3, earSize * 0.2, earSize * 0.4, 0.3, 0, Math.PI * 2)
+      ctx.fill()
+      break
+    }
+    
+    case 'halloween': {
+      // PT: Morcego minimalista (🦇) | EN: Minimalist bat (🦇) | ES: Murciélago minimalista (🦇) | FR: Chauve-souris minimaliste (🦇) | DE: Minimalistische Fledermaus (🦇)
+      const batSize = radius * 1.2
+      const wingSpan = batSize * 1.4
+      
+      ctx.fillStyle = '#1a1a1a' // Preto
+      
+      // Corpo do morcego (cabeça + corpo)
+      ctx.beginPath()
+      ctx.arc(pos.x, pos.y - radius - batSize * 0.3, batSize * 0.25, 0, Math.PI * 2)
+      ctx.fill()
+      
+      // Corpo alongado
+      ctx.beginPath()
+      ctx.ellipse(pos.x, pos.y - radius - batSize * 0.1, batSize * 0.15, batSize * 0.3, 0, 0, Math.PI * 2)
+      ctx.fill()
+      
+      // Asa esquerda (arco superior)
+      ctx.beginPath()
+      ctx.arc(
+        pos.x - wingSpan * 0.3,
+        pos.y - radius - batSize * 0.2,
+        wingSpan * 0.4,
+        Math.PI * 0.3,
+        Math.PI * 0.9,
+        false
+      )
+      ctx.lineTo(pos.x - batSize * 0.2, pos.y - radius)
+      ctx.closePath()
+      ctx.fill()
+      
+      // Asa direita (arco superior)
+      ctx.beginPath()
+      ctx.arc(
+        pos.x + wingSpan * 0.3,
+        pos.y - radius - batSize * 0.2,
+        wingSpan * 0.4,
+        Math.PI * 0.1,
+        Math.PI * 0.7,
+        false
+      )
+      ctx.lineTo(pos.x + batSize * 0.2, pos.y - radius)
+      ctx.closePath()
+      ctx.fill()
+      
+      // Orelhas pequenas
+      ctx.beginPath()
+      ctx.arc(pos.x - batSize * 0.15, pos.y - radius - batSize * 0.45, batSize * 0.08, 0, Math.PI * 2)
+      ctx.fill()
+      ctx.beginPath()
+      ctx.arc(pos.x + batSize * 0.15, pos.y - radius - batSize * 0.45, batSize * 0.08, 0, Math.PI * 2)
+      ctx.fill()
+      break
+    }
+    
+    case 'carnival': {
+      // PT: Máscara de carnaval (colorida) | EN: Carnival mask (colorful) | ES: Máscara de carnaval (colorida) | FR: Masque de carnaval (coloré) | DE: Karnevalsmaske (bunt)
+      const maskWidth = radius * 1.4
+      const maskHeight = radius * 0.6
+      
+      // Máscara base
+      ctx.fillStyle = colors.accent
+      ctx.beginPath()
+      ctx.ellipse(pos.x, pos.y - radius * 0.3, maskWidth / 2, maskHeight / 2, 0, 0, Math.PI * 2)
+      ctx.fill()
+      
+      // Decoração (penas/plumas)
+      const featherColors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00']
+      for (let i = 0; i < 4; i++) {
+        ctx.fillStyle = featherColors[i]
+        ctx.beginPath()
+        ctx.arc(
+          pos.x + (Math.cos(i * Math.PI / 2) * maskWidth * 0.4),
+          pos.y - radius * 0.8 + (Math.sin(i * Math.PI / 2) * maskHeight * 0.3),
+          radius * 0.15,
+          0,
+          Math.PI * 2
+        )
+        ctx.fill()
+      }
+      break
+    }
+    
+    case 'saojoao': {
+      // PT: Chapéu de festa junina (colorido) | EN: June festival hat (colorful) | ES: Sombrero de fiesta junina (colorido) | FR: Chapeau de fête de juin (coloré) | DE: Juni-Festmütze (bunt)
+      const hatHeight = radius * 0.6
+      const hatWidth = radius * 1.0
+      
+      // Chapéu (triângulo)
+      ctx.fillStyle = '#ff6b35' // Laranja
+      ctx.beginPath()
+      ctx.moveTo(pos.x, pos.y - radius - hatHeight)
+      ctx.lineTo(pos.x - hatWidth / 2, pos.y - radius)
+      ctx.lineTo(pos.x + hatWidth / 2, pos.y - radius)
+      ctx.closePath()
+      ctx.fill()
+      
+      // Bandeirinhas decorativas
+      const flagColors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00']
+      for (let i = 0; i < 4; i++) {
+        ctx.fillStyle = flagColors[i]
+        ctx.fillRect(
+          pos.x - hatWidth / 2 + (i * hatWidth / 4),
+          pos.y - radius - hatHeight * 0.5,
+          hatWidth / 4,
+          hatHeight * 0.3
+        )
+      }
+      break
+    }
+    
+    case 'childrensday': {
+      // PT: Ursinho/Plushie (🧸) estilizado | EN: Stylized teddy bear/plushie (🧸) | ES: Osito/Peluche estilizado (🧸) | FR: Ours en peluche stylisé (🧸) | DE: Stilisiertes Teddybär/Plüschtier (🧸)
+      const bearSize = radius * 0.9
+      const headSize = bearSize * 0.5
+      const earSize = headSize * 0.4
+      
+      // Corpo do ursinho (corpo principal)
+      ctx.fillStyle = '#8B4513' // Marrom
+      ctx.beginPath()
+      ctx.ellipse(pos.x, pos.y - radius - bearSize * 0.2, bearSize * 0.35, bearSize * 0.45, 0, 0, Math.PI * 2)
+      ctx.fill()
+      
+      // Cabeça
+      ctx.beginPath()
+      ctx.arc(pos.x, pos.y - radius - bearSize * 0.7, headSize * 0.5, 0, Math.PI * 2)
+      ctx.fill()
+      
+      // Orelha esquerda
+      ctx.beginPath()
+      ctx.arc(pos.x - headSize * 0.35, pos.y - radius - bearSize * 0.75, earSize * 0.5, 0, Math.PI * 2)
+      ctx.fill()
+      // Interior da orelha (mais claro)
+      ctx.fillStyle = '#A0522D'
+      ctx.beginPath()
+      ctx.arc(pos.x - headSize * 0.35, pos.y - radius - bearSize * 0.75, earSize * 0.3, 0, Math.PI * 2)
+      ctx.fill()
+      
+      // Orelha direita
+      ctx.fillStyle = '#8B4513'
+      ctx.beginPath()
+      ctx.arc(pos.x + headSize * 0.35, pos.y - radius - bearSize * 0.75, earSize * 0.5, 0, Math.PI * 2)
+      ctx.fill()
+      // Interior da orelha (mais claro)
+      ctx.fillStyle = '#A0522D'
+      ctx.beginPath()
+      ctx.arc(pos.x + headSize * 0.35, pos.y - radius - bearSize * 0.75, earSize * 0.3, 0, Math.PI * 2)
+      ctx.fill()
+      
+      // Olhos
+      ctx.fillStyle = '#000000'
+      ctx.beginPath()
+      ctx.arc(pos.x - headSize * 0.15, pos.y - radius - bearSize * 0.7, headSize * 0.08, 0, Math.PI * 2)
+      ctx.fill()
+      ctx.beginPath()
+      ctx.arc(pos.x + headSize * 0.15, pos.y - radius - bearSize * 0.7, headSize * 0.08, 0, Math.PI * 2)
+      ctx.fill()
+      
+      // Nariz (triângulo pequeno)
+      ctx.fillStyle = '#FF69B4' // Rosa
+      ctx.beginPath()
+      ctx.moveTo(pos.x, pos.y - radius - bearSize * 0.6)
+      ctx.lineTo(pos.x - headSize * 0.08, pos.y - radius - bearSize * 0.55)
+      ctx.lineTo(pos.x + headSize * 0.08, pos.y - radius - bearSize * 0.55)
+      ctx.closePath()
+      ctx.fill()
+      
+      // Boca (curva simples)
+      ctx.strokeStyle = '#000000'
+      ctx.lineWidth = 1.5
+      ctx.beginPath()
+      ctx.arc(pos.x, pos.y - radius - bearSize * 0.55, headSize * 0.1, 0, Math.PI)
+      ctx.stroke()
+      
+      // Braços (pequenos círculos nas laterais)
+      ctx.fillStyle = '#8B4513'
+      ctx.beginPath()
+      ctx.arc(pos.x - bearSize * 0.4, pos.y - radius - bearSize * 0.1, bearSize * 0.15, 0, Math.PI * 2)
+      ctx.fill()
+      ctx.beginPath()
+      ctx.arc(pos.x + bearSize * 0.4, pos.y - radius - bearSize * 0.1, bearSize * 0.15, 0, Math.PI * 2)
+      ctx.fill()
+      break
+    }
+  }
+  
+  ctx.restore()
+}
+
 /**
  * DevOrbsCanvas Component
  * 
@@ -143,6 +611,19 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
     const saved = localStorage.getItem("dev-orbs-visible")
     return saved !== null ? saved === "true" : true
   })
+  
+  // PT: Estado para controlar efeitos festivos | EN: State to control festive effects | ES: Estado para controlar efectos festivos | FR: État pour contrôler les effets festifs | DE: Zustand zur Steuerung festlicher Effekte
+  const [festiveEffectsEnabled, setFestiveEffectsEnabled] = useState(() => {
+    if (typeof window === "undefined") return true
+    const saved = localStorage.getItem("dev-orbs-festive-effects")
+    return saved !== null ? saved === "true" : true
+  })
+  
+  // PT: Forçar festividade para teste | EN: Force festivity for testing | ES: Forzar festividad para prueba | FR: Forcer fête pour test | DE: Feiertag zum Testen erzwingen
+  const [forceFestivity, setForceFestivity] = useState<FestiveType | null>(null) // null = usar data real
+  
+  // PT: Estado para animação de confetes | EN: State for confetti animation | ES: Estado para animación de confeti | FR: État pour animation de confettis | DE: Zustand für Konfetti-Animation
+  const [showConfetti, setShowConfetti] = useState(false)
   
   // Initialize mobile mode on mount
   useEffect(() => {
@@ -1850,45 +2331,151 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
       borderColor = colors.text
       borderWidth = 1
       glowIntensity = 2
+    } else if (themeId === "chaves") {
+      borderColor = colors.accent // Vermelho para Chaves
+      borderWidth = 3
+      glowIntensity = 5
+    } else if (themeId === "pomemin") {
+      borderColor = colors.accent // Vermelho para Pomemin
+      borderWidth = 3
+      glowIntensity = 6
     }
 
-    // Draw orb circle
-    ctx.beginPath()
-    ctx.arc(pos.x, pos.y, radius, 0, Math.PI * 2)
-    
-    // Draw avatar if loaded
-    if (orb.imageLoaded && orb.image) {
-      ctx.save()
+    // PT: Pomemin theme: desenha orbs com orelhinhas (estilo Pokémon) | EN: Pomemin theme: draws orbs with ears (Pokémon style) | ES: Tema Pomemin: dibuja orbs con orejitas (estilo Pokémon) | FR: Thème Pomemin: dessine orbs avec oreilles (style Pokémon) | DE: Pomemin-Theme: zeichnet Orbs mit Ohren (Pokémon-Stil)
+    if (themeId === "pomemin") {
+      // Draw orb with ears (Pokémon style)
+      const earSize = radius * 0.4 // Tamanho das orelhinhas (40% do raio)
+      const earOffset = radius * 0.3 // Distância das orelhinhas do centro
+      
       ctx.beginPath()
-      ctx.arc(pos.x, pos.y, radius - borderWidth, 0, Math.PI * 2)
-      ctx.clip()
-      ctx.drawImage(orb.image, pos.x - radius + borderWidth, pos.y - radius + borderWidth, (radius - borderWidth) * 2, (radius - borderWidth) * 2)
-      ctx.restore()
-    } else {
-      // Fallback: draw colored circle
+      
+      // Draw main circle
+      ctx.arc(pos.x, pos.y, radius, 0, Math.PI * 2)
+      
+      // Draw left ear (triângulo)
+      ctx.moveTo(pos.x - earOffset, pos.y - radius)
+      ctx.lineTo(pos.x - earOffset - earSize, pos.y - radius - earSize * 1.2)
+      ctx.lineTo(pos.x - earOffset + earSize * 0.3, pos.y - radius - earSize * 0.5)
+      ctx.closePath()
+      
+      // Draw right ear (triângulo)
+      ctx.moveTo(pos.x + earOffset, pos.y - radius)
+      ctx.lineTo(pos.x + earOffset + earSize, pos.y - radius - earSize * 1.2)
+      ctx.lineTo(pos.x + earOffset - earSize * 0.3, pos.y - radius - earSize * 0.5)
+      ctx.closePath()
+      
+      // Draw avatar if loaded (clipped to circle)
+      if (orb.imageLoaded && orb.image) {
+        ctx.save()
+        ctx.beginPath()
+        ctx.arc(pos.x, pos.y, radius - borderWidth, 0, Math.PI * 2)
+        ctx.clip()
+        ctx.drawImage(orb.image, pos.x - radius + borderWidth, pos.y - radius + borderWidth, (radius - borderWidth) * 2, (radius - borderWidth) * 2)
+        ctx.restore()
+      } else {
+        // Fallback: draw colored circle
+        ctx.fillStyle = colors.primary
+        ctx.fill()
+      }
+      
+      // Fill ears with same color
       ctx.fillStyle = colors.primary
       ctx.fill()
+      
+      // Draw border with glow (circle + ears)
+      ctx.strokeStyle = borderColor
+      ctx.lineWidth = borderWidth
+      ctx.shadowBlur = 14
+      ctx.shadowColor = colors.accent
+      
+      // Redraw path for border
+      ctx.beginPath()
+      ctx.arc(pos.x, pos.y, radius, 0, Math.PI * 2)
+      ctx.moveTo(pos.x - earOffset, pos.y - radius)
+      ctx.lineTo(pos.x - earOffset - earSize, pos.y - radius - earSize * 1.2)
+      ctx.lineTo(pos.x - earOffset + earSize * 0.3, pos.y - radius - earSize * 0.5)
+      ctx.closePath()
+      ctx.moveTo(pos.x + earOffset, pos.y - radius)
+      ctx.lineTo(pos.x + earOffset + earSize, pos.y - radius - earSize * 1.2)
+      ctx.lineTo(pos.x + earOffset - earSize * 0.3, pos.y - radius - earSize * 0.5)
+      ctx.closePath()
+      ctx.stroke()
+      ctx.shadowBlur = 0
+    } else if (themeId === "chaves") {
+      // PT: Chaves theme: desenha orbs quadradas | EN: Chaves theme: draws square orbs | ES: Tema Chaves: dibuja orbs cuadradas | FR: Thème Chaves: dessine orbs carrées | DE: Chaves-Theme: zeichnet quadratische Orbs
+      // Draw square orb (Chaves theme)
+      const size = radius * 2
+      ctx.beginPath()
+      ctx.rect(pos.x - radius, pos.y - radius, size, size)
+      
+      // Draw avatar if loaded (clipped to square)
+      if (orb.imageLoaded && orb.image) {
+        ctx.save()
+        ctx.beginPath()
+        ctx.rect(pos.x - radius + borderWidth, pos.y - radius + borderWidth, size - borderWidth * 2, size - borderWidth * 2)
+        ctx.clip()
+        ctx.drawImage(orb.image, pos.x - radius + borderWidth, pos.y - radius + borderWidth, size - borderWidth * 2, size - borderWidth * 2)
+        ctx.restore()
+      } else {
+        // Fallback: draw colored square
+        ctx.fillStyle = colors.primary
+        ctx.fill()
+      }
+
+      // Draw border with glow
+      ctx.strokeStyle = borderColor
+      ctx.lineWidth = borderWidth
+      ctx.shadowBlur = 12
+      ctx.shadowColor = colors.accent
+      ctx.stroke()
+      ctx.shadowBlur = 0
+    } else {
+      // Draw orb circle (other themes)
+      ctx.beginPath()
+      ctx.arc(pos.x, pos.y, radius, 0, Math.PI * 2)
+      
+      // Draw avatar if loaded
+      if (orb.imageLoaded && orb.image) {
+        ctx.save()
+        ctx.beginPath()
+        ctx.arc(pos.x, pos.y, radius - borderWidth, 0, Math.PI * 2)
+        ctx.clip()
+        ctx.drawImage(orb.image, pos.x - radius + borderWidth, pos.y - radius + borderWidth, (radius - borderWidth) * 2, (radius - borderWidth) * 2)
+        ctx.restore()
+      } else {
+        // Fallback: draw colored circle
+        ctx.fillStyle = colors.primary
+        ctx.fill()
+      }
+
+      // Draw border with reduced glow (consistent with rim)
+      ctx.strokeStyle = borderColor
+      ctx.lineWidth = borderWidth
+      ctx.shadowBlur = 12 // Reduced glow for orbs
+      ctx.shadowColor = colors.accent // Use same neon color as rim for consistency
+      ctx.stroke()
+      ctx.shadowBlur = 0
+
+      // Terminal theme: ASCII representation
+      if (themeId === "terminal" && !orb.image) {
+        ctx.fillStyle = colors.text
+        ctx.font = `${radius}px monospace`
+        ctx.textAlign = "center"
+        ctx.textBaseline = "middle"
+        ctx.fillText("()", pos.x, pos.y)
+      }
     }
 
-    // Draw border with reduced glow (consistent with rim)
-    ctx.strokeStyle = borderColor
-    ctx.lineWidth = borderWidth
-    ctx.shadowBlur = 12 // Reduced glow for orbs
-    ctx.shadowColor = colors.accent // Use same neon color as rim for consistency
-    ctx.stroke()
-    ctx.shadowBlur = 0
-
-    // Terminal theme: ASCII representation
-    if (themeId === "terminal" && !orb.image) {
-      ctx.fillStyle = colors.text
-      ctx.font = `${radius}px monospace`
-      ctx.textAlign = "center"
-      ctx.textBaseline = "middle"
-      ctx.fillText("()", pos.x, pos.y)
+    // PT: Desenha elementos festivos se houver festividade ativa e efeitos estiverem habilitados | EN: Draws festive elements if there's an active holiday and effects are enabled | ES: Dibuja elementos festivos si hay festividad activa y efectos están habilitados | FR: Dessine éléments festifs s'il y a une fête active et effets activés | DE: Zeichnet festliche Elemente, wenn ein Feiertag aktiv ist und Effekte aktiviert sind
+    if (festiveEffectsEnabled) {
+      const festiveType = getActiveFestivity(forceFestivity)
+      if (festiveType) {
+        drawFestiveElement(ctx, festiveType, pos, radius, colors)
+      }
     }
 
     ctx.restore()
-  }, [themeId])
+  }, [themeId, festiveEffectsEnabled, forceFestivity])
 
   // Draw static canvas for mobile lite mode (no animation loop)
   // Must be defined after all draw functions (drawFloor, drawCourt, etc.) and renderStaticOrb
@@ -1979,45 +2566,151 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
       borderColor = colors.text
       borderWidth = 1
       glowIntensity = 2
+    } else if (themeId === "chaves") {
+      borderColor = colors.accent // Vermelho para Chaves
+      borderWidth = 3
+      glowIntensity = 5
+    } else if (themeId === "pomemin") {
+      borderColor = colors.accent // Vermelho para Pomemin
+      borderWidth = 3
+      glowIntensity = 6
     }
 
-    // Draw orb circle
-    ctx.beginPath()
-    ctx.arc(pos.x, pos.y, radius, 0, Math.PI * 2)
-    
-    // Draw avatar if loaded
-    if (orb.imageLoaded && orb.image) {
-      ctx.save()
+    // PT: Pomemin theme: desenha orbs com orelhinhas (estilo Pokémon) | EN: Pomemin theme: draws orbs with ears (Pokémon style) | ES: Tema Pomemin: dibuja orbs con orejitas (estilo Pokémon) | FR: Thème Pomemin: dessine orbs avec oreilles (style Pokémon) | DE: Pomemin-Theme: zeichnet Orbs mit Ohren (Pokémon-Stil)
+    if (themeId === "pomemin") {
+      // Draw orb with ears (Pokémon style)
+      const earSize = radius * 0.4 // Tamanho das orelhinhas (40% do raio)
+      const earOffset = radius * 0.3 // Distância das orelhinhas do centro
+      
       ctx.beginPath()
-      ctx.arc(pos.x, pos.y, radius - borderWidth, 0, Math.PI * 2)
-      ctx.clip()
-      ctx.drawImage(orb.image, pos.x - radius + borderWidth, pos.y - radius + borderWidth, (radius - borderWidth) * 2, (radius - borderWidth) * 2)
-      ctx.restore()
-    } else {
-      // Fallback: draw colored circle
+      
+      // Draw main circle
+      ctx.arc(pos.x, pos.y, radius, 0, Math.PI * 2)
+      
+      // Draw left ear (triângulo)
+      ctx.moveTo(pos.x - earOffset, pos.y - radius)
+      ctx.lineTo(pos.x - earOffset - earSize, pos.y - radius - earSize * 1.2)
+      ctx.lineTo(pos.x - earOffset + earSize * 0.3, pos.y - radius - earSize * 0.5)
+      ctx.closePath()
+      
+      // Draw right ear (triângulo)
+      ctx.moveTo(pos.x + earOffset, pos.y - radius)
+      ctx.lineTo(pos.x + earOffset + earSize, pos.y - radius - earSize * 1.2)
+      ctx.lineTo(pos.x + earOffset - earSize * 0.3, pos.y - radius - earSize * 0.5)
+      ctx.closePath()
+      
+      // Draw avatar if loaded (clipped to circle)
+      if (orb.imageLoaded && orb.image) {
+        ctx.save()
+        ctx.beginPath()
+        ctx.arc(pos.x, pos.y, radius - borderWidth, 0, Math.PI * 2)
+        ctx.clip()
+        ctx.drawImage(orb.image, pos.x - radius + borderWidth, pos.y - radius + borderWidth, (radius - borderWidth) * 2, (radius - borderWidth) * 2)
+        ctx.restore()
+      } else {
+        // Fallback: draw colored circle
+        ctx.fillStyle = colors.primary
+        ctx.fill()
+      }
+      
+      // Fill ears with same color
       ctx.fillStyle = colors.primary
       ctx.fill()
+      
+      // Draw border with glow (circle + ears)
+      ctx.strokeStyle = borderColor
+      ctx.lineWidth = borderWidth
+      ctx.shadowBlur = 14
+      ctx.shadowColor = colors.accent
+      
+      // Redraw path for border
+      ctx.beginPath()
+      ctx.arc(pos.x, pos.y, radius, 0, Math.PI * 2)
+      ctx.moveTo(pos.x - earOffset, pos.y - radius)
+      ctx.lineTo(pos.x - earOffset - earSize, pos.y - radius - earSize * 1.2)
+      ctx.lineTo(pos.x - earOffset + earSize * 0.3, pos.y - radius - earSize * 0.5)
+      ctx.closePath()
+      ctx.moveTo(pos.x + earOffset, pos.y - radius)
+      ctx.lineTo(pos.x + earOffset + earSize, pos.y - radius - earSize * 1.2)
+      ctx.lineTo(pos.x + earOffset - earSize * 0.3, pos.y - radius - earSize * 0.5)
+      ctx.closePath()
+      ctx.stroke()
+      ctx.shadowBlur = 0
+    } else if (themeId === "chaves") {
+      // PT: Chaves theme: desenha orbs quadradas | EN: Chaves theme: draws square orbs | ES: Tema Chaves: dibuja orbs cuadradas | FR: Thème Chaves: dessine orbs carrées | DE: Chaves-Theme: zeichnet quadratische Orbs
+      // Draw square orb (Chaves theme)
+      const size = radius * 2
+      ctx.beginPath()
+      ctx.rect(pos.x - radius, pos.y - radius, size, size)
+      
+      // Draw avatar if loaded (clipped to square)
+      if (orb.imageLoaded && orb.image) {
+        ctx.save()
+        ctx.beginPath()
+        ctx.rect(pos.x - radius + borderWidth, pos.y - radius + borderWidth, size - borderWidth * 2, size - borderWidth * 2)
+        ctx.clip()
+        ctx.drawImage(orb.image, pos.x - radius + borderWidth, pos.y - radius + borderWidth, size - borderWidth * 2, size - borderWidth * 2)
+        ctx.restore()
+      } else {
+        // Fallback: draw colored square
+        ctx.fillStyle = colors.primary
+        ctx.fill()
+      }
+
+      // Draw border with glow
+      ctx.strokeStyle = borderColor
+      ctx.lineWidth = borderWidth
+      ctx.shadowBlur = 12
+      ctx.shadowColor = colors.accent
+      ctx.stroke()
+      ctx.shadowBlur = 0
+    } else {
+      // Draw orb circle (other themes)
+      ctx.beginPath()
+      ctx.arc(pos.x, pos.y, radius, 0, Math.PI * 2)
+      
+      // Draw avatar if loaded
+      if (orb.imageLoaded && orb.image) {
+        ctx.save()
+        ctx.beginPath()
+        ctx.arc(pos.x, pos.y, radius - borderWidth, 0, Math.PI * 2)
+        ctx.clip()
+        ctx.drawImage(orb.image, pos.x - radius + borderWidth, pos.y - radius + borderWidth, (radius - borderWidth) * 2, (radius - borderWidth) * 2)
+        ctx.restore()
+      } else {
+        // Fallback: draw colored circle
+        ctx.fillStyle = colors.primary
+        ctx.fill()
+      }
+
+      // Draw border with reduced glow (consistent with rim)
+      ctx.strokeStyle = borderColor
+      ctx.lineWidth = borderWidth
+      ctx.shadowBlur = 12 // Reduced glow for orbs
+      ctx.shadowColor = colors.accent // Use same neon color as rim for consistency
+      ctx.stroke()
+      ctx.shadowBlur = 0
+
+      // Terminal theme: ASCII representation
+      if (themeId === "terminal" && !orb.image) {
+        ctx.fillStyle = colors.text
+        ctx.font = `${radius}px monospace`
+        ctx.textAlign = "center"
+        ctx.textBaseline = "middle"
+        ctx.fillText("()", pos.x, pos.y)
+      }
     }
 
-    // Draw border with reduced glow (consistent with rim)
-    ctx.strokeStyle = borderColor
-    ctx.lineWidth = borderWidth
-    ctx.shadowBlur = 12 // Reduced glow for orbs
-    ctx.shadowColor = colors.accent // Use same neon color as rim for consistency
-    ctx.stroke()
-    ctx.shadowBlur = 0
-
-    // Terminal theme: ASCII representation
-    if (themeId === "terminal" && !orb.image) {
-      ctx.fillStyle = colors.text
-      ctx.font = `${radius}px monospace`
-      ctx.textAlign = "center"
-      ctx.textBaseline = "middle"
-      ctx.fillText("()", pos.x, pos.y)
+    // PT: Desenha elementos festivos se houver festividade ativa e efeitos estiverem habilitados | EN: Draws festive elements if there's an active holiday and effects are enabled | ES: Dibuja elementos festivos si hay festividad activa y efectos están habilitados | FR: Dessine éléments festifs s'il y a une fête active et effets activés | DE: Zeichnet festliche Elemente, wenn ein Feiertag aktiv ist und Effekte aktiviert sind
+    if (festiveEffectsEnabled) {
+      const festiveType = getActiveFestivity(forceFestivity)
+      if (festiveType) {
+        drawFestiveElement(ctx, festiveType, pos, radius, colors)
+      }
     }
 
     ctx.restore()
-  }, [themeId])
+  }, [themeId, festiveEffectsEnabled, forceFestivity])
 
   // Render loop
   useEffect(() => {
@@ -2224,26 +2917,89 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
               ctx.globalAlpha = 0.08 // 8% opacity
               ctx.filter = 'blur(6px)' // 6px blur
               
-              // Draw orb circle (reflection) - inverted vertically
-              ctx.save()
-              ctx.translate(pos.x, reflectionY)
-              ctx.scale(1, -1) // Invert vertically
-              ctx.translate(-pos.x, -reflectionY)
-              
-              ctx.beginPath()
-              ctx.arc(pos.x, reflectionY, radius, 0, Math.PI * 2)
-              
-              // Draw avatar if loaded
-              if (orb.imageLoaded && orb.image) {
+              // PT: Pomemin theme: desenha reflexo com orelhinhas | EN: Pomemin theme: draws reflection with ears | ES: Tema Pomemin: dibuja reflejo con orejitas | FR: Thème Pomemin: dessine réflexion avec oreilles | DE: Pomemin-Theme: zeichnet Reflexion mit Ohren
+              if (themeId === "pomemin") {
+                // Draw orb with ears reflection (Pokémon style) - inverted vertically
                 ctx.save()
+                ctx.translate(pos.x, reflectionY)
+                ctx.scale(1, -1) // Invert vertically
+                ctx.translate(-pos.x, -reflectionY)
+                
+                const earSize = radius * 0.4
+                const earOffset = radius * 0.3
+                
                 ctx.beginPath()
-                ctx.arc(pos.x, reflectionY, radius - 2, 0, Math.PI * 2)
-                ctx.clip()
-                ctx.drawImage(orb.image, pos.x - radius + 2, reflectionY - radius + 2, (radius - 2) * 2, (radius - 2) * 2)
+                ctx.arc(pos.x, reflectionY, radius, 0, Math.PI * 2)
+                ctx.moveTo(pos.x - earOffset, reflectionY - radius)
+                ctx.lineTo(pos.x - earOffset - earSize, reflectionY - radius - earSize * 1.2)
+                ctx.lineTo(pos.x - earOffset + earSize * 0.3, reflectionY - radius - earSize * 0.5)
+                ctx.closePath()
+                ctx.moveTo(pos.x + earOffset, reflectionY - radius)
+                ctx.lineTo(pos.x + earOffset + earSize, reflectionY - radius - earSize * 1.2)
+                ctx.lineTo(pos.x + earOffset - earSize * 0.3, reflectionY - radius - earSize * 0.5)
+                ctx.closePath()
+                
+                // Draw avatar if loaded (clipped to circle)
+                if (orb.imageLoaded && orb.image) {
+                  ctx.save()
+                  ctx.beginPath()
+                  ctx.arc(pos.x, reflectionY, radius - 2, 0, Math.PI * 2)
+                  ctx.clip()
+                  ctx.drawImage(orb.image, pos.x - radius + 2, reflectionY - radius + 2, (radius - 2) * 2, (radius - 2) * 2)
+                  ctx.restore()
+                } else {
+                  ctx.fillStyle = colors.primary
+                  ctx.fill()
+                }
+                ctx.restore()
+              } else if (themeId === "chaves") {
+                // PT: Chaves theme: desenha reflexo quadrado | EN: Chaves theme: draws square reflection | ES: Tema Chaves: dibuja reflejo cuadrado | FR: Thème Chaves: dessine réflexion carrée | DE: Chaves-Theme: zeichnet quadratische Reflexion
+                // Draw square reflection (Chaves theme) - inverted vertically
+                ctx.save()
+                ctx.translate(pos.x, reflectionY)
+                ctx.scale(1, -1) // Invert vertically
+                ctx.translate(-pos.x, -reflectionY)
+                
+                const size = radius * 2
+                ctx.beginPath()
+                ctx.rect(pos.x - radius, reflectionY - radius, size, size)
+                
+                // Draw avatar if loaded (clipped to square)
+                if (orb.imageLoaded && orb.image) {
+                  ctx.save()
+                  ctx.beginPath()
+                  ctx.rect(pos.x - radius + 2, reflectionY - radius + 2, size - 4, size - 4)
+                  ctx.clip()
+                  ctx.drawImage(orb.image, pos.x - radius + 2, reflectionY - radius + 2, size - 4, size - 4)
+                  ctx.restore()
+                } else {
+                  ctx.fillStyle = colors.primary
+                  ctx.fill()
+                }
                 ctx.restore()
               } else {
-                ctx.fillStyle = colors.primary
-                ctx.fill()
+                // Draw orb circle (reflection) - inverted vertically
+                ctx.save()
+                ctx.translate(pos.x, reflectionY)
+                ctx.scale(1, -1) // Invert vertically
+                ctx.translate(-pos.x, -reflectionY)
+                
+                ctx.beginPath()
+                ctx.arc(pos.x, reflectionY, radius, 0, Math.PI * 2)
+                
+                // Draw avatar if loaded
+                if (orb.imageLoaded && orb.image) {
+                  ctx.save()
+                  ctx.beginPath()
+                  ctx.arc(pos.x, reflectionY, radius - 2, 0, Math.PI * 2)
+                  ctx.clip()
+                  ctx.drawImage(orb.image, pos.x - radius + 2, reflectionY - radius + 2, (radius - 2) * 2, (radius - 2) * 2)
+                  ctx.restore()
+                } else {
+                  ctx.fillStyle = colors.primary
+                  ctx.fill()
+                }
+                ctx.restore()
               }
               
               ctx.restore()
@@ -2319,6 +3075,48 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
   const toggleVisibility = useCallback(() => {
     setIsVisible((prev) => !prev)
   }, [])
+  
+  // PT: Desabilita efeitos festivos e lança confetes | EN: Disables festive effects and launches confetti | ES: Desactiva efectos festivos y lanza confeti | FR: Désactive effets festifs et lance confettis | DE: Deaktiviert festliche Effekte und wirft Konfetti
+  const disableFestiveEffects = useCallback(() => {
+    setFestiveEffectsEnabled(false)
+    setShowConfetti(true)
+    setIsVisible(false) // Esconde o canvas
+    
+    // Salva preferência
+    if (typeof window !== "undefined") {
+      localStorage.setItem("dev-orbs-festive-effects", "false")
+    }
+    
+    // Remove confetes após 3 segundos
+    setTimeout(() => {
+      setShowConfetti(false)
+    }, 3000)
+  }, [])
+  
+  // PT: Verifica se há festividade ativa | EN: Checks if there's an active holiday | ES: Verifica si hay festividad activa | FR: Vérifie s'il y a une fête active | DE: Prüft, ob ein Feiertag aktiv ist
+  const activeFestivity = getActiveFestivity(forceFestivity)
+  const showFestiveButton = activeFestivity !== null && festiveEffectsEnabled
+  
+  // PT: Função para testar cada festividade | EN: Function to test each festivity | ES: Función para probar cada festividad | FR: Fonction pour tester chaque fête | DE: Funktion zum Testen jedes Feiertags
+  const testFestivity = useCallback((festivity: FestiveType) => {
+    setForceFestivity(festivity)
+    setFestiveEffectsEnabled(true)
+    setIsVisible(true)
+    if (typeof window !== "undefined") {
+      localStorage.setItem("dev-orbs-festive-effects", "true")
+    }
+  }, [])
+  
+  // PT: Lista de festividades para teste | EN: List of festivities for testing | ES: Lista de festividades para prueba | FR: Liste des fêtes pour test | DE: Liste der Feiertage zum Testen
+  const testFestivities: Array<{ type: FestiveType; name: string; emoji: string }> = [
+    { type: 'christmas', name: 'Natal', emoji: '🎄' },
+    { type: 'newyear', name: 'Ano Novo', emoji: '🎉' },
+    { type: 'easter', name: 'Páscoa', emoji: '🐰' },
+    { type: 'halloween', name: 'Halloween', emoji: '🎃' },
+    { type: 'carnival', name: 'Carnaval', emoji: '🎭' },
+    { type: 'saojoao', name: 'São João', emoji: '🔥' },
+    { type: 'childrensday', name: 'Dia das Crianças', emoji: '🎈' },
+  ]
 
   if (!isMounted || canvasSize.width === 0 || canvasSize.height === 0) {
     return (
@@ -2351,6 +3149,109 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
         {isVisible ? "👁️" : "👁️‍🗨️"}
       </button>
 
+      {/* PT: Botão para desativar efeitos festivos (só aparece quando há festividade) | EN: Button to disable festive effects (only appears when there's a holiday) | ES: Botón para desactivar efectos festivos (solo aparece cuando hay festividad) | FR: Bouton pour désactiver effets festifs (apparaît seulement s'il y a une fête) | DE: Schaltfläche zum Deaktivieren festlicher Effekte (erscheint nur bei Feiertagen) */}
+      {showFestiveButton && (
+        <button
+          onClick={disableFestiveEffects}
+          className="
+            absolute top-2 left-2 z-20
+            px-3 py-2
+            text-sm font-medium
+            text-white
+            bg-gradient-to-r from-red-500 to-pink-500
+            hover:from-red-600 hover:to-pink-600
+            border border-red-400/50
+            rounded-lg
+            shadow-lg
+            transition-all
+            backdrop-blur-sm
+            animate-pulse
+          "
+          title="Desativar efeitos festivos"
+          aria-label="Desativar efeitos festivos"
+        >
+          🎄 Desativar Festivo
+        </button>
+      )}
+
+      {/* PT: Botões de teste para cada efeito festivo | EN: Test buttons for each festive effect | ES: Botones de prueba para cada efecto festivo | FR: Boutons de test pour chaque effet festif | DE: Test-Schaltflächen für jeden festlichen Effekt */}
+      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-20 flex flex-wrap gap-2 justify-center max-w-[90vw]">
+        {testFestivities.map((festivity) => (
+          <button
+            key={festivity.type}
+            onClick={() => testFestivity(festivity.type)}
+            className={`
+              px-3 py-2
+              text-xs font-medium
+              rounded-lg
+              shadow-lg
+              transition-all
+              backdrop-blur-sm
+              border
+              ${forceFestivity === festivity.type 
+                ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white border-green-400/50 animate-pulse' 
+                : 'bg-page-secondary/80 hover:bg-page-secondary text-text-secondary hover:text-text border-border/50'
+              }
+            `}
+            title={`Testar ${festivity.name}`}
+            aria-label={`Testar ${festivity.name}`}
+          >
+            {festivity.emoji} {festivity.name}
+          </button>
+        ))}
+        <button
+          onClick={() => {
+            setForceFestivity(null)
+            setFestiveEffectsEnabled(true)
+            setIsVisible(true)
+          }}
+          className={`
+            px-3 py-2
+            text-xs font-medium
+            rounded-lg
+            shadow-lg
+            transition-all
+            backdrop-blur-sm
+            border
+            ${forceFestivity === null 
+              ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white border-blue-400/50' 
+              : 'bg-page-secondary/80 hover:bg-page-secondary text-text-secondary hover:text-text border-border/50'
+            }
+          `}
+          title="Voltar ao normal (data real)"
+          aria-label="Voltar ao normal"
+        >
+          🔄 Normal
+        </button>
+      </div>
+
+      {/* PT: Overlay de confetes | EN: Confetti overlay | ES: Overlay de confeti | FR: Overlay de confettis | DE: Konfetti-Overlay */}
+      {showConfetti && (
+        <div className="absolute inset-0 z-30 pointer-events-none">
+          {Array.from({ length: 100 }).map((_, i) => {
+            const delay = Math.random() * 0.5
+            const duration = 2 + Math.random() * 1
+            const left = Math.random() * 100
+            const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff', '#ff8800']
+            const color = colors[Math.floor(Math.random() * colors.length)]
+            
+            return (
+              <div
+                key={i}
+                className="absolute w-2 h-2 rounded-full"
+                style={{
+                  left: `${left}%`,
+                  top: '-10px',
+                  backgroundColor: color,
+                  animation: `confetti-fall ${duration}s ease-in ${delay}s forwards`,
+                  transform: `rotate(${Math.random() * 360}deg)`,
+                }}
+              />
+            )
+          })}
+        </div>
+      )}
+
       <canvas
         ref={canvasRef}
         width={canvasSize.width}
@@ -2365,6 +3266,7 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
           transition: "opacity 0.3s ease",
         }}
       />
+      
     </div>
   )
 }

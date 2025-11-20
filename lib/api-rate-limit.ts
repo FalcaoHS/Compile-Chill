@@ -27,13 +27,13 @@ export interface RateLimitHandlerConfig {
  * Get client IP address from request
  */
 function getClientIp(request: NextRequest): string {
-  // Try various headers that might contain the real IP
+  // PT: Tenta vários headers que podem conter o IP real (proxies, load balancers) | EN: Try various headers that might contain real IP (proxies, load balancers) | ES: Intenta varios headers que pueden contener IP real (proxies, load balancers) | FR: Essaie divers headers pouvant contenir IP réel (proxies, load balancers) | DE: Versucht verschiedene Header, die echte IP enthalten könnten (Proxies, Load Balancer)
   const forwarded = request.headers.get("x-forwarded-for")
   const realIp = request.headers.get("x-real-ip")
   const cfConnectingIp = request.headers.get("cf-connecting-ip")
 
   if (forwarded) {
-    // x-forwarded-for can contain multiple IPs, take the first one
+    // PT: x-forwarded-for pode conter múltiplos IPs, pega o primeiro (cliente original) | EN: x-forwarded-for can contain multiple IPs, take first (original client) | ES: x-forwarded-for puede contener múltiples IPs, toma el primero (cliente original) | FR: x-forwarded-for peut contenir plusieurs IPs, prendre le premier (client original) | DE: x-forwarded-for kann mehrere IPs enthalten, erste nehmen (ursprünglicher Client)
     return forwarded.split(",")[0].trim()
   }
 
@@ -108,11 +108,11 @@ export function withRateLimit(
       // Get authenticated user (if any)
       const user = await getAuthenticatedUser(request)
 
-      // Generate rate limit key
+      // PT: Gera chave de rate limit (user ID se autenticado, senão IP) | EN: Generate rate limit key (user ID if authenticated, else IP) | ES: Genera clave de rate limit (user ID si autenticado, sino IP) | FR: Génère clé rate limit (user ID si authentifié, sinon IP) | DE: Generiert Rate-Limit-Schlüssel (Benutzer-ID wenn authentifiziert, sonst IP)
       const keyGenerator = config.keyGenerator || defaultKeyGenerator
       const key = keyGenerator(request, user?.id || null)
 
-      // Check rate limit
+      // PT: Verifica rate limit (sliding window) | EN: Check rate limit (sliding window) | ES: Verifica rate limit (ventana deslizante) | FR: Vérifie rate limit (fenêtre glissante) | DE: Prüft Rate-Limit (gleitendes Fenster)
       const { success, limit, remaining, reset } = await config.limiter.limit(key)
 
       // Create response headers with rate limit information
@@ -121,8 +121,9 @@ export function withRateLimit(
       headers.set("X-RateLimit-Remaining", remaining.toString())
       headers.set("X-RateLimit-Reset", new Date(reset).toISOString())
 
-      // If rate limit exceeded, return 429 with Retry-After header
+      // PT: Se rate limit excedido, retorna 429 com header Retry-After | EN: If rate limit exceeded, return 429 with Retry-After header | ES: Si rate limit excedido, retorna 429 con header Retry-After | FR: Si rate limit dépassé, retourne 429 avec header Retry-After | DE: Wenn Rate-Limit überschritten, 429 mit Retry-After-Header zurückgeben
       if (!success) {
+        // PT: Calcula segundos até reset (para header Retry-After) | EN: Calculate seconds until reset (for Retry-After header) | ES: Calcula segundos hasta reset (para header Retry-After) | FR: Calcule secondes jusqu'à reset (pour header Retry-After) | DE: Berechnet Sekunden bis Reset (für Retry-After-Header)
         const retryAfter = Math.ceil((reset - Date.now()) / 1000)
         headers.set("Retry-After", retryAfter.toString())
 

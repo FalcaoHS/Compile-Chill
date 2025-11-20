@@ -11,7 +11,7 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
   const method = request.method
 
-  // Handle authentication errors from NextAuth
+  // PT: Trata erros de autenticação do NextAuth | EN: Handle NextAuth auth errors | ES: Maneja errores de autenticación de NextAuth | FR: Gère les erreurs d'authentification NextAuth | DE: Behandelt NextAuth-Authentifizierungsfehler
   const error = request.nextUrl.searchParams.get("error")
   
   if (error) {
@@ -24,10 +24,10 @@ export async function middleware(request: NextRequest) {
     )
   }
 
-  // Skip protection for public routes
+  // PT: Ignora proteção para rotas públicas | EN: Skip protection for public routes | ES: Omite protección para rutas públicas | FR: Ignore la protection pour les routes publiques | DE: Schutz für öffentliche Routen überspringen
   if (isPublicRoute(pathname)) {
     const response = NextResponse.next()
-    // Apply security headers to public routes too
+    // PT: Aplica headers de segurança mesmo em rotas públicas | EN: Apply security headers to public routes too | ES: Aplica headers de seguridad también en rutas públicas | FR: Applique les en-têtes de sécurité aux routes publiques aussi | DE: Sicherheitsheader auch auf öffentliche Routen anwenden
     const securityHeaders = applySecurityHeaders(request)
     Object.entries(securityHeaders).forEach(([key, value]) => {
       response.headers.set(key, value)
@@ -35,9 +35,9 @@ export async function middleware(request: NextRequest) {
     return response
   }
 
-  // Check if route requires authentication
+  // PT: Verifica se rota requer autenticação | EN: Check if route requires authentication | ES: Verifica si la ruta requiere autenticación | FR: Vérifie si la route nécessite une authentification | DE: Prüft, ob Route Authentifizierung erfordert
   if (isProtectedRoute(pathname, method)) {
-    // Perform lightweight authentication check at edge
+    // PT: Verificação leve de autenticação no edge (sem Prisma) | EN: Lightweight auth check at edge (no Prisma) | ES: Verificación ligera de auth en edge (sin Prisma) | FR: Vérification d'auth légère au edge (sans Prisma) | DE: Leichte Auth-Prüfung am Edge (ohne Prisma)
     const authResult = await requireAuthMiddleware(request)
     
     if (authResult) {

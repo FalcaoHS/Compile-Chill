@@ -17,7 +17,7 @@ function getRedisClient(): Redis | null {
     const url = process.env.UPSTASH_REDIS_REST_URL
     const token = process.env.UPSTASH_REDIS_REST_TOKEN
 
-    // If Redis is not configured, return null (rate limiting disabled)
+    // PT: Se Redis não configurado, retorna null (rate limiting desabilitado em dev) | EN: If Redis not configured, return null (rate limiting disabled in dev) | ES: Si Redis no configurado, retorna null (rate limiting deshabilitado en dev) | FR: Si Redis non configuré, retourne null (limitation désactivée en dev) | DE: Wenn Redis nicht konfiguriert, null zurückgeben (Rate-Limiting in Dev deaktiviert)
     if (!url || !token) {
       
       return null
@@ -91,11 +91,12 @@ export const RateLimitPresets = {
 export function createRateLimiter(config: RateLimitConfig): Ratelimit | null {
   const redis = getRedisClient()
 
-  // If Redis is not configured, return null (rate limiting disabled)
+  // PT: Se Redis não configurado, rate limiting desabilitado (modo desenvolvimento) | EN: If Redis not configured, rate limiting disabled (dev mode) | ES: Si Redis no configurado, rate limiting deshabilitado (modo desarrollo) | FR: Si Redis non configuré, limitation désactivée (mode dev) | DE: Wenn Redis nicht konfiguriert, Rate-Limiting deaktiviert (Dev-Modus)
   if (!redis) {
     return null
   }
 
+  // PT: Sliding window: janela deslizante permite distribuir requisições ao longo do tempo | EN: Sliding window: allows distributing requests over time | ES: Ventana deslizante: permite distribuir solicitudes en el tiempo | FR: Fenêtre glissante: permet de distribuer les requêtes dans le temps | DE: Gleitendes Fenster: ermöglicht Verteilung der Anfragen über die Zeit
   return new Ratelimit({
     redis,
     limiter: Ratelimit.slidingWindow(config.limit, `${config.window} s`),
