@@ -243,6 +243,236 @@ function calculateEaster(year: number): Date {
 }
 
 /**
+ * PT: Desenha elementos decorativos temáticos ao redor da orb | EN: Draws theme-specific decorative elements around orb | ES: Dibuja elementos decorativos temáticos alrededor de orb | FR: Dessine éléments décoratifs thématiques autour de orb | DE: Zeichnet themenspezifische dekorative Elemente um Orb
+ */
+function drawThemeDecorations(
+  ctx: CanvasRenderingContext2D,
+  themeId: string,
+  pos: { x: number; y: number },
+  radius: number,
+  colors: { primary: string; accent: string; text: string }
+) {
+  ctx.save()
+  const outerRadius = radius * 1.3 // Posição externa, não tapa a foto
+  
+  switch (themeId) {
+    case 'analista-jr': {
+      // Badge "JR" - símbolo de iniciante
+      const badgeSize = radius * 0.3
+      ctx.fillStyle = colors.accent
+      ctx.strokeStyle = colors.primary
+      ctx.lineWidth = 2
+      ctx.beginPath()
+      ctx.arc(pos.x + radius * 0.7, pos.y - radius * 0.7, badgeSize, 0, Math.PI * 2)
+      ctx.fill()
+      ctx.stroke()
+      // Texto "JR"
+      ctx.fillStyle = colors.text
+      ctx.font = `bold ${badgeSize * 0.6}px sans-serif`
+      ctx.textAlign = "center"
+      ctx.textBaseline = "middle"
+      ctx.fillText("JR", pos.x + radius * 0.7, pos.y - radius * 0.7)
+      break
+    }
+    
+    case 'analista-sr': {
+      // Coroa - símbolo de sênior
+      const crownSize = radius * 0.25
+      const crownX = pos.x + radius * 0.7
+      const crownY = pos.y - radius * 0.7
+      ctx.fillStyle = colors.primary
+      ctx.beginPath()
+      // Base da coroa
+      ctx.rect(crownX - crownSize, crownY, crownSize * 2, crownSize * 0.4)
+      // Pontas da coroa (3 pontas)
+      for (let i = 0; i < 3; i++) {
+        const x = crownX - crownSize + (crownSize * i)
+        ctx.moveTo(x, crownY)
+        ctx.lineTo(x + crownSize * 0.5, crownY - crownSize * 0.6)
+        ctx.lineTo(x + crownSize, crownY)
+      }
+      ctx.fill()
+      break
+    }
+    
+    case 'lofi-code': {
+      // Ondas sonoras - símbolo de música lofi
+      const waveCount = 3
+      const waveSpacing = radius * 0.15
+      ctx.strokeStyle = colors.accent
+      ctx.lineWidth = 2
+      for (let i = 0; i < waveCount; i++) {
+        const waveX = pos.x + radius * 0.8
+        const waveY = pos.y - radius * 0.5 + (i * waveSpacing)
+        const waveHeight = radius * 0.1 + (i * radius * 0.05)
+        ctx.beginPath()
+        ctx.moveTo(waveX, waveY)
+        ctx.quadraticCurveTo(waveX + waveHeight, waveY - waveHeight, waveX + waveHeight * 2, waveY)
+        ctx.quadraticCurveTo(waveX + waveHeight * 3, waveY + waveHeight, waveX + waveHeight * 4, waveY)
+        ctx.stroke()
+      }
+      break
+    }
+    
+    case 'cyber': {
+      // Código binário (0s e 1s) - símbolo hacker
+      ctx.fillStyle = colors.primary
+      ctx.font = `${radius * 0.15}px monospace`
+      ctx.textAlign = "left"
+      ctx.textBaseline = "top"
+      const binary = ['0', '1', '0', '1', '1', '0']
+      binary.forEach((bit, i) => {
+        const angle = (i / binary.length) * Math.PI * 2
+        const x = pos.x + Math.cos(angle) * outerRadius
+        const y = pos.y + Math.sin(angle) * outerRadius
+        ctx.fillText(bit, x, y)
+      })
+      break
+    }
+    
+    case 'pixel': {
+      // Pixels/blocos 8-bit ao redor
+      const pixelSize = radius * 0.15
+      ctx.fillStyle = colors.primary
+      const pixelPositions = [
+        { x: pos.x + radius * 0.8, y: pos.y - radius * 0.6 },
+        { x: pos.x + radius * 0.8, y: pos.y },
+        { x: pos.x + radius * 0.8, y: pos.y + radius * 0.6 },
+        { x: pos.x - radius * 0.8, y: pos.y - radius * 0.6 },
+        { x: pos.x - radius * 0.8, y: pos.y + radius * 0.6 },
+      ]
+      pixelPositions.forEach(p => {
+        ctx.fillRect(p.x, p.y, pixelSize, pixelSize)
+      })
+      break
+    }
+    
+    case 'neon': {
+      // Linhas neon futuristas
+      ctx.strokeStyle = colors.primary
+      ctx.lineWidth = 2
+      ctx.shadowBlur = 8
+      ctx.shadowColor = colors.primary
+      const lineCount = 4
+      for (let i = 0; i < lineCount; i++) {
+        const angle = (i / lineCount) * Math.PI * 2
+        const startX = pos.x + Math.cos(angle) * radius
+        const startY = pos.y + Math.sin(angle) * radius
+        const endX = pos.x + Math.cos(angle) * outerRadius
+        const endY = pos.y + Math.sin(angle) * outerRadius
+        ctx.beginPath()
+        ctx.moveTo(startX, startY)
+        ctx.lineTo(endX, endY)
+        ctx.stroke()
+      }
+      ctx.shadowBlur = 0
+      break
+    }
+    
+    case 'terminal': {
+      // Caracteres ASCII/símbolos de terminal
+      ctx.fillStyle = colors.text
+      ctx.font = `${radius * 0.2}px monospace`
+      ctx.textAlign = "center"
+      const symbols = ['>', '$', '#', '%']
+      symbols.forEach((sym, i) => {
+        const angle = (i / symbols.length) * Math.PI * 2
+        const x = pos.x + Math.cos(angle) * outerRadius
+        const y = pos.y + Math.sin(angle) * outerRadius
+        ctx.fillText(sym, x, y)
+      })
+      break
+    }
+    
+    case 'blueprint': {
+      // Linhas de construção/régua
+      ctx.strokeStyle = colors.primary
+      ctx.lineWidth = 1.5
+      // Linha horizontal
+      ctx.beginPath()
+      ctx.moveTo(pos.x - radius * 0.6, pos.y + radius * 0.9)
+      ctx.lineTo(pos.x + radius * 0.6, pos.y + radius * 0.9)
+      ctx.stroke()
+      // Marcações de régua
+      for (let i = -2; i <= 2; i++) {
+        const markX = pos.x + (i * radius * 0.2)
+        ctx.beginPath()
+        ctx.moveTo(markX, pos.y + radius * 0.9)
+        ctx.lineTo(markX, pos.y + radius * 0.9 + radius * 0.1)
+        ctx.stroke()
+      }
+      break
+    }
+    
+    case 'bruno-csharp': {
+      // Símbolo C# (hashtag estilizado)
+      const hashSize = radius * 0.3
+      const hashX = pos.x + radius * 0.7
+      const hashY = pos.y - radius * 0.7
+      ctx.strokeStyle = colors.accent
+      ctx.lineWidth = 2.5
+      // Linhas horizontais
+      ctx.beginPath()
+      ctx.moveTo(hashX - hashSize, hashY - hashSize * 0.3)
+      ctx.lineTo(hashX + hashSize, hashY - hashSize * 0.3)
+      ctx.moveTo(hashX - hashSize, hashY + hashSize * 0.3)
+      ctx.lineTo(hashX + hashSize, hashY + hashSize * 0.3)
+      // Linhas verticais
+      ctx.moveTo(hashX - hashSize * 0.3, hashY - hashSize)
+      ctx.lineTo(hashX - hashSize * 0.3, hashY + hashSize)
+      ctx.moveTo(hashX + hashSize * 0.3, hashY - hashSize)
+      ctx.lineTo(hashX + hashSize * 0.3, hashY + hashSize)
+      ctx.stroke()
+      break
+    }
+    
+    case 'chaves': {
+      // Detalhe do chapéu do Chaves (listras)
+      const stripeCount = 3
+      const stripeWidth = radius * 0.4
+      const stripeHeight = radius * 0.15
+      ctx.fillStyle = colors.primary
+      for (let i = 0; i < stripeCount; i++) {
+        ctx.fillRect(
+          pos.x + radius * 0.6,
+          pos.y - radius * 0.8 + (i * stripeHeight * 1.2),
+          stripeWidth,
+          stripeHeight
+        )
+      }
+      break
+    }
+    
+    case 'pomemin': {
+      // Raios elétricos ao redor (estilo Pikachu)
+      const lightningCount = 4
+      ctx.strokeStyle = colors.primary
+      ctx.lineWidth = 2.5
+      ctx.shadowBlur = 6
+      ctx.shadowColor = colors.primary
+      for (let i = 0; i < lightningCount; i++) {
+        const angle = (i / lightningCount) * Math.PI * 2
+        const startX = pos.x + Math.cos(angle) * radius
+        const startY = pos.y + Math.sin(angle) * radius
+        const midX = pos.x + Math.cos(angle) * outerRadius * 0.9
+        const midY = pos.y + Math.sin(angle) * outerRadius * 0.9
+        const endX = pos.x + Math.cos(angle) * outerRadius
+        const endY = pos.y + Math.sin(angle) * outerRadius
+        ctx.beginPath()
+        ctx.moveTo(startX, startY)
+        ctx.lineTo(midX + Math.cos(angle + 0.3) * radius * 0.1, midY + Math.sin(angle + 0.3) * radius * 0.1)
+        ctx.lineTo(endX, endY)
+        ctx.stroke()
+      }
+      ctx.shadowBlur = 0
+      break
+    }
+  }
+  
+  ctx.restore()
+}
+
+/**
  * PT: Desenha elementos festivos na orb | EN: Draws festive elements on orb | ES: Dibuja elementos festivos en orb | FR: Dessine éléments festifs sur orb | DE: Zeichnet festliche Elemente auf Orb
  */
 function drawFestiveElement(
@@ -2354,11 +2584,13 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
       glowIntensity = 6
     }
 
-    // PT: Pomemin theme: desenha orbs com orelhinhas (estilo Pokémon) | EN: Pomemin theme: draws orbs with ears (Pokémon style) | ES: Tema Pomemin: dibuja orbs con orejitas (estilo Pokémon) | FR: Thème Pomemin: dessine orbs avec oreilles (style Pokémon) | DE: Pomemin-Theme: zeichnet Orbs mit Ohren (Pokémon-Stil)
+    // PT: Pomemin theme: desenha orbs com orelhinhas e rabinho (estilo Pokémon) | EN: Pomemin theme: draws orbs with ears and tail (Pokémon style) | ES: Tema Pomemin: dibuja orbs con orejitas y colita (estilo Pokémon) | FR: Thème Pomemin: dessine orbs avec oreilles et queue (style Pokémon) | DE: Pomemin-Theme: zeichnet Orbs mit Ohren und Schwanz (Pokémon-Stil)
     if (themeId === "pomemin") {
-      // Draw orb with ears (Pokémon style)
+      // Draw orb with ears and tail (Pokémon style)
       const earSize = radius * 0.4 // Tamanho das orelhinhas (40% do raio)
       const earOffset = radius * 0.3 // Distância das orelhinhas do centro
+      const tailSize = radius * 0.5 // Tamanho do rabinho (50% do raio)
+      const tailOffset = radius * 0.4 // Distância do rabinho do centro
       
       ctx.beginPath()
       
@@ -2377,8 +2609,14 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
       ctx.lineTo(pos.x + earOffset - earSize * 0.3, pos.y - radius - earSize * 0.5)
       ctx.closePath()
       
-      // Draw avatar if loaded (clipped to circle)
-      if (orb.imageLoaded && orb.image) {
+      // Draw tail/rabinho (triângulo na parte inferior)
+      ctx.moveTo(pos.x, pos.y + radius)
+      ctx.lineTo(pos.x - tailOffset, pos.y + radius + tailSize * 0.8)
+      ctx.lineTo(pos.x + tailOffset, pos.y + radius + tailSize * 0.8)
+      ctx.closePath()
+      
+      // Draw avatar if loaded (clipped to circle) - verificar se imageLoaded está true E image existe
+      if (orb.imageLoaded && orb.image && orb.image.complete && orb.image.naturalWidth > 0) {
         ctx.save()
         ctx.beginPath()
         ctx.arc(pos.x, pos.y, radius - borderWidth, 0, Math.PI * 2)
@@ -2391,11 +2629,11 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
         ctx.fill()
       }
       
-      // Fill ears with same color
+      // Fill ears and tail with same color
       ctx.fillStyle = colors.primary
       ctx.fill()
       
-      // Draw border with glow (circle + ears)
+      // Draw border with glow (circle + ears + tail)
       ctx.strokeStyle = borderColor
       ctx.lineWidth = borderWidth
       ctx.shadowBlur = 14
@@ -2411,6 +2649,11 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
       ctx.moveTo(pos.x + earOffset, pos.y - radius)
       ctx.lineTo(pos.x + earOffset + earSize, pos.y - radius - earSize * 1.2)
       ctx.lineTo(pos.x + earOffset - earSize * 0.3, pos.y - radius - earSize * 0.5)
+      ctx.closePath()
+      // Tail border
+      ctx.moveTo(pos.x, pos.y + radius)
+      ctx.lineTo(pos.x - tailOffset, pos.y + radius + tailSize * 0.8)
+      ctx.lineTo(pos.x + tailOffset, pos.y + radius + tailSize * 0.8)
       ctx.closePath()
       ctx.stroke()
       ctx.shadowBlur = 0
@@ -2478,6 +2721,9 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
         ctx.fillText("()", pos.x, pos.y)
       }
     }
+
+    // PT: Desenha elementos decorativos temáticos ao redor da orb (não tapa a foto) | EN: Draws theme-specific decorative elements around orb (doesn't cover photo) | ES: Dibuja elementos decorativos temáticos alrededor de orb (no tapa la foto) | FR: Dessine éléments décoratifs thématiques autour de orb (ne couvre pas la photo) | DE: Zeichnet themenspezifische dekorative Elemente um Orb (deckt Foto nicht ab)
+    drawThemeDecorations(ctx, themeId, pos, radius, colors)
 
     // PT: Desenha elementos festivos se houver festividade ativa e efeitos estiverem habilitados | EN: Draws festive elements if there's an active holiday and effects are enabled | ES: Dibuja elementos festivos si hay festividad activa y efectos están habilitados | FR: Dessine éléments festifs s'il y a une fête active et effets activés | DE: Zeichnet festliche Elemente, wenn ein Feiertag aktiv ist und Effekte aktiviert sind
     if (festiveEffectsEnabled) {
@@ -2714,6 +2960,9 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
       }
     }
 
+    // PT: Desenha elementos decorativos temáticos ao redor da orb (não tapa a foto) | EN: Draws theme-specific decorative elements around orb (doesn't cover photo) | ES: Dibuja elementos decorativos temáticos alrededor de orb (no tapa la foto) | FR: Dessine éléments décoratifs thématiques autour de orb (ne couvre pas la photo) | DE: Zeichnet themenspezifische dekorative Elemente um Orb (deckt Foto nicht ab)
+    drawThemeDecorations(ctx, themeId, pos, radius, colors)
+
     // PT: Desenha elementos festivos se houver festividade ativa e efeitos estiverem habilitados | EN: Draws festive elements if there's an active holiday and effects are enabled | ES: Dibuja elementos festivos si hay festividad activa y efectos están habilitados | FR: Dessine éléments festifs s'il y a une fête active et effets activés | DE: Zeichnet festliche Elemente, wenn ein Feiertag aktiv ist und Effekte aktiviert sind
     if (festiveEffectsEnabled) {
       const festiveType = getActiveFestivity(forceFestivity)
@@ -2930,9 +3179,9 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
               ctx.globalAlpha = 0.08 // 8% opacity
               ctx.filter = 'blur(6px)' // 6px blur
               
-              // PT: Pomemin theme: desenha reflexo com orelhinhas | EN: Pomemin theme: draws reflection with ears | ES: Tema Pomemin: dibuja reflejo con orejitas | FR: Thème Pomemin: dessine réflexion avec oreilles | DE: Pomemin-Theme: zeichnet Reflexion mit Ohren
+              // PT: Pomemin theme: desenha reflexo com orelhinhas e rabinho | EN: Pomemin theme: draws reflection with ears and tail | ES: Tema Pomemin: dibuja reflejo con orejitas y colita | FR: Thème Pomemin: dessine réflexion avec oreilles et queue | DE: Pomemin-Theme: zeichnet Reflexion mit Ohren und Schwanz
               if (themeId === "pomemin") {
-                // Draw orb with ears reflection (Pokémon style) - inverted vertically
+                // Draw orb with ears and tail reflection (Pokémon style) - inverted vertically
                 ctx.save()
                 ctx.translate(pos.x, reflectionY)
                 ctx.scale(1, -1) // Invert vertically
@@ -2940,6 +3189,8 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
                 
                 const earSize = radius * 0.4
                 const earOffset = radius * 0.3
+                const tailSize = radius * 0.5
+                const tailOffset = radius * 0.4
                 
                 ctx.beginPath()
                 ctx.arc(pos.x, reflectionY, radius, 0, Math.PI * 2)
@@ -2951,9 +3202,14 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
                 ctx.lineTo(pos.x + earOffset + earSize, reflectionY - radius - earSize * 1.2)
                 ctx.lineTo(pos.x + earOffset - earSize * 0.3, reflectionY - radius - earSize * 0.5)
                 ctx.closePath()
+                // Tail reflection
+                ctx.moveTo(pos.x, reflectionY + radius)
+                ctx.lineTo(pos.x - tailOffset, reflectionY + radius + tailSize * 0.8)
+                ctx.lineTo(pos.x + tailOffset, reflectionY + radius + tailSize * 0.8)
+                ctx.closePath()
                 
                 // Draw avatar if loaded (clipped to circle)
-                if (orb.imageLoaded && orb.image) {
+                if (orb.imageLoaded && orb.image && orb.image.complete && orb.image.naturalWidth > 0) {
                   ctx.save()
                   ctx.beginPath()
                   ctx.arc(pos.x, reflectionY, radius - 2, 0, Math.PI * 2)

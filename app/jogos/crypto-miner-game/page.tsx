@@ -26,7 +26,7 @@ import {
 
 const TICK_INTERVAL = 1000 // 1 second
 const SAVE_INTERVAL = 5000 // 5 seconds
-const MAX_CLICK_RATE = 20 // clicks per second
+const MAX_CLICK_RATE = 1000 // clicks per second (aumentado drasticamente)
 const CLICK_WINDOW = 1000 // 1 second window
 
 export default function CryptoMinerPage() {
@@ -142,7 +142,9 @@ export default function CryptoMinerPage() {
 
   // Click handler with rate limiting
   const handleMiningClick = useCallback(() => {
-    if (!gameState || clicksDisabled) return
+    // Use ref to get latest state (fixes bug where coins stop updating on rapid clicks)
+    const currentState = gameStateRef.current
+    if (!currentState || clicksDisabled) return
 
     const now = Date.now()
     
@@ -161,12 +163,15 @@ export default function CryptoMinerPage() {
     // Add current timestamp
     clickTimestamps.current.push(now)
     
-    // Process click
+    // Process click - use functional update to ensure we always use latest state
     setGameState(prevState => {
       if (!prevState) return prevState
-      return handleClick(prevState)
+      const newState = handleClick(prevState)
+      // Update ref immediately to keep it in sync
+      gameStateRef.current = newState
+      return newState
     })
-  }, [gameState, clicksDisabled])
+  }, [clicksDisabled])
 
   // Keyboard support
   useEffect(() => {

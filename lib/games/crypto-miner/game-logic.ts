@@ -175,6 +175,54 @@ export const CLICK_UPGRADES: ClickUpgrade[] = [
     cost: 100000,
     clickPowerBonus: 100,
     icon: '🧠'
+  },
+  {
+    id: 'keyboard-5',
+    name: 'Quantum Clicker',
+    description: 'Break the speed barrier',
+    cost: 1000000,
+    clickPowerBonus: 500,
+    icon: '⚛️'
+  },
+  {
+    id: 'keyboard-6',
+    name: 'Neural Interface',
+    description: 'Direct brain-to-click connection',
+    cost: 10000000,
+    clickPowerBonus: 2500,
+    icon: '🧬'
+  },
+  {
+    id: 'keyboard-7',
+    name: 'Time Dilation',
+    description: 'Click faster than time itself',
+    cost: 100000000,
+    clickPowerBonus: 12500,
+    icon: '⏰'
+  },
+  {
+    id: 'keyboard-8',
+    name: 'Reality Breaker',
+    description: 'Clicks that transcend reality',
+    cost: 1000000000,
+    clickPowerBonus: 62500,
+    icon: '🌀'
+  },
+  {
+    id: 'keyboard-9',
+    name: 'Infinity Clicker',
+    description: 'Unlimited clicking power',
+    cost: 10000000000,
+    clickPowerBonus: 312500,
+    icon: '♾️'
+  },
+  {
+    id: 'keyboard-10',
+    name: 'God Mode',
+    description: 'Absolute clicking supremacy',
+    cost: 100000000000,
+    clickPowerBonus: 1562500,
+    icon: '👑'
   }
 ]
 
@@ -213,6 +261,60 @@ export const MULTIPLIER_UPGRADES: MultiplierUpgrade[] = [
     cost: 5000000,
     multiplier: 2.0,
     icon: '🍴',
+    purchased: false
+  },
+  {
+    id: 'mult-5',
+    name: 'Parallel Processing',
+    description: '+200% all production',
+    cost: 50000000,
+    multiplier: 3.0,
+    icon: '🔀',
+    purchased: false
+  },
+  {
+    id: 'mult-6',
+    name: 'Quantum Entanglement',
+    description: '+400% all production',
+    cost: 500000000,
+    multiplier: 5.0,
+    icon: '🔮',
+    purchased: false
+  },
+  {
+    id: 'mult-7',
+    name: 'Dimensional Rift',
+    description: '+900% all production',
+    cost: 5000000000,
+    multiplier: 10.0,
+    icon: '🌌',
+    purchased: false
+  },
+  {
+    id: 'mult-8',
+    name: 'Reality Warp',
+    description: '+1900% all production',
+    cost: 50000000000,
+    multiplier: 20.0,
+    icon: '🌀',
+    purchased: false
+  },
+  {
+    id: 'mult-9',
+    name: 'Universe Expansion',
+    description: '+4900% all production',
+    cost: 500000000000,
+    multiplier: 50.0,
+    icon: '🌠',
+    purchased: false
+  },
+  {
+    id: 'mult-10',
+    name: 'Omnipotence',
+    description: '+9900% all production',
+    cost: 5000000000000,
+    multiplier: 100.0,
+    icon: '👁️',
     purchased: false
   }
 ]
