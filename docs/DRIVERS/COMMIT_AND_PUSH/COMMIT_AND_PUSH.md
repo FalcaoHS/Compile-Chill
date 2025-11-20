@@ -2,12 +2,25 @@
 
 Autor: Hudson "Shuk" Falcão
 Data: 19/11/2025
-Versão: 2.0
+Versão: 2.2
 Objetivo: Definir um padrão claro, simples, elegante e sustentável para commits, branches, revisão, testes e publicação, permitindo que colaboradores mantenham coerência e qualidade no repositório.
+
+⚠️ **CRÍTICO: ANTES de executar este driver, o agente DEVE ler:**
+- `docs/DRIVERS/TOKEN_MANAGEMENT.md` - Gerenciamento de tokens (OBRIGATÓRIO)
+- Este arquivo contém regras sobre consumo de tokens e modo leve
+- O agente DEVE informar sobre tokens e perguntar sobre plano antes de executar
 
 🤖 IMPORTANTE: Instruções para o Agente de IA
 
 **⚠️ REGRAS OBRIGATÓRIAS - O AGENTE DEVE SEGUIR EXATAMENTE:**
+
+0. **O agente DEVE ler TOKEN_MANAGEMENT.md ANTES de executar!**
+   - SEMPRE ler `docs/DRIVERS/TOKEN_MANAGEMENT.md` primeiro
+   - SEMPRE informar sobre consumo estimado de tokens (~3.000-8.000 tokens modo completo)
+   - SEMPRE perguntar sobre plano (pago/free)
+   - SEMPRE oferecer modo leve (~1.000-3.000 tokens, redução ~60-70%)
+   - NUNCA executar sem informar sobre tokens
+   - NUNCA ignorar preocupações do usuário sobre consumo
 
 1. **O agente DEVE fazer perguntas antes de commitar!**
    - NUNCA commitar sem perguntar primeiro
@@ -30,14 +43,23 @@ Objetivo: Definir um padrão claro, simples, elegante e sustentável para commit
    - Não assumir respostas
    - Sempre aguardar confirmação do usuário
 
+5. **O agente DEVE detectar auto-atualizações de drivers!**
+   - SEMPRE verificar se mudanças são em arquivos `docs/DRIVERS/*/*.md`
+   - SEMPRE verificar se há incremento de versão no driver
+   - SEMPRE verificar se há adição/atualização na seção "AUTO-ATUALIZAÇÃO" ou "Histórico"
+   - Se detectar auto-atualização, SEMPRE avisar o usuário e pedir autorização especial
+   - SEMPRE explicar que são melhorias na própria conduta do agente
+
 **Fluxo esperado (OBRIGATÓRIO seguir):**
-1. O agente pergunta o que mudou
-2. O agente pergunta o tipo de commit
-3. O agente pergunta sobre a branch
-4. O agente pergunta se é mudança grande
-5. O agente valida o que será commitado (verifica `agent-os/`)
-6. O agente gera os comandos
-7. O agente pede confirmação final
+1. O agente verifica `git status` e analisa mudanças
+2. O agente detecta se há auto-atualização de drivers (NOVO)
+3. O agente pergunta o que mudou
+4. O agente pergunta o tipo de commit
+5. O agente pergunta sobre a branch
+6. O agente pergunta se é mudança grande
+7. O agente valida o que será commitado (verifica `agent-os/`)
+8. O agente gera os comandos
+9. O agente pede confirmação final
 
 **O agente NUNCA deve:**
 - ❌ Commitar sem perguntar primeiro
@@ -45,6 +67,60 @@ Objetivo: Definir um padrão claro, simples, elegante e sustentável para commit
 - ❌ Commitar direto na main para mudanças grandes
 - ❌ Pular etapas de validação
 - ❌ Assumir o que o usuário quer
+- ❌ Commitar auto-atualizações de drivers sem avisar e pedir autorização
+
+🔄 AUTO-ATUALIZAÇÃO: Melhoria Contínua dos Drivers
+
+**⚠️ REGRA CRÍTICA - O agente DEVE auto-atualizar este driver quando necessário:**
+
+1. **O agente DEVE identificar problemas e melhorias:**
+   - Quando o usuário tiver dúvidas sobre o processo de commit
+   - Quando o usuário reclamar de algo relacionado a commits/branches
+   - Quando o agente identificar um problema recorrente no fluxo
+   - Quando houver ambiguidade nas instruções de commit
+
+2. **O agente DEVE atualizar este driver:**
+   - Adicionar regras claras na seção "REGRAS OBRIGATÓRIAS"
+   - Adicionar proibições na seção "O agente NUNCA deve"
+   - Adicionar validações na checklist pré-commit
+   - Incrementar versão do driver (ex: 2.0 → 2.1)
+   - Documentar a mudança no histórico
+
+3. **O agente DEVE seguir este processo:**
+   ```
+   a) Identificar o problema/dúvida/reclamação sobre commits
+   b) Entender a causa raiz (ex: falta de validação, instrução ambígua)
+   c) Propor solução específica (ex: adicionar validação, esclarecer regra)
+   d) Perguntar: "Identifiquei um problema no processo de commit. Posso atualizar o Commit & Push Driver para evitar que isso aconteça novamente?"
+   e) Se autorizado, atualizar o driver imediatamente
+   f) Documentar: "📝 Histórico: [Data] - [Problema identificado] - [Solução aplicada]"
+   ```
+
+4. **Exemplos de situações que requerem atualização:**
+   - Usuário: "Por que você não verificou o build?" → Adicionar validação obrigatória de build
+   - Usuário: "Isso não deveria ter sido commitado" → Adicionar regra de validação de arquivos
+   - Agente esquece de verificar `agent-os/` → Adicionar checklist explícito
+   - Mensagem de commit não segue padrão → Adicionar exemplo mais claro
+
+5. **Formato de atualização:**
+   - **Regra crítica** → Adicionar em "REGRAS OBRIGATÓRIAS" com número sequencial
+   - **Proibição** → Adicionar em "O agente NUNCA deve" com ❌
+   - **Validação** → Adicionar na "Checklist Before Commit" com ✔
+   - **Esclarecimento** → Atualizar seção correspondente com exemplo mais claro
+   - **Versão** → Incrementar (2.0 → 2.1 para pequenas, 2.0 → 3.0 para grandes)
+
+**Exemplo prático:**
+```
+Situação: Usuário reclama "você não deveria ter feito commit sem buildar antes"
+
+Ação do agente:
+1. Identifica: Falta validação obrigatória de build antes do commit
+2. Atualiza driver:
+   - Adiciona em "REGRAS OBRIGATÓRIAS": "5. O agente DEVE executar build antes de commitar!"
+   - Adiciona na checklist: "✔ **2. Verificar build** (OBRIGATÓRIO antes de commit)"
+   - Incrementa versão: 2.0 → 2.1
+   - Adiciona histórico: "📝 20/11/2025 - Adicionada validação obrigatória de build antes de commit"
+```
 
 🚫 REGRA CRÍTICA: O que NUNCA deve ser commitado
 
@@ -107,8 +183,11 @@ chore: atualiza dependências internas
 - `refactor:` - reestruturação sem mudança de comportamento
 - `docs:` - documentação
 - `test:` - testes unitários
-- `chore:` - rotinas internas
+- `chore:` - rotinas internas (inclui auto-atualizações de drivers)
 - `build:` - ajustes de build/configuração
+
+**Tipo especial para auto-atualizações de drivers:**
+- `chore: driver auto-update` - auto-atualização de driver pelo agente (melhoria na própria conduta)
 
 **Regras:**
 - → Sempre escrever em português simples, frases curtas
@@ -286,6 +365,74 @@ git status
 ### 🔧 Cursor Commit Assistant — DRIVER
 
 Quando o usuário disser "commit" ou pedir para commitar, você DEVE executar o seguinte fluxo:
+
+#### **ETAPA 0: Detectar Auto-Atualizações de Drivers (OBRIGATÓRIO - NOVO)**
+
+**⚠️ CRÍTICO: Antes de fazer perguntas, o agente DEVE verificar se as mudanças são auto-atualizações de drivers!**
+
+**O agente DEVE:**
+1. Rodar `git status` e analisar arquivos modificados
+2. Verificar se TODOS os arquivos modificados estão em `docs/DRIVERS/*/*.md`
+3. Verificar se a versão do driver foi incrementada (ex: 2.0 → 2.1, 1.0 → 1.1)
+4. Verificar se há mudanças nas seções "AUTO-ATUALIZAÇÃO" ou "Histórico de Atualizações"
+5. Verificar se as mudanças seguem padrão de auto-atualização (adição de regras, validações, exemplos)
+
+**Se auto-atualização de driver for detectada, o agente DEVE:**
+
+1. **Alertar o usuário imediatamente:**
+   ```
+   🔄 DETECÇÃO: Identifiquei que as mudanças são uma auto-atualização de driver(s)!
+   
+   📋 O que foi detectado:
+   - Mudanças em: [listar arquivos de drivers modificados]
+   - Versão atualizada: [ex: 2.0 → 2.1]
+   - Tipo de atualização: [ex: Adição de regra obrigatória, Validação, Exemplo]
+   
+   ✅ Não precisa se preocupar! Estas são melhorias que eu mesmo fiz para refinar minha própria conduta.
+   
+   📝 Explicação:
+   Quando identifico problemas, recebo dúvidas ou reclamações, eu atualizo os drivers
+   para evitar que o mesmo problema aconteça novamente. Isso melhora minha capacidade
+   de seguir as regras e evitar erros futuros.
+   
+   💡 Essas atualizações incluem:
+   - Novas regras obrigatórias baseadas em problemas identificados
+   - Validações adicionais para prevenir erros
+   - Exemplos mais claros para evitar ambiguidades
+   - Melhorias na documentação baseadas em feedback
+   
+   ❓ Posso commitar essas mudanças? Elas melhoram minha capacidade de seguir as regras
+   e evitar problemas similares no futuro.
+   ```
+
+2. **Aguardar autorização explícita do usuário:**
+   - Se usuário disser "sim", "yes", "pode", "ok" → Prosseguir com mensagem especial de commit
+   - Se usuário disser "não", "no" → Pular commit, explicar que mudanças ficarão locais
+   - Se usuário fizer perguntas → Responder claramente sobre o que será commitado
+
+3. **Se autorizado, usar tipo de commit especial:**
+   - Tipo: `chore: driver auto-update` ou `docs: driver self-improvement`
+   - Incluir explicação no corpo do commit
+   - Usar regras padrão de branch (geralmente pode commitar direto se mudança pequena)
+
+**Exemplo de mensagem de commit para auto-atualização:**
+```
+chore: driver auto-update - melhoria na conduta do agente
+
+Auto-atualização do [DRIVER_NAME] Driver (v[X.Y] → v[X.Z])
+
+- Adicionada regra obrigatória: [descrição da regra]
+- Adicionada validação: [descrição da validação]
+- Melhorado exemplo: [descrição da melhoria]
+
+Motivo: [explicação do problema identificado que levou à atualização]
+
+Esta atualização melhora a capacidade do agente de seguir as regras
+e evitar problemas similares no futuro, refinando sua própria conduta
+baseada em feedback e problemas identificados.
+```
+
+**Se NÃO for auto-atualização de driver, prosseguir normalmente para ETAPA 1.**
 
 #### **ETAPA 1: Fazer Perguntas (OBRIGATÓRIO)**
 
@@ -479,6 +626,23 @@ Antes de finalizar o commit, verificar:
 - [ ] Apenas arquivos relevantes estão sendo commitados
 - [ ] Testes manuais realizados
 - [ ] Mobile-lite testado (se aplicável)
+
+📝 Histórico de Atualizações
+
+**Versão 2.2 (20/11/2025):**
+- Adicionada detecção automática de auto-atualizações de drivers
+- Agente agora identifica quando mudanças são auto-atualizações e avisa o usuário
+- Mensagem especial de commit para auto-atualizações (`chore: driver auto-update`)
+- Explicação clara ao usuário sobre melhorias na própria conduta do agente
+- Pedido de autorização explícita para commitar auto-atualizações
+
+**Versão 2.1 (20/11/2025):**
+- Adicionada seção de AUTO-ATUALIZAÇÃO para melhoria contínua dos drivers
+- Instruções para o agente auto-atualizar o driver quando identificar problemas ou receber feedback do usuário
+- Exemplos práticos de como atualizar o driver baseado em feedback
+
+**Versão 2.0 (19/11/2025):**
+- Versão inicial do Commit & Push Driver
 
 📋 10. Conclusão
 

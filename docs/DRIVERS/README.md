@@ -2,10 +2,16 @@
 
 Esta pasta contém todos os drivers automatizados para gerenciar o projeto Compile & Chill.
 
+⚠️ **CRÍTICO: ANTES de executar QUALQUER driver, leia:**
+- [`TOKEN_MANAGEMENT.md`](TOKEN_MANAGEMENT.md) - **Gerenciamento de tokens (OBRIGATÓRIO)**
+- Este arquivo define regras sobre consumo de tokens e modo leve
+- Todos os drivers referenciam este arquivo no início
+
 ## 📁 Estrutura
 
 ```
 docs/DRIVERS/
+├── TOKEN_MANAGEMENT.md ⚠️ (OBRIGATÓRIO ler antes de qualquer driver)
 ├── ARCHYGIENE/
 │   ├── ARCHITECTURE_HYGIENE_DRIVER.md (PT)
 │   └── ARCHITECTURE_HYGIENE_DRIVER.en.md (EN)
@@ -15,6 +21,12 @@ docs/DRIVERS/
 ├── THEME_CREATION/
 │   ├── THEME_CREATION_DRIVER.md (PT)
 │   └── THEME_CREATION_DRIVER.en.md (EN)
+├── GAME_CREATION/
+│   ├── GAME_CREATION_DRIVER.md (PT)
+│   └── GAME_CREATION_DRIVER.en.md (EN)
+├── DRIVER_CREATION/
+│   ├── DRIVER_CREATION_DRIVER.md (PT)
+│   └── DRIVER_CREATION_DRIVER.en.md (EN)
 ├── SETUP/
 │   ├── INSTALL.md (PT)
 │   └── INSTALL.en.md (EN)
@@ -25,6 +37,27 @@ docs/DRIVERS/
 ```
 
 ## 🎯 Drivers Disponíveis
+
+### 0. 🪙 Token Management (OBRIGATÓRIO)
+
+**Localização:** `TOKEN_MANAGEMENT.md`
+
+**O que faz:**
+- Define regras OBRIGATÓRIAS sobre consumo de tokens
+- Exige que agente informe sobre tokens antes de executar drivers
+- Oferece modo leve para reduzir consumo (~60-70%)
+- Protege colaboradores de uso excessivo de tokens
+
+**⚠️ IMPORTANTE:**
+- **DEVE ser lido ANTES de qualquer driver**
+- Todos os drivers referenciam este arquivo
+- Protege usuários com plano free de esgotar tokens
+- Evita custos inesperados para usuários com plano pago
+
+**Versões:**
+- 🇧🇷 [Português](TOKEN_MANAGEMENT.md)
+
+---
 
 ### 1. 🧼 Architecture Hygiene Driver
 
@@ -98,7 +131,57 @@ docs/DRIVERS/
 
 ---
 
-### 4. ⚙️ Environment Setup Driver
+### 4. 🎮 Game Creation Driver
+
+**Localização:** `GAME_CREATION/GAME_CREATION_DRIVER.md`
+
+**O que faz:**
+- Guia criação completa de novos jogos
+- Faz 10 perguntas obrigatórias sobre o jogo
+- Avalia viabilidade técnica
+- Gera sistema de pontuação balanceado
+- Cria validação anti-cheat
+- Integra com sistema de temas
+- Cria estrutura completa de arquivos
+- Gera help/instruções se solicitado
+
+**Quando usar:**
+- Quando um colaborador quer criar um novo jogo
+- Para padronizar criação de jogos
+- Para garantir que jogos seguem padrões de qualidade
+- Para automatizar processo de criação de jogos
+
+**Versões:**
+- 🇧🇷 [Português](GAME_CREATION/GAME_CREATION_DRIVER.md)
+- 🇺🇸 [English](GAME_CREATION/GAME_CREATION_DRIVER.en.md) (em breve)
+
+---
+
+### 5. 🛠️ Driver Creation Driver
+
+**Localização:** `DRIVER_CREATION/DRIVER_CREATION_DRIVER.md`
+
+**O que faz:**
+- Guia criação completa de novos drivers
+- Faz 8 perguntas obrigatórias sobre o driver
+- Gera estrutura completa seguindo padrões
+- Integra automaticamente no README
+- Garante que drivers seguem padrões de qualidade
+- Cria versão em inglês (se solicitado)
+
+**Quando usar:**
+- Quando um colaborador quer criar um novo driver
+- Para padronizar criação de drivers
+- Para garantir que drivers seguem padrões de qualidade
+- Para automatizar processo de criação de drivers
+
+**Versões:**
+- 🇧🇷 [Português](DRIVER_CREATION/DRIVER_CREATION_DRIVER.md)
+- 🇺🇸 [English](DRIVER_CREATION/DRIVER_CREATION_DRIVER.en.md) (em breve)
+
+---
+
+### 6. ⚙️ Environment Setup Driver
 
 **Localização:** `SETUP/INSTALL.md`
 
@@ -125,7 +208,7 @@ docs/DRIVERS/
 
 ---
 
-### 5. 🚀 Auto Deploy Driver
+### 7. 🚀 Auto Deploy Driver
 
 **Localização:** `AUTO/AUTODEPLOY.md`
 
@@ -147,6 +230,29 @@ docs/DRIVERS/
 - 🇺🇸 [English](AUTO/AUTODEPLOY.en.md)
 
 ---
+
+## 🪙 Gerenciamento de Tokens (OBRIGATÓRIO)
+
+**⚠️ ANTES de executar QUALQUER driver:**
+
+1. **Leia:** [`TOKEN_MANAGEMENT.md`](TOKEN_MANAGEMENT.md)
+2. **O agente DEVE:**
+   - Informar sobre consumo estimado de tokens
+   - Perguntar sobre plano (pago/free)
+   - Oferecer modo leve (reduz ~60-70% consumo)
+   - Aguardar confirmação antes de executar
+
+**Por que isso é crítico:**
+- ✅ Protege colaboradores com plano free
+- ✅ Evita custos inesperados
+- ✅ Processo transparente
+- ✅ Usuário tem controle
+
+**Modo Leve:**
+- Executa apenas o essencial
+- Evita análises extensas
+- Reduz consumo significativamente
+- Mantém funcionalidade principal
 
 ## 📖 Como Usar os Drivers
 
@@ -212,6 +318,24 @@ Agente: "Concluído! Relatório: [lista de mudanças]"
    - Cria estrutura completa para novo tema
    - **Como usar:** Forneça o arquivo `THEME_CREATION/THEME_CREATION_DRIVER.md` para o agente e responda as perguntas sobre o tema
 
+### Para Criar um Novo Jogo:
+
+1. **Usar Game Creation Driver** (`GAME_CREATION/GAME_CREATION_DRIVER.md`)
+   - Cria estrutura completa para novo jogo
+   - Faz 10 perguntas obrigatórias sobre o jogo
+   - Gera sistema de pontuação balanceado
+   - Cria validação anti-cheat
+   - **Como usar:** Forneça o arquivo `GAME_CREATION/GAME_CREATION_DRIVER.md` para o agente e responda as perguntas sobre o jogo
+
+### Para Criar um Novo Driver:
+
+1. **Usar Driver Creation Driver** (`DRIVER_CREATION/DRIVER_CREATION_DRIVER.md`)
+   - Cria estrutura completa para novo driver
+   - Faz 8 perguntas obrigatórias sobre o driver
+   - Gera estrutura seguindo padrões estabelecidos
+   - Integra automaticamente no README
+   - **Como usar:** Forneça o arquivo `DRIVER_CREATION/DRIVER_CREATION_DRIVER.md` para o agente e responda as perguntas sobre o driver
+
 ### Para Configurar Ambiente do Zero:
 
 1. **Usar Environment Setup Driver** (`SETUP/INSTALL.md`)
@@ -269,6 +393,32 @@ Execute o driver: docs/DRIVERS/COMMIT_AND_PUSH/COMMIT_AND_PUSH.md
 **Passo a passo:**
 
 1. Forneça o arquivo `THEME_CREATION/THEME_CREATION_DRIVER.md` para o agente
+2. O agente irá fazer perguntas sobre o tema
+3. O agente irá gerar especificação completa
+4. O agente irá criar estrutura de arquivos
+
+**Ou simplesmente:** Arraste o arquivo `THEME_CREATION_DRIVER.md` para o prompt e dê Enter!
+
+---
+
+### 🎮 Game Creation Driver
+
+**Passo a passo:**
+
+1. Forneça o arquivo `GAME_CREATION/GAME_CREATION_DRIVER.md` para o agente
+2. O agente irá fazer 10 perguntas obrigatórias sobre o jogo
+3. O agente irá avaliar viabilidade técnica
+4. O agente irá gerar sistema de pontuação balanceado
+5. O agente irá criar estrutura completa de arquivos
+6. O agente irá integrar com sistema existente
+
+**Ou simplesmente:** Arraste o arquivo `GAME_CREATION_DRIVER.md` para o prompt e dê Enter!
+
+---
+
+**Passo a passo:**
+
+1. Forneça o arquivo `THEME_CREATION/THEME_CREATION_DRIVER.md` para o agente
 2. O agente irá fazer perguntas sobre:
    - Nome do tema
    - Paleta de cores
@@ -287,6 +437,33 @@ Execute o driver: docs/DRIVERS/COMMIT_AND_PUSH/COMMIT_AND_PUSH.md
 **Comando sugerido para o agente:**
 ```
 Execute o driver: docs/DRIVERS/THEME_CREATION/THEME_CREATION_DRIVER.md
+```
+
+---
+
+### 🛠️ Driver Creation Driver
+
+**Passo a passo:**
+
+1. Forneça o arquivo `DRIVER_CREATION/DRIVER_CREATION_DRIVER.md` para o agente
+2. O agente irá fazer 8 perguntas obrigatórias sobre:
+   - Nome e objetivo do driver
+   - Quando usar o driver
+   - Fluxo de perguntas/etapas
+   - Regras obrigatórias
+   - Estrutura de arquivos
+   - Integração com README
+   - Versão em inglês
+3. O agente irá:
+   - Criar estrutura completa de arquivos
+   - Seguir padrões estabelecidos
+   - Integrar automaticamente no README
+   - Criar versão em inglês (se solicitado)
+4. Revise os arquivos criados
+
+**Comando sugerido para o agente:**
+```
+Execute o driver: docs/DRIVERS/DRIVER_CREATION/DRIVER_CREATION_DRIVER.md
 ```
 
 ---
@@ -355,6 +532,29 @@ Execute o driver: docs/DRIVERS/AUTO/AUTODEPLOY.md
 - ✅ Gerar relatório das mudanças
 - ✅ Seguir todas as regras obrigatórias
 
+## 🔄 Auto-Atualização dos Drivers
+
+**⚠️ IMPORTANTE:** Todos os drivers têm capacidade de auto-atualização!
+
+Quando o agente identificar problemas, receber dúvidas ou reclamações do usuário, ele **DEVE**:
+
+1. **Identificar o problema:** Entender a causa raiz da dúvida/reclamação
+2. **Propor solução:** Sugerir atualização no driver correspondente
+3. **Perguntar ao usuário:** "Posso atualizar o driver [NOME] para evitar que isso aconteça novamente?"
+4. **Atualizar o driver:** Se autorizado, adicionar regras/validações necessárias
+5. **Documentar:** Adicionar no histórico de atualizações do driver
+
+**Exemplos:**
+- Usuário reclama: "Você não deveria ter commitado sem buildar" → Agente atualiza Commit & Push Driver adicionando validação obrigatória de build
+- Usuário pergunta: "Por que você moveu esse arquivo?" → Agente atualiza Architecture Hygiene Driver com regra clara sobre onde esse tipo de arquivo deve ficar
+- Agente identifica problema recorrente → Agente atualiza o driver correspondente para prevenir o problema
+
+**Benefícios:**
+- ✅ Drivers melhoram continuamente
+- ✅ Problemas não se repetem
+- ✅ Processo fica mais robusto
+- ✅ Menos erros e retrabalho
+
 ## 📚 Outros Drivers
 
 **Nota:** O Theme Creation Driver não é executado pelo Auto Deploy, apenas quando necessário criar novos temas.
@@ -369,8 +569,71 @@ Execute o driver: docs/DRIVERS/AUTO/AUTODEPLOY.md
 - [Auto Deploy Driver (EN)](AUTO/AUTODEPLOY.en.md)
 - [Theme Creation Driver (PT)](THEME_CREATION/THEME_CREATION_DRIVER.md)
 - [Theme Creation Driver (EN)](THEME_CREATION/THEME_CREATION_DRIVER.en.md)
+- [Game Creation Driver (PT)](GAME_CREATION/GAME_CREATION_DRIVER.md)
+- [Game Creation Driver (EN)](GAME_CREATION/GAME_CREATION_DRIVER.en.md) (em breve)
+- [Driver Creation Driver (PT)](DRIVER_CREATION/DRIVER_CREATION_DRIVER.md)
+- [Driver Creation Driver (EN)](DRIVER_CREATION/DRIVER_CREATION_DRIVER.en.md) (em breve)
 - [Environment Setup Driver (PT)](SETUP/INSTALL.md)
 - [Environment Setup Driver (EN)](SETUP/INSTALL.en.md) (em breve)
+
+## 🗺️ Roadmap: Drivers Futuros
+
+**Sugestões de drivers para implementação futura:**
+
+### 1. 🧩 Component Creation Driver
+- Cria componentes React padronizados
+- TypeScript, testes, documentação
+- Integração com temas
+- Acessibilidade
+
+### 2. 🧪 Test Creation Driver
+- Cria testes automatizados
+- Cobertura de casos
+- Mocks e fixtures
+- Integração com Jest/Vitest
+
+### 3. 🔌 API Route Driver
+- Cria rotas de API padronizadas
+- Autenticação, rate limiting, validação
+- Tratamento de erros
+- Documentação OpenAPI
+
+### 4. 🐛 Bug Fix Driver
+- Guia correção de bugs
+- Reprodução, diagnóstico, correção
+- Testes de regressão
+- Documentação do fix
+
+### 5. ⚡ Performance Optimization Driver
+- Guia otimizações
+- Análise de performance
+- Sugestões de melhorias
+- Validação de ganhos
+
+### 6. 📚 Documentation Driver
+- Cria/atualiza documentação
+- README, JSDoc, guias
+- Exemplos e tutoriais
+- Manutenção de docs
+
+### 7. 🎯 Feature Planning Driver
+- Planeja features complexas
+- Quebra em tarefas
+- Define arquitetura
+- Cria roadmap
+
+### 8. 👀 Code Review Driver
+- Guia revisão de código
+- Checklist de qualidade
+- Sugestões de melhorias
+- Validação de padrões
+
+**💡 Prioridades sugeridas:**
+1. **Component Creation Driver** - Uso muito frequente
+2. **Test Creation Driver** - Aumenta qualidade do código
+3. **Bug Fix Driver** - Padroniza processo de correção
+
+---
 
 ## 📝 Notas
 
@@ -379,4 +642,5 @@ Execute o driver: docs/DRIVERS/AUTO/AUTODEPLOY.md
 - Todos têm regras obrigatórias explícitas
 - Todos fazem perguntas antes de executar
 - Todos geram relatórios das mudanças
+- **Todos têm capacidade de auto-atualização** (ver seção 🔄 Auto-Atualização acima)
 

@@ -2,12 +2,25 @@
 
 Autor: Hudson "Shuk" Falcão
 Data: 19/11/2025
-Versão: 1.0
+Versão: 1.1
 Objetivo: Driver automático que executa sequencialmente os processos de higienização de arquitetura e commit organizado, garantindo que o código esteja sempre limpo, organizado e pronto para deploy.
+
+⚠️ **CRÍTICO: ANTES de executar este driver, o agente DEVE ler:**
+- `docs/DRIVERS/TOKEN_MANAGEMENT.md` - Gerenciamento de tokens (OBRIGATÓRIO)
+- Este arquivo contém regras sobre consumo de tokens e modo leve
+- O agente DEVE informar sobre tokens e perguntar sobre plano antes de executar
 
 🤖 IMPORTANTE: Instruções para o Agente de IA
 
 **⚠️ REGRAS OBRIGATÓRIAS - O AGENTE DEVE SEGUIR EXATAMENTE:**
+
+0. **O agente DEVE ler TOKEN_MANAGEMENT.md ANTES de executar!**
+   - SEMPRE ler `docs/DRIVERS/TOKEN_MANAGEMENT.md` primeiro
+   - SEMPRE informar sobre consumo estimado de tokens
+   - SEMPRE perguntar sobre plano (pago/free)
+   - SEMPRE oferecer modo leve
+   - NUNCA executar sem informar sobre tokens
+   - NUNCA ignorar preocupações do usuário sobre consumo
 
 1. **O agente DEVE executar os drivers na sequência correta!**
    - PRIMEIRO: Architecture Hygiene Driver
@@ -43,6 +56,53 @@ Objetivo: Driver automático que executa sequencialmente os processos de higieni
 - ❌ Prosseguir sem validar etapa anterior
 - ❌ Assumir o que o usuário quer
 - ❌ Executar commits sem seguir o driver de commit
+
+🔄 AUTO-ATUALIZAÇÃO: Melhoria Contínua dos Drivers
+
+**⚠️ REGRA CRÍTICA - O agente DEVE auto-atualizar os drivers quando necessário:**
+
+1. **O agente DEVE identificar problemas e melhorias:**
+   - Quando o usuário tiver dúvidas sobre o processo
+   - Quando o usuário reclamar de algo que aconteceu
+   - Quando o agente identificar um problema recorrente
+   - Quando houver ambiguidade nas instruções
+
+2. **O agente DEVE atualizar o driver correspondente:**
+   - Identificar qual driver precisa ser atualizado
+   - Adicionar regras claras para evitar o problema
+   - Documentar a mudança no próprio driver
+   - Atualizar a versão do driver (incrementar versão)
+
+3. **O agente DEVE seguir este processo:**
+   ```
+   a) Identificar o problema/dúvida/reclamação
+   b) Entender a causa raiz
+   c) Propor solução no driver
+   d) Perguntar ao usuário: "Identifiquei um problema. Posso atualizar o driver [NOME] para evitar que isso aconteça novamente?"
+   e) Se autorizado, atualizar o driver
+   f) Documentar a mudança no histórico do driver
+   ```
+
+4. **Exemplos de situações que requerem atualização:**
+   - Usuário pergunta "por que você fez X?" → Adicionar regra explícita sobre X
+   - Usuário reclama "isso não deveria acontecer" → Adicionar validação/prevenção
+   - Agente comete erro recorrente → Adicionar checklist ou validação
+   - Instrução ambígua causa confusão → Esclarecer instrução
+
+5. **Formato de atualização do driver:**
+   - Adicionar na seção "REGRAS OBRIGATÓRIAS" se for regra crítica
+   - Adicionar na seção "O agente NUNCA deve" se for algo proibido
+   - Adicionar checklist de validação se for necessário verificar algo
+   - Incrementar versão (ex: 1.0 → 1.1)
+   - Adicionar nota no final: "📝 Histórico de Atualizações"
+
+**Exemplo de atualização:**
+```
+Se o usuário reclamar: "Você não deveria ter commitado sem perguntar"
+→ Adicionar em "REGRAS OBRIGATÓRIAS": "O agente DEVE SEMPRE perguntar antes de executar git commit"
+→ Adicionar em "O agente NUNCA deve": "❌ Executar git commit sem confirmação explícita do usuário"
+→ Incrementar versão: 1.0 → 1.1
+```
 
 🎯 Como Funciona
 
@@ -203,6 +263,15 @@ Antes de finalizar o Auto Deploy, verificar:
 - [ ] Nenhum erro foi ignorado
 - [ ] Relatório foi gerado
 - [ ] Usuário foi informado de todas as mudanças
+
+📝 Histórico de Atualizações
+
+**Versão 1.1 (20/11/2025):**
+- Adicionada seção de AUTO-ATUALIZAÇÃO para melhoria contínua dos drivers
+- Instruções para o agente auto-atualizar o driver quando identificar problemas ou receber feedback do usuário
+
+**Versão 1.0 (19/11/2025):**
+- Versão inicial do Auto Deploy Driver
 
 🚀 Conclusão
 

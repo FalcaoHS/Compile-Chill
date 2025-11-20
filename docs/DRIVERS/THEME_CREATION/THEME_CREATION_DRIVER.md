@@ -5,6 +5,11 @@ Data: 19/11/2025
 Versão: 2.0
 Motivo: Criar um padrão simples, organizado e acessível para colaboradores da comunidade criarem novos temas visuais para o Compile & Chill — permitindo que cada dev deixe sua marca, com créditos exibidos dentro do site.
 
+⚠️ **CRÍTICO: ANTES de executar este driver, o agente DEVE ler:**
+- `docs/DRIVERS/TOKEN_MANAGEMENT.md` - Gerenciamento de tokens (OBRIGATÓRIO)
+- Este arquivo contém regras sobre consumo de tokens e modo leve
+- O agente DEVE informar sobre tokens e perguntar sobre plano antes de executar
+
 🎨 Como funciona
 
 Este documento é um DRIVER para gerar novos temas usando IA ou criação manual.
@@ -32,6 +37,14 @@ Este formato deve ser seguido sempre que criar um novo tema.
 🤖 IMPORTANTE: Instruções para o Agente de IA
 
 **⚠️ REGRAS OBRIGATÓRIAS - O AGENTE DEVE SEGUIR EXATAMENTE:**
+
+0. **O agente DEVE ler TOKEN_MANAGEMENT.md ANTES de executar!**
+   - SEMPRE ler `docs/DRIVERS/TOKEN_MANAGEMENT.md` primeiro
+   - SEMPRE informar sobre consumo estimado de tokens (~10.000-20.000 tokens modo completo)
+   - SEMPRE perguntar sobre plano (pago/free)
+   - SEMPRE oferecer modo leve (~4.000-8.000 tokens, redução ~60-70%)
+   - NUNCA executar sem informar sobre tokens
+   - NUNCA ignorar preocupações do usuário sobre consumo
 
 1. **O agente DEVE fazer perguntas antes de criar arquivos!**
    - NUNCA criar arquivos sem perguntar primeiro

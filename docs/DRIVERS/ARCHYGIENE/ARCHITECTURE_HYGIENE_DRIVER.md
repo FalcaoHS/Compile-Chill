@@ -2,8 +2,13 @@
 
 Autor: Hudson "Shuk" Falcão
 Data: 19/11/2025
-Versão: 2.0
+Versão: 2.1
 Motivo: Garantir que todas as funcionalidades implementadas e planejadas estejam organizadas, documentadas e coerentes com a arquitetura geral do projeto — preparando terreno para contribuidores, novos temas, otimizações e expansão futura.
+
+⚠️ **CRÍTICO: ANTES de executar este driver, o agente DEVE ler:**
+- `docs/DRIVERS/TOKEN_MANAGEMENT.md` - Gerenciamento de tokens (OBRIGATÓRIO)
+- Este arquivo contém regras sobre consumo de tokens e modo leve
+- O agente DEVE informar sobre tokens e perguntar sobre plano antes de executar
 
 🎯 Como funciona
 
@@ -22,6 +27,14 @@ O agente irá:
 🤖 IMPORTANTE: Instruções para o Agente de IA
 
 **⚠️ REGRAS OBRIGATÓRIAS - O AGENTE DEVE SEGUIR EXATAMENTE:**
+
+0. **O agente DEVE ler TOKEN_MANAGEMENT.md ANTES de executar!**
+   - SEMPRE ler `docs/DRIVERS/TOKEN_MANAGEMENT.md` primeiro
+   - SEMPRE informar sobre consumo estimado de tokens (~15.000-30.000 tokens modo completo)
+   - SEMPRE perguntar sobre plano (pago/free)
+   - SEMPRE oferecer modo leve (~5.000-10.000 tokens, redução ~60-70%)
+   - NUNCA executar sem informar sobre tokens
+   - NUNCA ignorar preocupações do usuário sobre consumo
 
 1. **O agente DEVE fazer perguntas antes de mover/reorganizar arquivos!**
    - NUNCA mover arquivos sem perguntar primeiro
@@ -51,6 +64,58 @@ O agente irá:
 - ❌ Pular etapas de validação
 - ❌ Assumir o que o usuário quer
 - ❌ Fazer mudanças sem gerar relatório
+
+🔄 AUTO-ATUALIZAÇÃO: Melhoria Contínua dos Drivers
+
+**⚠️ REGRA CRÍTICA - O agente DEVE auto-atualizar este driver quando necessário:**
+
+1. **O agente DEVE identificar problemas e melhorias:**
+   - Quando o usuário tiver dúvidas sobre a reorganização
+   - Quando o usuário reclamar de arquivos movidos incorretamente
+   - Quando o agente identificar padrões de problemas recorrentes
+   - Quando houver ambiguidade sobre onde arquivos devem ficar
+
+2. **O agente DEVE atualizar este driver:**
+   - Adicionar regras na seção "REGRAS OBRIGATÓRIAS"
+   - Adicionar exemplos claros de estrutura recomendada
+   - Adicionar validações na checklist pós-organização
+   - Incrementar versão do driver (ex: 2.0 → 2.1)
+   - Documentar a mudança no histórico
+
+3. **O agente DEVE seguir este processo:**
+   ```
+   a) Identificar o problema/dúvida/reclamação sobre organização
+   b) Entender a causa (ex: estrutura não clara, falta de validação)
+   c) Propor solução (ex: adicionar exemplo, regra explícita)
+   d) Perguntar: "Identifiquei um problema na organização. Posso atualizar o Architecture Hygiene Driver para evitar que isso aconteça novamente?"
+   e) Se autorizado, atualizar o driver
+   f) Documentar: "📝 Histórico: [Data] - [Problema] - [Solução]"
+   ```
+
+4. **Exemplos de situações que requerem atualização:**
+   - Usuário: "Por que você moveu X para Y?" → Adicionar regra clara sobre onde X deve ficar
+   - Usuário: "Isso quebrou minhas referências" → Adicionar validação obrigatória de referências
+   - Agente move arquivo para lugar errado → Adicionar exemplo na estrutura recomendada
+   - Dúvida sobre onde colocar novo tipo de arquivo → Adicionar na seção de estrutura
+
+5. **Formato de atualização:**
+   - **Regra** → Adicionar em "REGRAS OBRIGATÓRIAS"
+   - **Estrutura** → Atualizar seção "Estrutura Recomendada" com exemplo
+   - **Validação** → Adicionar na "Checklist de Validação Pós-Organização"
+   - **Versão** → Incrementar (2.0 → 2.1)
+
+**Exemplo prático:**
+```
+Situação: Usuário reclama "você moveu os testes mas quebrou os imports"
+
+Ação do agente:
+1. Identifica: Falta validação de imports após mover arquivos
+2. Atualiza driver:
+   - Adiciona em "REGRAS OBRIGATÓRIAS": "5. O agente DEVE verificar e atualizar TODOS os imports após mover arquivos!"
+   - Adiciona na checklist: "- [ ] Todos os imports foram atualizados após mover arquivos"
+   - Incrementa versão: 2.0 → 2.1
+   - Adiciona histórico: "📝 20/11/2025 - Adicionada validação obrigatória de imports após mover arquivos"
+```
 
 **Fluxo esperado (OBRIGATÓRIO seguir):**
 1. O agente analisa estrutura atual completamente
@@ -454,6 +519,16 @@ Após o agente organizar a arquitetura, verificar:
 - Especificações: `agent-os/specs/`
 - Performance: `lib/performance/`
 - Canvas: `lib/canvas/`
+
+📝 Histórico de Atualizações
+
+**Versão 2.1 (20/11/2025):**
+- Adicionada seção de AUTO-ATUALIZAÇÃO para melhoria contínua dos drivers
+- Instruções para o agente auto-atualizar o driver quando identificar problemas ou receber feedback do usuário
+- Exemplos práticos de como atualizar o driver baseado em feedback sobre organização
+
+**Versão 2.0 (19/11/2025):**
+- Versão inicial do Architecture Hygiene Driver
 
 📋 Conclusão
 
