@@ -5,6 +5,9 @@ generator client {
   provider = "prisma-client-js"
 }
 
+// Note: The `url` property in datasource is valid and required for Prisma 6.x
+// This project uses Prisma 6.19.0, where `url` in datasource is the correct syntax
+// Prisma 7+ uses a different configuration approach (prisma.config.ts), but we're on 6.19.0
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
