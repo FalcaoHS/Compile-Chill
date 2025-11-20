@@ -7,6 +7,12 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.5-blue)](https://www.typescriptlang.org/)
 [![Prisma](https://img.shields.io/badge/Prisma-6.19-2D3748?logo=prisma)](https://www.prisma.io/)
 
+## 🌐 Outros Idiomas / Other Languages / Otros Idiomas
+
+- 🇧🇷 [Português (PT-BR)](README.md) - Padrão / Default
+- 🇺🇸 [English (EN)](README.en.md)
+- 🇪🇸 [Español (ES)](README.es.md)
+
 ## ✨ Sobre o Projeto
 
 Compile & Chill é um portal criado especialmente para desenvolvedores que desejam alguns minutos de relaxamento sem sair do "clima dev". O projeto une jogos leves, estética hacker/cyber, personalização de temas, ranking global, login simplificado via X (Twitter) e compartilhamento social.
@@ -365,6 +371,11 @@ npm run db:studio        # Abre Prisma Studio
 ## 🤝 Contribuindo
 
 Contribuições são bem-vindas! Por favor, leia o [CONTRIBUTING.md](CONTRIBUTING.md) para diretrizes sobre como contribuir para o projeto.
+
+**Idiomas disponíveis:**
+- [Português](CONTRIBUTING.md) (padrão)
+- [English](CONTRIBUTING.en.md)
+- [Español](CONTRIBUTING.es.md)
 
 ## 📄 Licença
 
