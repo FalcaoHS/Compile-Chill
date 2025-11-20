@@ -397,6 +397,24 @@ Este proyecto está licenciado bajo la Licencia MIT - ver el archivo [LICENSE](L
 - [Português (PT-BR)](README.md) - Por defecto
 - [English (EN)](README.en.md)
 
+## 🎓 ¿Eres Principiante? ¿Empezando en Programación?
+
+**¡No te preocupes!** Creamos guías completas y detalladas especialmente para ti:
+
+- 🇧🇷 **[Guía Completa para Principiantes (Português)](docs/GUIA_INICIANTE_PT.md)** - Explicaciones paso a paso, conceptos explicados, solución de problemas
+- 🇺🇸 **[Complete Beginner's Guide (English)](docs/BEGINNER_GUIDE_EN.md)** - Step-by-step explanations, concepts explained, troubleshooting
+- 🇪🇸 **[Guía Completa para Principiantes (Español)](docs/GUIA_INICIANTE_ES.md)** - Explicaciones paso a paso, conceptos explicados, solución de problemas
+
+**Lo que encontrarás en las guías:**
+- ✅ Explicación de cada concepto (Node.js, npm, Git, etc.)
+- ✅ Paso a paso detallado con ejemplos
+- ✅ Por qué cada cosa es necesaria (no solo cómo hacerlo)
+- ✅ Solución de problemas completa para problemas comunes
+- ✅ Analogías simples para entender conceptos complejos
+- ✅ Calmando y animando a desarrolladores principiantes
+
+**¡Si sigues la guía, terminarás con el sistema corriendo localmente!** 🚀
+
 ---
 
 **Nota:** Esta es la versión en español. Para otros idiomas, consulta los enlaces arriba.

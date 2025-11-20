@@ -397,6 +397,24 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [Português (PT-BR)](README.md) - Default
 - [Español (ES)](README.es.md)
 
+## 🎓 Are You a Beginner? Just Starting with Programming?
+
+**Don't worry!** We created complete and detailed guides especially for you:
+
+- 🇧🇷 **[Complete Beginner's Guide (Português)](docs/GUIA_INICIANTE_PT.md)** - Step-by-step explanations, concepts explained, troubleshooting
+- 🇺🇸 **[Complete Beginner's Guide (English)](docs/BEGINNER_GUIDE_EN.md)** - Step-by-step explanations, concepts explained, troubleshooting
+- 🇪🇸 **[Complete Beginner's Guide (Español)](docs/GUIA_INICIANTE_ES.md)** - Step-by-step explanations, concepts explained, troubleshooting
+
+**What you'll find in the guides:**
+- ✅ Explanation of each concept (Node.js, npm, Git, etc.)
+- ✅ Detailed step-by-step with examples
+- ✅ Why each thing is necessary (not just how to do it)
+- ✅ Complete troubleshooting for common problems
+- ✅ Simple analogies to understand complex concepts
+- ✅ Calming and encouraging beginner developers
+
+**If you follow the guide, you'll end up with the system running locally!** 🚀
+
 ---
 
 **Note:** This is the English version. For other languages, see the links above.

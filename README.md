@@ -13,6 +13,24 @@
 - 🇺🇸 [English (EN)](README.en.md)
 - 🇪🇸 [Español (ES)](README.es.md)
 
+## 🎓 É Iniciante? Começando na Programação?
+
+**Não se preocupe!** Criamos guias completos e detalhados especialmente para você:
+
+- 🇧🇷 **[Guia Completo para Iniciantes (Português)](docs/GUIA_INICIANTE_PT.md)** - Explicações passo a passo, conceitos explicados, troubleshooting
+- 🇺🇸 **[Complete Beginner's Guide (English)](docs/BEGINNER_GUIDE_EN.md)** - Step-by-step explanations, concepts explained, troubleshooting
+- 🇪🇸 **[Guía Completa para Principiantes (Español)](docs/GUIA_INICIANTE_ES.md)** - Explicaciones paso a paso, conceptos explicados, solución de problemas
+
+**O que você vai encontrar nos guias:**
+- ✅ Explicação de cada conceito (Node.js, npm, Git, etc.)
+- ✅ Passo a passo detalhado com screenshots e exemplos
+- ✅ Por que cada coisa é necessária (não só como fazer)
+- ✅ Troubleshooting completo para problemas comuns
+- ✅ Analogias simples para entender conceitos complexos
+- ✅ Acalmando e incentivando desenvolvedores iniciantes
+
+**Se você seguir o guia, vai terminar com o sistema rodando localmente!** 🚀
+
 ## ✨ Sobre o Projeto
 
 Compile & Chill é um portal criado especialmente para desenvolvedores que desejam alguns minutos de relaxamento sem sair do "clima dev". O projeto une jogos leves, estética hacker/cyber, personalização de temas, ranking global, login simplificado via X (Twitter) e compartilhamento social.
