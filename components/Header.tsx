@@ -39,41 +39,41 @@ export function Header() {
           </Link>
 
           {/* Navigation */}
-          <nav className="hidden md:flex items-center gap-6">
+          <nav className="hidden md:flex items-center gap-3 lg:gap-4">
             <Link
               href="/"
-              className="text-sm font-medium text-text-secondary hover:text-text transition-colors"
+              className="text-sm font-medium text-text-secondary hover:text-text transition-colors whitespace-nowrap"
             >
               Home
             </Link>
             <Link
               href="/jogos"
-              className="text-sm font-medium text-text-secondary hover:text-text transition-colors"
+              className="text-sm font-medium text-text-secondary hover:text-text transition-colors whitespace-nowrap"
             >
               Jogos
             </Link>
             <Link
-              href="/sobre"
-              className="text-sm font-medium text-text-secondary hover:text-text transition-colors"
+              href="/ranking"
+              className="text-sm font-medium text-text-secondary hover:text-text transition-colors whitespace-nowrap"
             >
-              Sobre
+              Ranking
             </Link>
             <Link
               href="/blog"
-              className="text-sm font-medium text-text-secondary hover:text-text transition-colors"
+              className="text-sm font-medium text-text-secondary hover:text-text transition-colors whitespace-nowrap"
             >
               Blog
             </Link>
             <Link
-              href="/ranking"
-              className="text-sm font-medium text-text-secondary hover:text-text transition-colors"
+              href="/sobre"
+              className="text-sm font-medium text-text-secondary hover:text-text transition-colors whitespace-nowrap"
             >
-              Ranking
+              Sobre
             </Link>
             {session && (
               <Link
                 href="/profile"
-                className="text-sm font-medium text-text-secondary hover:text-text transition-colors"
+                className="text-sm font-medium text-text-secondary hover:text-text transition-colors whitespace-nowrap"
               >
                 Perfil
               </Link>

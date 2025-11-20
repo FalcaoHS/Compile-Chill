@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from "react"
 import { useThemeStore } from "@/lib/theme-store"
+import type { ThemeId } from "@/lib/themes"
 import { useMobileModeStore } from "@/lib/performance/mobile-mode"
 import { useFPSGuardianStore } from "@/lib/performance/fps-guardian"
 import { useParticleBudgetStore, allocateParticles, deallocateParticles } from "@/lib/performance/particle-budget"
@@ -2713,6 +2714,338 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
     ctx.restore()
   }, [canvasSize.width, isFPSLevel1, isFPSLevel2])
 
+  // Draw theme-specific decorative objects
+  const drawThemeDecorativeObject = useCallback((
+    ctx: CanvasRenderingContext2D,
+    themeId: ThemeId,
+    colors: ReturnType<typeof getThemeColors>,
+    canvasWidth: number,
+    canvasHeight: number,
+    animationTime: number
+  ) => {
+    if (!colors) return
+
+    // Performance optimization: Check mobile mode and FPS Guardian
+    const { mode: mobileMode, isMobile } = useMobileModeStore.getState()
+    if (mobileMode === 'lite') return // Skip completely in lite mode
+
+    // FPS Guardian Level 2: Skip decorative objects
+    if (isFPSLevel2) return
+
+    ctx.save()
+
+    // Calculate object size (5-15% of canvas width)
+    const objectSize = canvasWidth * 0.10 // 10% of canvas width
+
+    // Determine rendering mode: simplified for mobile-full, full for desktop
+    const isSimplifiedMode = mobileMode === 'full' && isMobile
+    const isFullMode = mobileMode === 'full' && !isMobile
+
+    // Animation phase for pulsing/rotating effects
+    // FPS Guardian Level 1: Reduce animation speed by 50%
+    const animationSpeed = isFPSLevel1 ? 0.001 : 0.002
+    const pulsePhase = Math.sin(animationTime * animationSpeed) * 0.5 + 0.5 // 0 to 1
+    const rotationSpeed = isFPSLevel1 ? 0.0005 : 0.001
+    const rotationAngle = (animationTime * rotationSpeed) % (Math.PI * 2) // Continuous rotation
+
+    switch (themeId) {
+      case 'cyber': {
+        // 3️⃣ Matrix – Green Rain: Coluna de Código Caindo
+        // Forma: bloco vertical 3px + caracteres individuais
+        // Cores: verde neon, preto puro
+        // Animação: queda contínua estilo digital rain
+        // Posição: lateral direita
+        const x = canvasWidth * 0.95 // Right side
+        const y = canvasHeight * 0.2 // Top area
+        const width = 3
+        const height = canvasHeight * 0.3
+
+        ctx.fillStyle = '#00ff41' // Matrix green neon
+        ctx.globalAlpha = 0.6 + pulsePhase * 0.4
+
+        // Draw vertical column (3px block)
+        ctx.fillRect(x, y, width, height)
+
+        // Draw falling characters (digital rain effect)
+        // Simplified mode: fewer characters, desktop: full animation
+        if (!isSimplifiedMode) {
+          ctx.fillStyle = '#00ff41' // Green neon
+          ctx.globalAlpha = 0.8
+          const charCount = isFPSLevel1 ? 4 : 8 // Reduce in FPS Level 1
+          const fallSpeed = isFPSLevel1 ? 0.03 : 0.05
+          for (let i = 0; i < charCount; i++) {
+            const charY = y + ((animationTime * fallSpeed + i * 20) % height)
+            ctx.fillRect(x - 2, charY, 7, 2)
+          }
+        }
+        break
+      }
+
+      case 'neon': {
+        // 5️⃣ Tron Grid: Torre de Energia do Grid
+        // Forma: cilindro azul neon com linhas vetoriais
+        // Cores: azul-ciano, preto neon
+        // Animação: pulsos verticais subindo
+        // Posição: lateral esquerda
+        const x = canvasWidth * 0.05 // Left side
+        const y = canvasHeight * 0.3
+        const radius = objectSize * 0.3
+        const height = canvasHeight * 0.4
+
+        // Draw cylinder base with vector lines
+        ctx.strokeStyle = '#00ffff' // Tron cyan-blue
+        ctx.lineWidth = 3
+        ctx.shadowBlur = 12
+        ctx.shadowColor = '#00ffff'
+        ctx.globalAlpha = 0.7 + pulsePhase * 0.3
+
+        // Vertical lines (vector style)
+        for (let i = 0; i < 4; i++) {
+          const lineX = x + (i * radius * 0.6)
+          ctx.beginPath()
+          ctx.moveTo(lineX, y)
+          ctx.lineTo(lineX, y + height)
+          ctx.stroke()
+        }
+
+        // Pulse effect (vertical energy pulse going up) - skip in simplified mode
+        if (!isSimplifiedMode) {
+          const pulseY = y + (pulsePhase * height)
+          ctx.fillStyle = '#00ffff'
+          ctx.globalAlpha = isFPSLevel1 ? 0.2 : 0.4
+          ctx.fillRect(x - radius, pulseY - 5, radius * 2, 10)
+        }
+        break
+      }
+
+      case 'pomemin': {
+        // 1️⃣ Zelda – Sheikah Slate: Pedra Sheikah Minimalista
+        // Forma: retângulo arredondado + olho Sheikah geométrico
+        // Cores: azul Sheikah, cinza pedra
+        // Animação: brilho pulsante no símbolo
+        // Posição: canto superior esquerdo
+        const x = canvasWidth * 0.05 // Top left
+        const y = canvasHeight * 0.1
+        const width = objectSize * 0.8
+        const height = objectSize * 0.6
+
+        // Draw rounded rectangle (slate) - cinza pedra
+        ctx.fillStyle = '#6b7280' // Gray stone color
+        ctx.globalAlpha = 0.8
+        const cornerRadius = 8
+        ctx.beginPath()
+        ctx.roundRect(x, y, width, height, cornerRadius)
+        ctx.fill()
+
+        // Draw geometric eye symbol (Sheikah eye) - azul Sheikah
+        ctx.strokeStyle = '#4a9eff' // Sheikah blue
+        ctx.lineWidth = 3
+        // FPS Guardian Level 1: Reduce glow intensity
+        const baseGlow = isFPSLevel1 ? 4 : 8
+        ctx.shadowBlur = baseGlow + (isSimplifiedMode ? 0 : pulsePhase * baseGlow)
+        ctx.shadowColor = '#4a9eff' // Sheikah blue glow
+        ctx.globalAlpha = 0.9
+
+        const centerX = x + width / 2
+        const centerY = y + height / 2
+        const eyeSize = Math.min(width, height) * 0.4
+
+        // Draw eye shape (simplified triangle with circle)
+        ctx.beginPath()
+        ctx.arc(centerX, centerY, eyeSize * 0.3, 0, Math.PI * 2)
+        ctx.stroke()
+        ctx.beginPath()
+        ctx.moveTo(centerX, centerY - eyeSize)
+        ctx.lineTo(centerX - eyeSize * 0.6, centerY + eyeSize * 0.3)
+        ctx.lineTo(centerX + eyeSize * 0.6, centerY + eyeSize * 0.3)
+        ctx.closePath()
+        ctx.stroke()
+        break
+      }
+
+      case 'terminal': {
+        // 6️⃣ Portal – Aperture Science: Mini Portal Generator
+        // Forma: dois arcos semicirculares (azul e laranja)
+        // Cores: #42C6FF, #FF7A00
+        // Animação: rotação alternada
+        // Posição: canto inferior direito
+        const x = canvasWidth * 0.95 // Bottom right
+        const y = canvasHeight * 0.8
+        const radius = objectSize * 0.4
+        const centerX = x
+        const centerY = y
+
+        ctx.save()
+        ctx.translate(centerX, centerY)
+        ctx.rotate(rotationAngle)
+        ctx.translate(-centerX, -centerY)
+
+        // Blue arc (semicircle)
+        ctx.strokeStyle = '#42C6FF' // Portal blue (exact color from raw idea)
+        ctx.lineWidth = 4
+        ctx.shadowBlur = 10
+        ctx.shadowColor = '#42C6FF'
+        ctx.beginPath()
+        ctx.arc(centerX, centerY, radius, 0, Math.PI)
+        ctx.stroke()
+
+        // Orange arc (semicircle, rotated 180 degrees)
+        ctx.strokeStyle = '#FF7A00' // Portal orange (exact color from raw idea)
+        ctx.shadowColor = '#FF7A00'
+        ctx.beginPath()
+        ctx.arc(centerX, centerY, radius, Math.PI, Math.PI * 2)
+        ctx.stroke()
+
+        ctx.restore()
+        break
+      }
+
+      case 'dracula': {
+        // 4️⃣ Star Wars – Dark Side: Núcleo Sith Instável
+        // Forma: esfera negra com rachaduras vermelhas
+        // Cores: preto absoluto, vermelho queimado
+        // Animação: rachaduras pulsando como sabre instável
+        // Posição: canto superior direito
+        // Note: There's also a castle in drawFloor (kept as existing), this is the new object from raw idea
+        const x = canvasWidth * 0.95 // Top right
+        const y = canvasHeight * 0.1
+        const radius = objectSize * 0.3
+
+        // Draw black sphere (preto absoluto)
+        ctx.fillStyle = '#000000' // Absolute black
+        ctx.beginPath()
+        ctx.arc(x, y, radius, 0, Math.PI * 2)
+        ctx.fill()
+
+        // Draw red cracks (vermelho queimado, pulsing like unstable saber)
+        ctx.strokeStyle = '#cc0000' // Burnt red
+        ctx.lineWidth = 2
+        ctx.shadowBlur = 6 + (isSimplifiedMode ? 0 : pulsePhase * 6)
+        ctx.shadowColor = '#cc0000' // Burnt red glow
+        ctx.globalAlpha = 0.7 + (isSimplifiedMode ? 0 : pulsePhase * 0.3)
+
+        // Draw crack lines (pulsing)
+        const crackCount = isFPSLevel1 ? 3 : 4
+        for (let i = 0; i < crackCount; i++) {
+          const angle = (i * Math.PI * 2) / 4
+          const startX = x + Math.cos(angle) * radius * 0.3
+          const startY = y + Math.sin(angle) * radius * 0.3
+          const endX = x + Math.cos(angle) * radius * 0.9
+          const endY = y + Math.sin(angle) * radius * 0.9
+
+          ctx.beginPath()
+          ctx.moveTo(startX, startY)
+          ctx.lineTo(endX, endY)
+          ctx.stroke()
+        }
+        break
+      }
+
+      case 'pixel': {
+        // 2️⃣ Minecraft – Redstone: Totem de Redstone Ativado
+        // Forma: blocos quadrados empilhados + linha vermelha central
+        // Cores: marrom terra, vermelho pulsante
+        // Animação: pulsar ON/OFF como circuito powered
+        // Posição: canto inferior esquerdo
+        const x = canvasWidth * 0.05 // Bottom left
+        const y = canvasHeight * 0.85
+        const blockSize = objectSize * 0.25
+        const blockCount = 4
+
+        // Draw stacked blocks (pixelated style) - marrom terra
+        for (let i = 0; i < blockCount; i++) {
+          const blockY = y - (i * blockSize)
+          // Brown earth color
+          ctx.fillStyle = '#8B4513' // Brown earth
+          ctx.fillRect(x, blockY, blockSize, blockSize)
+          
+          // Block border
+          ctx.strokeStyle = '#654321' // Dark brown
+          ctx.lineWidth = 1
+          ctx.strokeRect(x, blockY, blockSize, blockSize)
+        }
+
+        // Draw central red line (vermelho pulsante, ON/OFF like powered circuit)
+        const centerX = x + blockSize / 2
+        const lineY = y - (blockCount * blockSize)
+        
+        // Pulsing effect: ON/OFF based on pulsePhase
+        const isPowered = pulsePhase > 0.5
+        if (isPowered || !isSimplifiedMode) {
+          ctx.strokeStyle = '#ff0000' // Red pulsating
+          ctx.lineWidth = 3
+          ctx.shadowBlur = isPowered ? 8 : 4
+          ctx.shadowColor = '#ff0000'
+          ctx.globalAlpha = isPowered ? 0.9 : 0.5
+          
+          ctx.beginPath()
+          ctx.moveTo(centerX, y)
+          ctx.lineTo(centerX, lineY)
+          ctx.stroke()
+        }
+        break
+      }
+
+      case 'blueprint': {
+        // 7️⃣ Avengers – Stark Tech: Arc Reactor Pad
+        // Forma: círculo triplo com anéis concêntricos
+        // Cores: arc blue, branco holográfico
+        // Animação: rotação suave dos anéis
+        // Posição: canto da quadra, centralizado lateralmente
+        const x = canvasWidth * 0.5 // Center horizontally
+        const y = canvasHeight * 0.9 // Bottom center
+
+        ctx.save()
+        ctx.translate(x, y)
+        ctx.rotate(rotationAngle)
+        ctx.translate(-x, -y)
+
+        // Draw concentric rings (triple circle)
+        const ringCount = 3
+        for (let i = 0; i < ringCount; i++) {
+          const ringRadius = objectSize * 0.2 + (i * objectSize * 0.1)
+          ctx.strokeStyle = '#00a8ff' // Arc blue
+          ctx.lineWidth = 2
+          ctx.shadowBlur = 8
+          ctx.shadowColor = '#00a8ff' // Arc blue glow
+          ctx.globalAlpha = 0.8 - (i * 0.2)
+
+          ctx.beginPath()
+          ctx.arc(x, y, ringRadius, 0, Math.PI * 2)
+          ctx.stroke()
+        }
+
+        // Center core (holographic white)
+        ctx.fillStyle = '#ffffff' // White holographic
+        ctx.globalAlpha = 0.9
+        ctx.shadowBlur = 10
+        ctx.shadowColor = '#00a8ff' // Blue glow on white
+        ctx.beginPath()
+        ctx.arc(x, y, objectSize * 0.15, 0, Math.PI * 2)
+        ctx.fill()
+
+        ctx.restore()
+        break
+      }
+
+      // Note: Chaves barrel is already drawn in drawFloor function, so we skip it here
+      case 'chaves':
+      case 'analista-jr':
+      case 'analista-sr':
+      case 'lofi-code':
+      case 'bruno-csharp':
+        // These themes don't have decorative objects in the original raw idea (7 objects only)
+        // or already have objects drawn elsewhere (chaves barrel in drawFloor)
+        break
+
+      default:
+        // No decorative object for this theme
+        break
+    }
+
+    ctx.restore()
+  }, [canvasSize.width, canvasSize.height, isFPSLevel1, isFPSLevel2])
+
   // Render static orb (for mobile lite mode - no physics)
   const renderStaticOrb = useCallback((ctx: CanvasRenderingContext2D, orb: StaticOrb, colors: ReturnType<typeof getThemeColors>) => {
     if (!colors) return
@@ -3754,6 +4087,9 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
           // Draw basket elements (backboard with integrated LED scoreboard, rim)
           drawBackboard(ctx, colors) // Scoreboard is now inside backboard
           drawRim(ctx, colors)
+          
+          // Draw theme decorative objects (after background, before orbs)
+          drawThemeDecorativeObject(ctx, themeId, colors, canvas.width, canvas.height, currentTime)
           
           // Render orbs
           orbsRef.current.forEach((orb) => {
