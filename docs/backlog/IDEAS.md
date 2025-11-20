@@ -1,275 +1,311 @@
-🎮 Social / Interação (faltantes / necessários)
+# 📋 Backlog de Ideias - Compile & Chill
 
- Chat: moderação & segurança
+Este documento contém ideias, features e melhorias planejadas para o projeto, organizadas por categoria e prioridade.
 
-fila de moderação automática (AI + heurísticas)
+---
 
-report/ban UI para moderadores
+## ✅ Já Implementado
 
-rate limit por usuário (Upstash)
+### Segurança
+- ✅ Validação de env com Zod (`lib/auth-env-validation.ts`)
+- ✅ Security headers básicos (`lib/security-headers.ts`)
+- ✅ Audit logs básicos (`lib/session-monitor.ts`)
+- ✅ Session renewal strategy
+- ✅ CSRF protection (via NextAuth)
 
-blocklist de palavras/regex
+### Rate Limiting & Performance
+- ✅ Rate limiting com Upstash (`lib/rate-limit.ts`, `lib/api-rate-limit.ts`)
+- ✅ Multi-tab protection (`lib/performance/multi-tab.ts`)
+- ✅ Endpoint `/api/users/recent` com cache e fallback
 
-sanitização e escaping de mensagens (XSS)
+### Validação & Anti-Cheat
+- ✅ Score validation server-side (`lib/validations/score.ts`)
+- ✅ Game-specific validators (`lib/game-validators/`)
+- ✅ Anti-cheat logging
 
- Persistência & histórico
+### Session & Auth
+- ✅ Session isolation (`lib/session-monitor.ts`)
+- ✅ Session monitoring queries e testes (`__tests__/integration/`)
 
-store de mensagens (Postgres) + TTL para efêmeras
+### Stats & Monitoring
+- ✅ Endpoint `/api/stats/online`
+- ✅ Endpoint `/api/stats/active-games`
 
-paginação + fetch incremental (only last N on open)
+### Documentação
+- ✅ README completo com guias de setup
+- ✅ Roadmap público (`app/sobre/page.tsx`)
 
- Emotes: infra & integração
+---
 
-API de emotes (catalog, raridade, ownership)
+## 🔒 Segurança & Compliance (Crítico - Antes do Launch)
 
-endpoint para usar emote no chat (rate-limited)
+### CORS e Políticas de Segurança
+- [ ] Configurar CORS allowlist e revisar políticas
+- [ ] Configurar CSP (Content Security Policy) para produção e staging
+- [x] Implementar CSRF tokens para rotas mutáveis (se fora NextAuth) - ✅ NextAuth já protege
+- [x] Configurar HSTS e security headers completos - ✅ Headers básicos implementados (`lib/security-headers.ts`)
 
- Mensagens efêmeras
+### Sanitização e Validação
+- [ ] Sanitização completa de user input mostrado no canvas/DOM
+- [x] Validação de env com Zod consolidada e fail-fast - ✅ Implementado (`lib/auth-env-validation.ts`)
+- [ ] SRI (Subresource Integrity) para recursos externos (fonts)
 
-job para deletar (cron/Lambda) ou TTL DB
+### Auditoria e Monitoramento
+- [x] Audit logs básicos (login fails, score fails, canvas crashes) - ✅ Implementado (`lib/session-monitor.ts`)
+- [x] Session renewal strategy (silent refresh / warning) - ✅ Implementado
+- [ ] Dependency audit e correção de CVEs altos
 
- Salas temáticas
+---
 
-criação/room metadata, permissões, limite de membros
+## 🎮 Social / Interação
 
- Anti-spam
+### Chat: Moderação & Segurança
+- [ ] Fila de moderação automática (AI + heurísticas)
+- [ ] UI de report/ban para moderadores
+- [x] Rate limit por usuário (Upstash) - ✅ Implementado (`lib/rate-limit.ts`, `lib/api-rate-limit.ts`)
+- [ ] Blocklist de palavras/regex
+- [ ] Sanitização e escaping de mensagens (XSS)
 
-Captcha challenge / rate-limit escalonável
+### Persistência & Histórico
+- [ ] Store de mensagens (Postgres) + TTL para efêmeras
+- [ ] Paginação + fetch incremental (only last N on open)
 
-heurísticas: messages/sec, similarity, new-account limits
+### Emotes: Infra & Integração
+- [ ] API de emotes (catalog, raridade, ownership)
+- [ ] Endpoint para usar emote no chat (rate-limited)
 
- Audio messages
+### Mensagens Efêmeras
+- [ ] Job para deletar (cron/Lambda) ou TTL DB
 
-upload/streaming: WebRTC or MediaRecorder + signed upload to S3
+### Salas Temáticas
+- [ ] Criação/room metadata, permissões, limite de membros
 
-transcription (optional) + moderation (speech-to-text + AI)
+### Anti-Spam
+- [ ] Captcha challenge / rate-limit escalonável
+- [ ] Heurísticas: messages/sec, similarity, new-account limits
 
-storage + TTL & quota
+### Audio Messages
+- [ ] Upload/streaming: WebRTC or MediaRecorder + signed upload to S3
+- [ ] Transcription (optional) + moderation (speech-to-text + AI)
+- [ ] Storage + TTL & quota
 
- Privacy / opt-out for chat data (GDPR)
+### Privacy / GDPR
+- [ ] Opt-out para chat data (GDPR compliance)
 
-♟️ Xadrez Dev Edition (faltantes)
+---
 
- Matchmaking / multiplayer
+## ♟️ Xadrez Dev Edition
 
-lobby, invites, sockets (WebSocket / Pusher)
+### Matchmaking / Multiplayer
+- [ ] Lobby, invites, sockets (WebSocket / Pusher)
+- [ ] Reconnection handling
 
-reconnection handling
+### Anti-Cheat / Validação
+- [ ] Store PGN / moves history
+- [ ] Server-side validation contra movimentos legais
 
- Anti-cheat / replay validation
+### Sistema de Rating
+- [ ] Elo-like rating system (DLO)
+- [ ] Fórmula + DB migration + UI
 
-store PGN / moves history
+### Spectator Mode
+- [ ] Watch games com eventos limitados
 
-server-side validation against legal moves
+### Chat e Moderação
+- [ ] Match chat moderation & emotes
 
- Elo-like rating system (DLO)
+### UX
+- [ ] No-scroll guarantee: QA + CSS locked layout
 
-formula + DB migration + UI
+---
 
- Spectator mode
+## 📚 FunWiki
 
-watch games w/ limited events
+### Moderação
+- [ ] Moderation pipeline
+- [ ] Auto-tagging + human review queue
+- [ ] Abuse reports + admin dashboard
 
- Match chat moderation & emotes
+### Content Model
+- [ ] WYSIWYG editor ou Markdown + sanitization
 
- No-scroll guarantee: QA + CSS locked layout
+### Busca e Tags
+- [ ] Full-text search (Postgres ou Elastic) + tagging suggestions
 
-📚 FunWiki (faltantes)
+### Postagem Anônima
+- [ ] Rate limits, stricter moderation, captcha
 
- Moderation pipeline
+### Versionamento
+- [ ] Versioning / edits / rollback
 
-auto-tagging + human review queue
+---
 
-abuse reports + admin dashboard
+## 🏠 Home Page Lendária
 
- Content model
+### Performance
+- [x] Server-side endpoint `/api/users/recent` (cached) - ✅ Implementado com cache de 3s e fallback
+- [x] Fallback se <N users - ✅ Implementado (fake profiles)
 
-WYSIWYG editor or Markdown + sanitization
+### Mobile Behavior
+- [ ] Static fallback ou lightweight physics (já discutido)
 
- Search / tags
+### Acessibilidade
+- [ ] Keyboard drag fallback, aria labels para orbs
 
-full-text search (Postgres or Elastic) + tagging suggestions
+### Consent & Privacy
+- [ ] Opt-out para mostrar user avatar em orbs
 
- Anonymous posting
+### Easter Egg Telemetry
+- [ ] Track triggers (opt-in)
 
-rate limits, stricter moderation, captcha
+---
 
- Versioning / edits / rollback
+## 🔨 Extravasar a Raiva
 
-🏠 Home Page Lendária (faltantes)
+### Asset Management
+- [ ] Library de ícones para techs (copyright safe)
 
- Performance guardrails
+### Interação & Persistência
+- [ ] Save preference no profile + local override
 
-server-side endpoint /api/users/recent (cached)
+### Moderação
+- [ ] Garantir que animações de martelo não permitam assédio
+- [ ] Restringir conteúdo apenas para logos de tech
 
-fallback if <N users
+### Acessibilidade & UX
+- [ ] Fornecer alternativa não-violenta (ex: "squeeze stress ball")
 
- Mobile behavior
+---
 
-static fallback or lightweight physics (already discussed)
+## 🎭 Features Extras (6.x) — Backlog Técnico
 
- Accessibility
+### Perfil Dev Cinemático
+- [ ] Metrics store, charting lib config (recharts), export PNG
 
-keyboard drag fallback, aria labels for orbs
+### Drops (In-Game Rewards)
+- [ ] Signed URLs para asset claims
+- [ ] Rate-limited claim endpoint
+- [ ] Rarity RNG
 
- Consent & privacy
+### Sala Secreta
+- [ ] Route protection, secret token generation
 
-opt-out for showing user avatar in orbs
+### Terminal Oculto
+- [ ] Command whitelist + rate-limit + audit log
 
- Easter egg telemetry
+### Eventos Semanais
+- [ ] Feature flags + scheduling UI
 
-track triggers (opt-in)
+### Laboratório Experimental
+- [ ] A/B testing / feature flags toggles + telemetry
 
-🔨 Extravasar a Raiva (faltantes)
+### Painel Hacker Real-Time
+- [x] Endpoints: `/api/metrics/online`, `/api/games/active` - ✅ Implementado (`app/api/stats/online/route.ts`, `app/api/stats/active-games/route.ts`)
+- [ ] Caching + websockets para live updates
 
- Asset management
+### Cartões de Score Cinematográficos
+- [ ] Server-side canvas render (html-to-image no backend)
+- [ ] Signed URL para share image
 
-library of icons for techs (copyright safe)
+---
 
- Interaction & persistence
+## 📈 Observability & Ops
 
-save preference in profile + local override
+### Metrics
+- [ ] Request latency, errors, FPS incidents count
+- [ ] Particle budget breaches
 
- Moderation
+### Error Tracking
+- [ ] Sentry setup para frontend + backend (canvas errors, crashes)
 
-ensure hammer animations don't allow harassment; restrict content to tech logos only
+### Logs
+- [ ] Log retention & rotation
 
- Accessibility & UX
+### Health Checks
+- [ ] Health checks & uptime alerts
 
-provide alternative non-violent interaction (e.g., "squeeze stress ball")
+### Backups
+- [ ] Backups para DB & critical data
 
-🎭 Features extras (6.x) — backlog técnico
+### Rate-Limit Monitoring
+- [ ] Upstash dashboard + alerts
 
- Perfil Dev Cinemático
+---
 
-metrics store, charting lib config (recharts), export PNG
+## ♿ Acessibilidade & Internacionalização
 
- Drops (in-game rewards)
+- [ ] WCAG checks básicos: color contrast, keyboard nav, aria labels
+- [ ] Captions/transcripts para audio messages
+- [ ] i18n framework + strings file (pt-BR primeiro, en-US)
+- [ ] Screen-reader friendly fallback para canvas interactions
 
-signed URLs for asset claims, rate-limited claim endpoint, rarity RNG
+---
 
- Sala Secreta
+## 🧪 QA / Testing
 
-route protection, secret token generation
+- [ ] E2E tests (Playwright) para flows críticos (login, save score, chat)
+- [ ] Unit tests para validation (Zod) + score validation
+- [ ] Load testing (k6) em score endpoints + `/api/users/recent`
+- [ ] Security scanning no CI (Snyk/npm audit)
+- [ ] Visual regression checks para no-scroll UI across resolutions
 
- Terminal Oculto
+---
 
-command whitelist + rate-limit + audit log
+## 🔁 Infra / CI-CD
 
- Eventos Semanais
+- [ ] CI pipeline (lint, test, build, audit)
+- [ ] Staging environment mirror de prod
+- [ ] Feature flags (LaunchDarkly / simple DB flags)
+- [ ] Deploy rollback plan + DB migration backups
 
-feature flags + scheduling UI
+---
 
- Laboratório Experimental
+## 📣 Social / Virality
 
-A/B testing / feature flags toggles + telemetry
+- [ ] Share image generator (server-side) para OG + X share (PNG)
+- [ ] Deep-linking para compartilhar runs específicos
+- [ ] Prebuilt tweet templates com hashtags e @shuktv
 
- Painel Hacker Real-Time
+---
 
-endpoints: /api/metrics/online, /api/games/active; caching + websockets for live updates
+## 🧾 Doc & Product
 
- Cartões de Score Cinematográficos
+- [x] README / developer onboarding (how to run, envs, migrations) - ✅ Implementado (README.md com guias completos)
+- [ ] API docs (OpenAPI) para endpoints `/api/*`
+- [ ] Moderation guide para community managers
+- [x] Roadmap public page (short bullets + status) - ✅ Implementado (`app/sobre/page.tsx` - aba Roadmap)
 
-server-side canvas render (html-to-image on backend) + signed URL for share image
+---
 
-🔒 Segurança & Compliance (faltantes críticos)
+## ✅ Prioridade Sugerida
 
- CORS allowlist e revisão de políticas
+### 🔴 Crítico (Implementar antes do pentest / launch)
+- [x] Env validation - ✅ Implementado
+- [x] Security headers básicos - ✅ Implementado (HSTS pendente)
+- [x] Audit logs básicos - ✅ Implementado
+- [x] Session renewal - ✅ Implementado
+- [ ] CORS allowlist
+- [ ] CSP completo
+- [ ] Sanitização completa
+- [ ] SRI
+- [ ] Dependency fixes
 
- CSP configurada (prod + staging)
+### 🟡 Alto
+- [x] Score fail-safe - ✅ Implementado (validação server-side com `lib/game-validators/`)
+- [x] Multi-tab protection - ✅ Implementado (`lib/performance/multi-tab.ts`)
+- [x] Rate limiting (Upstash) - ✅ Implementado (`lib/rate-limit.ts`, `lib/api-rate-limit.ts`)
+- [x] Session isolation - ✅ Implementado (`lib/session-monitor.ts`, testes em `__tests__/integration/`)
+- [ ] Chat moderation infra
+- [ ] Upstash limits monitoring
+- [ ] Observability (Sentry)
+- [ ] Load tests
 
- CSRF tokens para rotas mutáveis (se fora NextAuth)
+### 🟢 Médio
+Audio moderation/transcription, drops infra, features do xadrez/multiplayer, cartões share server-side.
 
- Sanitização completa (user input mostrado no canvas/DOM)
+### ⚪ Baixo
+Gamification extras, secret rooms, advanced analytics.
 
- Env validation (Zod) consolidada e fail-fast
+---
 
- Audit logs básicos (login fails, score fails, canvas crashes)
-
- Session renewal strategy (silent refresh / warning)
-
- SRI para recursos externos (fonts)
-
- HSTS / Security headers completos
-
- Dependency audit & fix high CVEs
-
-📈 Observability & Ops (faltantes)
-
- Metrics
-
-request latency, errors, FPS incidents count, particle budget breaches
-
- Error tracking
-
-Sentry setup for frontend + backend (canvas errors, crashes)
-
- Log retention & rotation
-
- Health checks & uptime alerts
-
- Backups for DB & critical data
-
- Rate-limit monitoring (Upstash dashboard + alerts)
-
-♿ Acessibilidade & Internacionalização (faltantes)
-
- WCAG checks basics: color contrast, keyboard nav, aria labels
-
- Captions/transcripts for audio messages
-
- i18n framework + strings file (pt-BR first, en-US)
-
- Screen-reader friendly fallback for canvas interactions
-
-🧪 QA / Testing (faltantes)
-
- E2E tests (Playwright) para flows críticos (login, save score, chat)
-
- Unit tests para validation (Zod) + score validation
-
- Load testing (k6) on score endpoints + /api/users/recent
-
- Security scanning in CI (Snyk/npm audit)
-
- Visual regression checks for no-scroll UI across resolutions
-
-🔁 Infra / CI-CD (faltantes)
-
- CI pipeline (lint, test, build, audit)
-
- Staging environment mirror of prod
-
- Feature flags (LaunchDarkly / simple DB flags)
-
- Deploy rollback plan + DB migration backups
-
-
-📣 Social / Virality (faltantes)
-
- Share image generator (server-side) for OG + X share (PNG)
-
- Deep-linking to share specific runs
-
- Prebuilt tweet templates with hashtags and @shuktv
-
-🧾 Doc & Product (faltantes)
-
- README / developer onboarding (how to run, envs, migrations)
-
- API docs (OpenAPI) for /api/* endpoints
-
- Moderation guide for community managers
-
- Roadmap public page (short bullets + status)
-
-✅ Prioridade sugerida (p/ backlog)
-
-Crítico (implementar antes do pentest / launch):
-CORS, CSP, CSRF, sanitização, env validation, SRI, HSTS, audit logs, session renewal, dependency fixes.
-
-Alto: Chat moderation infra, score fail-safe, multi-tab protection, Upstash limits monitoring, observability (Sentry), load tests.
-
-Médio: Audio moderation/transcription, drops infra, features do xadrez/multiplayer, cartoes share server-side.
-
-Baixo: Gamification extras, secret rooms, advanced analytics, monetização.
+**Nota:** Este backlog é um documento vivo e será atualizado conforme o projeto evolui.
