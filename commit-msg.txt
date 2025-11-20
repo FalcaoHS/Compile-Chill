@@ -1,0 +1,6 @@
+🔧 Fix ESLint dependency conflict
+
+- Corrigido conflito entre eslint-config-next e eslint
+- eslint-config-next agora compatível com Next.js 14.2.33
+- Build testado e funcionando ✅
+

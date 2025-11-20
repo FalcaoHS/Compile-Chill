@@ -17,6 +17,7 @@ import { startSessionMonitoring, stopSessionMonitoring } from "@/lib/performance
 import { CanvasRestartButton } from "@/components/CanvasRestartButton"
 import { Test99BasketsButton } from "@/components/Test99BasketsButton"
 import { DevMaster99Egg } from "@/components/DevMaster99Egg"
+import { OpenSourceAlert } from "@/components/OpenSourceAlert"
 
 interface UserData {
   userId: number
@@ -109,6 +110,7 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-page">
+      <OpenSourceAlert />
       <CanvasRestartButton />
       {/* Physics Area - Replaces Hero Section */}
       <div className="w-full relative" style={{ height: "calc(100vh - 96px)", minHeight: "400px" }}>

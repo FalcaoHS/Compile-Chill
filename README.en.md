@@ -362,6 +362,19 @@ npm run db:migrate       # Run migrations
 npm run db:studio        # Open Prisma Studio
 ```
 
+## 🤖 Development with AI
+
+This project was **completely developed using AI tools** as coding copilots. All code was "vibecoded" with:
+
+- **[Cursor](https://cursor.sh)** - AI-powered code editor
+- **[ChatGPT](https://chat.openai.com)** - OpenAI's AI assistant
+- **[Gemini](https://gemini.google.com)** - Google's AI model
+- **[Canvas](https://canvas.app)** - AI-powered design and prototyping tool
+
+### ⚠️ Important
+
+Since this project was primarily developed with AI assistance, **there may be errors, inconsistencies, or unoptimized code** in some parts of the project. Contributions, fixes, and improvements are very welcome!
+
 ## 🤝 Contributing
 
 Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on how to contribute to the project.

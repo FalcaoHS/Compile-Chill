@@ -114,7 +114,7 @@ export default function MeuComecoPage() {
           </p>
 
           <p>
-            Então é isso. Contei um pouco sobre mim e, sério, espero muito que curtam… porque eu gastei meu almoço todo do resto do mês assinando IA pra fazer algo majestoso ao meu ver.
+            Então é isso. Contei um pouco sobre mim e, sério, espero muito que curtam… porque dediquei muito tempo e esforço para fazer algo majestoso ao meu ver.
           </p>
 
           <p>
@@ -125,22 +125,6 @@ export default function MeuComecoPage() {
             Abraços,<br />
             Hudson "Shuk" Falcão (Analista de Sistemas Sr.)
           </p>
-
-          <p>
-            Eu vou ser bem sincero com vocês (necessidade apenas):<br />
-            Eu gastei mais de 600 reais esse mês — duas assinaturas do Cursor, assinatura do Canvas, assinatura do GPT, assinatura do Gemini… Todos esses caras foram envolvidos no processo de idealização, definição, criação e desenvolvimento, com prompts rabiscados e sempre com um pinguinho a mais de toda experiência que tenho como DEV.<br />
-            Lembra que eu lembro de tudo? Nesse ponto ajuda.
-          </p>
-
-          <p>
-            Então… se quiserem me pagar um café ou uma quentinha pra me ajudar, meu pix é:
-          </p>
-
-          <div className="flex items-center gap-3 mb-6">
-            <span className="text-lg">📧</span>
-            <span className="font-mono text-lg">falcaoh@gmail.com</span>
-            <CopyEmailButton email="falcaoh@gmail.com" />
-          </div>
 
           <p>
             Se você leu até aqui:

@@ -59,6 +59,14 @@ Nosso projeto busca apoiar comunidades com **acesso limitado a recursos digitais
 
 **Saiba mais:** Visite nossa [página de Impacto Social](/impacto-social) para mais informações sobre parcerias e formas de contribuir.
 
+## 💝 Sobre o Projeto
+
+Compile & Chill não tem intenção de ganhar dinheiro com isso.
+
+A ideia é simples: levar informação e acesso pra quem precisa, especialmente pra desenvolvedores que têm recursos limitados. Por isso, tudo aqui é de graça — sem anúncios, sem assinaturas, sem cobrança nenhuma.
+
+É um projeto feito com carinho pela comunidade dev, pra criar um espaço onde todo mundo se sinta acolhido e possa descomprimir.
+
 ## ✨ Sobre o Projeto
 
 Compile & Chill é um portal criado especialmente para desenvolvedores que desejam alguns minutos de relaxamento sem sair do "clima dev". O projeto une jogos leves, estética hacker/cyber, personalização de temas, ranking global, login simplificado via X (Twitter) e compartilhamento social.
@@ -371,9 +379,20 @@ O Prisma está configurado para logar queries em desenvolvimento. Verifique o co
 - **Upstash Redis** - Rate limiting
 - **Vercel** - Deploy (recomendado)
 
-## 🤖 Desenvolvimento com Agent OS
+## 🤖 Desenvolvimento com IA
 
-Este projeto foi desenvolvido usando **[Agent OS](https://github.com/buildermethods/agent-os)**, um sistema para melhor planejamento e execução de tarefas de desenvolvimento de software com agentes de IA.
+Este projeto foi **completamente desenvolvido usando ferramentas de IA** como copilotos de código. Todo o código foi "vibecodado" com:
+
+- **[Cursor](https://cursor.sh)** - Editor de código com IA integrada
+- **[ChatGPT](https://chat.openai.com)** - Assistente de IA da OpenAI
+- **[Gemini](https://gemini.google.com)** - Modelo de IA do Google
+- **[Canvas](https://canvas.app)** - Ferramenta de design e prototipagem com IA
+
+### ⚠️ Importante
+
+Por ter sido desenvolvido principalmente com assistência de IA, **podem existir erros, inconsistências ou código não otimizado** em algumas partes do projeto. Contribuições, correções e melhorias são muito bem-vindas!
+
+Este projeto também foi desenvolvido usando **[Agent OS](https://github.com/buildermethods/agent-os)**, um sistema para melhor planejamento e execução de tarefas de desenvolvimento de software com agentes de IA.
 
 ### O que é Agent OS?
 

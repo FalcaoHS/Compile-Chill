@@ -33,20 +33,12 @@ E eu juro pra vocês: o incentivo maior foi todo o carinho e reconhecimento que 
 Vi que já estou inspirando gente a desenvolver seus próprios apps — e pra quem se achava esquecido pelo mundo (sim, a depressão tirou todos os meus amigos), graças a DEUS eu tenho meu filho.
 Ele me mostrou o quanto eu de fato tenho capacidade de fazer algo muito legal, útil e — não menos importante — da forma correta.
 
-Então é isso. Contei um pouco sobre mim e, sério, espero muito que curtam… porque eu gastei meu almoço todo do resto do mês assinando IA pra fazer algo majestoso ao meu ver.
+Então é isso. Contei um pouco sobre mim e, sério, espero muito que curtam… porque dediquei muito tempo e esforço pra fazer algo especial ao meu ver.
 
 Divirtam-se e descomprimam…
 
 Abraços,
-Hudson “Shuk” Falcão (Analista de Sistemas Sr.)
-
-Eu vou ser bem sincero com vocês (necessidade apenas):
-Eu gastei mais de 600 reais esse mês — duas assinaturas do Cursor, assinatura do Canvas, assinatura do GPT, assinatura do Gemini… Todos esses caras foram envolvidos no processo de idealização, definição, criação e desenvolvimento, com prompts rabiscados e sempre com um pinguinho a mais de toda experiência que tenho como DEV.
-Lembra que eu lembro de tudo? Nesse ponto ajuda.
-
-Então… se quiserem me pagar um café ou uma quentinha pra me ajudar, meu pix é:
-
-📧 falcaoh@gmail.com
+Hudson "Shuk" Falcão (Analista de Sistemas Sr.)
 
 Se você leu até aqui:
 

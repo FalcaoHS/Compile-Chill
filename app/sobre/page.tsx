@@ -250,11 +250,6 @@ function CriadorContent({ lang, theme }: { lang: 'pt' | 'en'; theme: any }) {
           de criar algo especial.
         </p>
 
-        <p className="mb-4">
-          Para viabilizar esses projetos, investiu mais de R$ 600 em assinaturas de IA (Cursor, Canvas, GPT, Gemini),
-          gastando seu orçamento de almoço do mês inteiro.
-        </p>
-
         <h3 className="text-2xl font-bold mt-8 mb-4">A Mensagem</h3>
         <p className="mb-4 italic" style={{ borderLeft: `4px solid ${theme['--color-primary']}`, paddingLeft: '1rem' }}>
           "Acredite em você. Lute. Corra atrás. As IAs estão aí pra te ajudar a pôr em prática suas ideias — e eu tenho sido a prova disso."
@@ -323,11 +318,6 @@ function CriadorContent({ lang, theme }: { lang: 'pt' | 'en'; theme: any }) {
         The main drive came from the affection and recognition from the dev community. Hudson, who felt forgotten by the world
         (depression drove away all his friends), found strength in his son, who showed him how much he's capable
         of creating something special.
-      </p>
-
-      <p className="mb-4">
-        To make these projects viable, he invested over R$ 600 in AI subscriptions (Cursor, Canvas, GPT, Gemini),
-        spending his entire month's lunch budget.
       </p>
 
       <h3 className="text-2xl font-bold mt-8 mb-4">The Message</h3>
@@ -407,6 +397,20 @@ function MissaoContent({ lang, theme }: { lang: 'pt' | 'en'; theme: any }) {
           <li><strong>Gaming social integrado:</strong> Combinamos jogos rápidos, rankings, conquistas e compartilhamento social especificamente para a comunidade dev.</li>
         </ul>
 
+        <h3 className="text-2xl font-bold mt-8 mb-4">Sobre o Projeto</h3>
+        <div className="mb-6 p-6 rounded-lg" style={{ backgroundColor: theme['--color-primary'] + '10', borderLeft: `4px solid ${theme['--color-primary']}` }}>
+          <p className="mb-4">
+            Compile & Chill não tem intenção de ganhar dinheiro com isso.
+          </p>
+          <p className="mb-4">
+            A ideia é simples: levar informação e acesso pra quem precisa, especialmente pra desenvolvedores que têm recursos limitados.
+            Por isso, tudo aqui é de graça — sem anúncios, sem assinaturas, sem cobrança nenhuma.
+          </p>
+          <p>
+            É um projeto feito com carinho pela comunidade dev, pra criar um espaço onde todo mundo se sinta acolhido e possa descomprimir.
+          </p>
+        </div>
+
         <h3 className="text-2xl font-bold mt-8 mb-4">Visão de Futuro</h3>
         <p className="mb-4">
           Queremos que o Compile & Chill se torne o hub de descompressão padrão para a comunidade global de desenvolvedores.
@@ -477,6 +481,20 @@ function MissaoContent({ lang, theme }: { lang: 'pt' | 'en'; theme: any }) {
         <li><strong>Customizable visual themes:</strong> 5 distinct themes (Cyber Hacker, Pixel Lab, Neon Future, Terminal Minimal, Blueprint Dev) with instant switching.</li>
         <li><strong>Integrated social gaming:</strong> We combine quick games, rankings, achievements, and social sharing specifically for the dev community.</li>
       </ul>
+
+      <h3 className="text-2xl font-bold mt-8 mb-4">About the Project</h3>
+      <div className="mb-6 p-6 rounded-lg" style={{ backgroundColor: theme['--color-primary'] + '10', borderLeft: `4px solid ${theme['--color-primary']}` }}>
+        <p className="mb-4">
+          Compile & Chill has no intention of making money from this.
+        </p>
+        <p className="mb-4">
+          The idea is simple: bring information and access to those who need it, especially developers with limited resources.
+          That's why everything here is free — no ads, no subscriptions, no charges whatsoever.
+        </p>
+        <p>
+          This is a project made with care for the dev community, to create a space where everyone feels welcome and can decompress.
+        </p>
+      </div>
 
       <h3 className="text-2xl font-bold mt-8 mb-4">Future Vision</h3>
       <p className="mb-4">

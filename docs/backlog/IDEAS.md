@@ -244,13 +244,6 @@ Sentry setup for frontend + backend (canvas errors, crashes)
 
  Deploy rollback plan + DB migration backups
 
-💸 Monetização / Payments (se for futuro)
-
- Stripe setup safe (if needed)
-
- Free tier / paid perks design (emotes, skins)
-
- Receipts & tax compliance
 
 📣 Social / Virality (faltantes)
 

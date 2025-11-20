@@ -362,6 +362,19 @@ npm run db:migrate        # Ejecuta migraciones
 npm run db:studio         # Abre Prisma Studio
 ```
 
+## 🤖 Desarrollo con IA
+
+Este proyecto fue **completamente desarrollado usando herramientas de IA** como copilotos de código. Todo el código fue "vibecodado" con:
+
+- **[Cursor](https://cursor.sh)** - Editor de código con IA integrada
+- **[ChatGPT](https://chat.openai.com)** - Asistente de IA de OpenAI
+- **[Gemini](https://gemini.google.com)** - Modelo de IA de Google
+- **[Canvas](https://canvas.app)** - Herramienta de diseño y prototipado con IA
+
+### ⚠️ Importante
+
+Por haber sido desarrollado principalmente con asistencia de IA, **pueden existir errores, inconsistencias o código no optimizado** en algunas partes del proyecto. ¡Las contribuciones, correcciones y mejoras son muy bienvenidas!
+
 ## 🤝 Contribuyendo
 
 ¡Las contribuciones son bienvenidas! Por favor, lee [CONTRIBUTING.md](CONTRIBUTING.md) para directrices sobre cómo contribuir al proyecto.

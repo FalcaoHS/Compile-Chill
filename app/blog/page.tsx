@@ -24,6 +24,13 @@ const posts = [
     category: 'História',
   },
   {
+    slug: 'por-que-open-source',
+    title: 'Por que coloquei o Compile & Chill como open-source?',
+    excerpt: 'Explicação clara sobre os motivos de tornar o projeto open-source: aprendizado, transparência e acesso.',
+    date: new Date().toISOString().split('T')[0],
+    category: 'Reflexão',
+  },
+  {
     slug: 'sistema-fisica-compile-chill',
     title: 'Como nasceu o sistema de física do Compile & Chill',
     excerpt: 'Detalhes técnicos sobre a implementação do motor de física usado nos jogos do portal.',
