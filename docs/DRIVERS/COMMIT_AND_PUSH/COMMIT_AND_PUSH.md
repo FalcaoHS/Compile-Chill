@@ -148,6 +148,34 @@ git status
 
 E garantir que NENHUM arquivo da pasta `agent-os/` esteja na lista de arquivos a serem commitados.
 
+**⚠️ IMPORTANTE: Encoding UTF-8 nos Commits**
+
+Para evitar problemas de encoding (caracteres estranhos como "verificaÃ§Ã£o"), o agente DEVE:
+
+1. **Configurar Git para UTF-8 (se ainda não estiver):**
+   ```bash
+   git config --global i18n.commitencoding utf-8
+   git config --global i18n.logoutputencoding utf-8
+   git config --global core.quotepath false
+   ```
+
+2. **Ao fazer commit no PowerShell, usar:**
+   ```powershell
+   # Opção 1: Usar arquivo temporário
+   $msg = "feat: mensagem com acentuação correta"
+   $msg | Out-File -Encoding utf8 commit-msg.txt
+   git commit -F commit-msg.txt
+   Remove-Item commit-msg.txt
+   
+   # Opção 2: Usar -c para forçar encoding
+   git -c i18n.commitencoding=utf-8 commit -m "feat: mensagem com acentuação"
+   
+   # Opção 3: Usar helper script (se disponível)
+   .\.git-commit-utf8.ps1 "feat: mensagem com acentuação"
+   ```
+
+3. **NUNCA usar commits diretos com acentos no PowerShell sem configurar encoding primeiro!**
+
 Se houver arquivos de `agent-os/` na lista, o agente DEVE:
 1. Alertar o usuário
 2. Remover esses arquivos do staging: `git reset HEAD agent-os/`
