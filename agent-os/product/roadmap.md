@@ -2,7 +2,7 @@
 
 1. [x] X OAuth Authentication — Implement NextAuth with X OAuth provider, allowing users to sign in with a single button and retrieve name, avatar, and ID from X account `S` ✅
 
-2. [x] Theme System Foundation — Create theme switching infrastructure with 11 visual themes (Cyber Hacker, Pixel Lab, Neon Future, Terminal Minimal, Blueprint Dev, Analista Jr, Analista Sr, Lofi Code, Bruno C#, Chaves, Pomemin), theme persistence, and global theme context using Zustand/Jotai `M` ✅
+2. [x] Theme System Foundation — Create theme switching infrastructure with 11 visual themes (Cyber Hacker, Pixel Lab, Neon Future, Terminal Minimal, Blueprint Dev, Analista Jr, Analista Sr, Lofi Code, Bruno C#, Chaves, PókeDev ⚡), theme persistence, and global theme context using Zustand/Jotai `M` ✅
 
 2a. [x] Festive Elements System — Implement automatic festive elements on orbs based on dates and cultural region (Christmas, New Year, Easter, Halloween, Carnival, São João, Children's Day) with geolocation support and user controls `M` ✅
 

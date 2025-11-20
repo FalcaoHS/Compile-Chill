@@ -62,7 +62,7 @@ backlog/
    - Hack Grid, Debug Maze, Refactor Rush, Crypto Miner Game, Packet Switch
 
 3. **Expanded Theme System** ✅
-   - 11 themes available (including Chaves and Pomemin)
+   - 11 themes available (including Chaves and PókeDev ⚡)
 
 ---
 

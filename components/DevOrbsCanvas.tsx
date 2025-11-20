@@ -774,6 +774,10 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
         loadAvatarImage(orb.userId, orb.id).then((img) => {
           orb.image = img
           orb.imageLoaded = true
+          // Force redraw of static canvas when image loads
+          if (isLiteMode && canvasRef.current) {
+            drawStaticCanvas()
+          }
         })
       } else {
         orb.imageLoaded = true
@@ -819,8 +823,17 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
     // Load avatar image via proxy
     if (user.userId) {
       loadAvatarImage(user.userId, orb.id).then((img) => {
-        orb.image = img
-        orb.imageLoaded = true
+        if (img) {
+          orb.image = img
+          orb.imageLoaded = true
+          // The animation loop will automatically pick up the loaded image on next frame
+          // No need to force redraw - the continuous render loop handles it
+        } else {
+          orb.imageLoaded = true // Mark as loaded even if image failed
+        }
+      }).catch((error) => {
+        console.warn(`[DevOrbs] Error loading avatar for user ${user.userId}:`, error)
+        orb.imageLoaded = true // Mark as loaded to prevent infinite retries
       })
     } else {
       orb.imageLoaded = true // No avatar to load

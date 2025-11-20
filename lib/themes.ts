@@ -463,7 +463,7 @@ export const THEMES: Record<ThemeId, Theme> = {
     },
   },
   pomemin: {
-    name: 'Pomemin',
+    name: 'PókeDev ⚡',
     vars: {
       // Colors - Cores vibrantes de Pokémon (vermelho, azul, amarelo)
       '--color-bg': '#1a1a2e', // Azul escuro (céu noturno)
