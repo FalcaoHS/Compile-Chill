@@ -17,7 +17,7 @@ Atualmente, estamos fornecendo atualizações de segurança para:
 Se você descobriu uma vulnerabilidade de segurança, **NÃO** abra uma issue pública. Em vez disso, siga estas etapas:
 
 1. **Entre em contato diretamente** através de um dos seguintes métodos:
-   - Email: [seu-email@exemplo.com] (substitua pelo email real)
+   - Email: falcaoh@gmail.com
    - Abra uma [Security Advisory](https://github.com/seu-usuario/compile-and-chill/security/advisories/new) no GitHub
 
 2. **Inclua as seguintes informações**:

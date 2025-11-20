@@ -34,7 +34,7 @@ Este Código de Conduta se aplica tanto nos espaços do projeto quanto nos espa�
 
 ## Aplicação
 
-Instâncias de comportamento abusivo, assediador ou inaceitável podem ser relatadas entrando em contato com a equipe do projeto em [seu-email@exemplo.com]. Todas as reclamações serão revisadas e investigadas e resultarão em uma resposta considerada necessária e apropriada às circunstâncias. A equipe do projeto é obrigada a manter a confidencialidade em relação ao relator de um incidente. Detalhes adicionais de políticas de aplicação específicas podem ser publicados separadamente.
+Instâncias de comportamento abusivo, assediador ou inaceitável podem ser relatadas entrando em contato com a equipe do projeto em falcaoh@gmail.com. Todas as reclamações serão revisadas e investigadas e resultarão em uma resposta considerada necessária e apropriada às circunstâncias. A equipe do projeto é obrigada a manter a confidencialidade em relação ao relator de um incidente. Detalhes adicionais de políticas de aplicação específicas podem ser publicados separadamente.
 
 Mantenedores do projeto que não seguem ou aplicam o Código de Conduta de boa fé podem enfrentar repercussões temporárias ou permanentes, conforme determinado por outros membros da liderança do projeto.
 
