@@ -2291,11 +2291,13 @@ export function DevOrbsCanvas({ users, onShakeReady, onScoreChange, onTest99Bask
 
     // Assign Indiana Jones variant if theme is active
     if (themeId === "indiana-jones") {
+      if (!orb.meta) orb.meta = {}
       orb.meta.indyVariant = pickRandomVariant()
     }
 
     // Assign Star Wars variant if theme is active
     if (themeId === "star-wars") {
+      if (!orb.meta) orb.meta = {}
       orb.meta.starWarsVariant = pickRandomStarWarsVariant()
     }
 
