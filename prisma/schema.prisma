@@ -5,10 +5,9 @@ generator client {
   provider = "prisma-client-js"
 }
 
-// Prisma 7+ configuration: datasource URL moved to prisma.config.ts
-// See https://pris.ly/d/config-datasource for details
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 // User model for storing user data from X OAuth

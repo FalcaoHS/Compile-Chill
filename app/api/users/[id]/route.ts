@@ -6,6 +6,7 @@ import { handleApiError, ApiErrors } from "@/lib/utils/api-errors"
  * GET /api/users/[id]
  * 
  * Returns public user profile data.
+ * Accepts either numeric user ID or username slug (xUsername).
  * Respects privacy settings - if showPublicHistory is false,
  * returns only avatar, name, and privacy message.
  * Public access (no authentication required).
@@ -15,28 +16,69 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const userId = parseInt(params.id)
+    // Try to parse as numeric ID first
+    const numericId = parseInt(params.id)
+    const isNumericId = !isNaN(numericId)
 
-    if (isNaN(userId)) {
-      throw ApiErrors.badRequest("ID de usuário inválido")
+    let dbUser
+
+    if (isNumericId) {
+      // Search by numeric ID
+      dbUser = await prisma.user.findUnique({
+        where: { id: numericId },
+        select: {
+          id: true,
+          name: true,
+          avatar: true,
+          xId: true,
+          xUsername: true,
+          showPublicHistory: true,
+          createdAt: true,
+        },
+      })
+    } else {
+      // Search by username slug (remove @ if present)
+      const cleanSlug = params.id.replace(/^@/, '')
+      
+      dbUser = await prisma.user.findFirst({
+        where: {
+          xUsername: cleanSlug,
+        },
+        select: {
+          id: true,
+          name: true,
+          avatar: true,
+          xId: true,
+          xUsername: true,
+          showPublicHistory: true,
+          createdAt: true,
+        },
+      })
+
+      // If not found by xUsername, try xId as fallback
+      if (!dbUser) {
+        dbUser = await prisma.user.findFirst({
+          where: {
+            xId: cleanSlug,
+          },
+          select: {
+            id: true,
+            name: true,
+            avatar: true,
+            xId: true,
+            xUsername: true,
+            showPublicHistory: true,
+            createdAt: true,
+          },
+        })
+      }
     }
-
-    // Get user profile data from database
-    const dbUser = await prisma.user.findUnique({
-      where: { id: userId },
-      select: {
-        id: true,
-        name: true,
-        avatar: true,
-        xId: true,
-        showPublicHistory: true,
-        createdAt: true,
-      },
-    })
 
     if (!dbUser) {
       throw ApiErrors.notFound("Usuário não encontrado")
     }
+
+    const userId = dbUser.id
 
     // If privacy is disabled, return minimal data
     if (!dbUser.showPublicHistory) {
@@ -46,7 +88,7 @@ export async function GET(
             id: dbUser.id,
             name: dbUser.name,
             avatar: dbUser.avatar,
-            handle: dbUser.xId,
+            handle: dbUser.xUsername || dbUser.xId, // Prefer xUsername, fallback to xId
             isPrivate: true,
             message: "Este usuário mantém o histórico privado",
           },
@@ -107,7 +149,7 @@ export async function GET(
           id: dbUser.id,
           name: dbUser.name,
           avatar: dbUser.avatar,
-          handle: dbUser.xId,
+          handle: dbUser.xUsername || dbUser.xId, // Prefer xUsername, fallback to xId
           joinDate: dbUser.createdAt,
           isPrivate: false,
           stats: {
